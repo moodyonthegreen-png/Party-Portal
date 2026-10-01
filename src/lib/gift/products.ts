@@ -1,7 +1,7 @@
 /**
  * Products the group gift can be printed on. Print areas are in pixels at
- * the product's print resolution. Sizes marked `estimated` are placeholders
- * until we confirm the exact numbers from Printify's product creator.
+ * the product's print resolution, taken from Printify's product creator.
+ * Inches assume 150 dpi for blankets and towels and 300 dpi for garments.
  */
 export type ProductKey = "fleece-blanket" | "minky-lovey" | "hooded-towel" | "bodysuit";
 
@@ -28,53 +28,53 @@ export const PRODUCTS: Record<ProductKey, Product> = {
     key: "fleece-blanket",
     name: "Soft Fleece Baby Blanket",
     printifyBlueprintId: 575,
-    widthPx: 4500,
-    heightPx: 6000,
+    widthPx: 4725,
+    heightPx: 6225,
     dpi: 150,
     safeInsetIn: 1,
     format: "jpeg",
     mockup: "blanket",
-    estimated: true,
-    blurb: "About 30 × 40 in, printed edge to edge",
+    estimated: false,
+    blurb: "About 31 × 41 in, printed edge to edge",
   },
   "minky-lovey": {
     key: "minky-lovey",
     name: "Minky Baby Lovey Blanket",
     printifyBlueprintId: 3192,
-    widthPx: 4500,
-    heightPx: 4500,
-    dpi: 300,
+    widthPx: 2800,
+    heightPx: 2600,
+    dpi: 150,
     safeInsetIn: 0.75,
     format: "jpeg",
     mockup: "lovey",
-    estimated: true,
-    blurb: "About 15 × 15 in, a small snuggle blanket",
+    estimated: false,
+    blurb: "About 19 × 17 in, a small snuggle blanket",
   },
   "hooded-towel": {
     key: "hooded-towel",
     name: "Hooded Baby Towel",
     printifyBlueprintId: 5359,
-    widthPx: 4500,
-    heightPx: 4500,
+    widthPx: 4650,
+    heightPx: 4650,
     dpi: 150,
     safeInsetIn: 1,
     format: "jpeg",
     mockup: "towel",
-    estimated: true,
-    blurb: "About 30 × 30 in, printed on the towel body",
+    estimated: false,
+    blurb: "About 31 × 31 in, printed on the towel body",
   },
   bodysuit: {
     key: "bodysuit",
     name: "Infant Fine Jersey Bodysuit",
     printifyBlueprintId: 33,
-    widthPx: 1800,
-    heightPx: 1800,
+    widthPx: 1444,
+    heightPx: 2034,
     dpi: 300,
-    safeInsetIn: 0.2,
+    safeInsetIn: 0.15,
     format: "png",
     mockup: "bodysuit",
-    estimated: true,
-    blurb: "Front print, about 6 × 6 in",
+    estimated: false,
+    blurb: "Front print, about 5 × 7 in",
   },
 };
 
