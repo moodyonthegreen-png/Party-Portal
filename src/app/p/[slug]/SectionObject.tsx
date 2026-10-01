@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Motif } from "@/components/Motif";
+import { Badge } from "@/components/Badge";
 import type { SectionKey, Theme } from "@/themes";
 
 /** The CSS-drawn scrapbook object for each party section. */
@@ -29,16 +29,23 @@ function Drawing({ section, theme }: { section: SectionKey; theme: Theme }) {
     case "messages":
       return (
         <div className="pp-postcard">
-          <div className="pp-postcard-note pp-script">Wish you were here!</div>
+          <div className="pp-postcard-note pp-script">{theme.postcardNote}</div>
           <div className="pp-postcard-lines" />
-          <div className="pp-stamp pp-postcard-stamp" style={{ "--perf": "3px" } as React.CSSProperties}>
-            <div className="pp-stamp-inner">
-              <Motif motif={theme.motif} size={12} />
-            </div>
+          <div className="pp-postcard-stamp">
+            <Badge theme={theme} size={34} />
           </div>
         </div>
       );
     case "games":
+      if (theme.objects.games === "blocks") {
+        return (
+          <div className="pp-blocks">
+            <div className="pp-block">A</div>
+            <div className="pp-block">C</div>
+            <div className="pp-block">B</div>
+          </div>
+        );
+      }
       return (
         <div className="pp-pass">
           <div className="pp-pass-band">
@@ -56,6 +63,24 @@ function Drawing({ section, theme }: { section: SectionKey; theme: Theme }) {
         </div>
       );
     case "registry":
+      if (theme.objects.registry === "gift") {
+        return (
+          <div className="pp-gift">
+            <div className="pp-gift-bow" />
+            <div className="pp-gift-lid" />
+            <div className="pp-gift-box">
+              <div className="pp-gift-label">
+                <span className="pp-script" style={{ fontSize: "1.6rem", display: "block" }}>
+                  Registry
+                </span>
+                <span className="pp-caps" style={{ fontSize: "0.55rem" }}>
+                  Tap to view
+                </span>
+              </div>
+            </div>
+          </div>
+        );
+      }
       return (
         <div className="pp-tag-wrap">
           <div className="pp-tag">

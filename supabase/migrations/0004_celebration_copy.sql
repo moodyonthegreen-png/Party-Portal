@@ -4,10 +4,10 @@
 
 alter table public.parties add column if not exists event_date timestamptz;
 alter table public.parties add column if not exists tagline text;
-alter table public.parties alter column theme set default 'explorer';
+alter table public.parties alter column theme set default 'classic';
 
 update public.parties
-set theme = 'explorer',
+set theme = 'classic',
     guest_of_honor_name = 'Jessica',
     title = null,
     tagline = 'The mom-to-be',

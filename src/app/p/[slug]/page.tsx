@@ -1,10 +1,9 @@
 import { notFound } from "next/navigation";
 import { TimeLeft, EventDate } from "@/components/LocalDate";
-import { Motif } from "@/components/Motif";
+import { Badge } from "@/components/Badge";
 import { defaultTagline, defaultWelcome } from "@/lib/copy";
 import { getParty } from "@/lib/parties";
 import { getTheme } from "@/themes";
-import { EnvelopeOpener } from "./EnvelopeOpener";
 import { SectionObject } from "./SectionObject";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -22,8 +21,6 @@ export default async function PartyHome({ params }: Props) {
 
   return (
     <>
-      <EnvelopeOpener slug={party.slug} name={party.guestOfHonorName} occasion={party.occasion} motif={theme.motif} />
-
       <main className="pp-wrap">
         {/* The guest of honor */}
         <section style={{ position: "relative", marginTop: "1.75rem" }}>
@@ -58,15 +55,11 @@ export default async function PartyHome({ params }: Props) {
             )}
             <p style={{ marginTop: "1.2rem", lineHeight: 1.55, whiteSpace: "pre-line" }}>{welcome}</p>
           </div>
-          <div
-            className="pp-stamp"
-            style={{ position: "absolute", right: "-4px", bottom: "-24px", width: 68, height: 82, transform: "rotate(8deg)" }}
-            aria-hidden="true"
-          >
-            <div className="pp-stamp-inner">
-              <Motif motif={theme.motif} size={26} />
-            </div>
-          </div>
+          <Badge
+            theme={theme}
+            size={76}
+            style={{ position: "absolute", right: "-6px", bottom: "-24px", transform: "rotate(9deg)" }}
+          />
         </section>
 
         {/* Things to do */}
