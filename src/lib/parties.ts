@@ -64,7 +64,7 @@ export async function getGuestNames(partyId: string): Promise<string[]> {
     .eq("party_id", partyId)
     .order("name");
   if (error) throw error;
-  return data.map((g) => g.name);
+  return (data ?? []).map((g) => g.name);
 }
 
 /** Names of guests who already have a design, so we can show "replace" instead of "add". */
@@ -74,7 +74,7 @@ export async function getSubmittedGuestNames(partyId: string): Promise<string[]>
     .select("guests(name)")
     .eq("party_id", partyId);
   if (error) throw error;
-  return data
+  return (data ?? [])
     .map((d) => (d.guests as unknown as { name: string } | null)?.name)
     .filter((n): n is string => Boolean(n));
 }

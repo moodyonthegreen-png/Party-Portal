@@ -17,7 +17,7 @@
  *  6. Measure sharpness so we can warn about blurry photos.
  */
 
-export type RGBAImage = { data: Uint8ClampedArray; width: number; height: number };
+export type RGBAImage = { data: Uint8ClampedArray<ArrayBuffer>; width: number; height: number };
 
 export type Rect = { x: number; y: number; w: number; h: number };
 

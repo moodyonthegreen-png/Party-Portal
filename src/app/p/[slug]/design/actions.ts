@@ -91,7 +91,7 @@ export async function startDesignUpload(slug: string, rawName: string): Promise<
     bucket.createSignedUploadUrl(`${base}-design.png`),
     bucket.createSignedUploadUrl(`${base}-original.jpg`),
   ]);
-  if (design.error || original.error) return fail("We couldn't get ready to upload. Please try again.");
+  if (!design.data || !original.data) return fail("We couldn't get ready to upload. Please try again.");
 
   return {
     ok: true,
@@ -143,7 +143,7 @@ export async function finishDesignUpload(
   // Make sure both files really arrived
   const bucket = db.storage.from(DESIGNS_BUCKET);
   const { data: files, error: listErr } = await bucket.list(folder, { limit: 100 });
-  if (listErr) return fail("Something went wrong. Please try again.");
+  if (listErr || !files) return fail("Something went wrong. Please try again.");
   const names = new Set(files.map((f) => f.name));
   if (!names.has(`${input.version}-design.png`) || !names.has(`${input.version}-original.jpg`)) {
     return fail("Your photo didn't finish uploading. Please try again.");
