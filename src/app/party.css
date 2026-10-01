@@ -584,3 +584,8 @@
   --font-display: var(--pp-display);
   --font-sans: var(--pp-body);
 }
+
+@keyframes pp-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}

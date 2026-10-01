@@ -215,3 +215,37 @@ export async function setPartyPassword(slug: string, _prev: ActionState, formDat
       : "Password set. Guests will be asked for it once on each device.",
   };
 }
+
+// ---------------------------------------------------------------------------
+// Message board moderation
+// ---------------------------------------------------------------------------
+
+export async function setMessageHidden(slug: string, id: string, hidden: boolean): Promise<ActionState> {
+  const party = await host(slug);
+  if (isState(party)) return party;
+  if (!UUID.test(id)) return { error: "That note wasn't found." };
+
+  const { error } = await supabaseAdmin()
+    .from("messages")
+    .update({ status: hidden ? "hidden" : "visible" })
+    .eq("id", id)
+    .eq("party_id", party.id)
+    .neq("status", "pending");
+  if (error) return { error: "We couldn't update that note. Please try again." };
+  refresh(party.slug);
+  return { ok: true };
+}
+
+export async function deleteMessage(slug: string, id: string): Promise<ActionState> {
+  const party = await host(slug);
+  if (isState(party)) return party;
+  if (!UUID.test(id)) return { error: "That note wasn't found." };
+
+  const db = supabaseAdmin();
+  const { data } = await db.from("messages").select("media_path").eq("id", id).eq("party_id", party.id).maybeSingle();
+  if (data?.media_path) await db.storage.from("media").remove([data.media_path]);
+  const { error } = await db.from("messages").delete().eq("id", id).eq("party_id", party.id);
+  if (error) return { error: "We couldn't delete that note. Please try again." };
+  refresh(party.slug);
+  return { ok: true };
+}

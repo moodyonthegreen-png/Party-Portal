@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { TimeLeft, EventDate } from "@/components/LocalDate";
 import { Badge } from "@/components/Badge";
 import { defaultTagline, defaultWelcome } from "@/lib/copy";
+import { countMessages } from "@/lib/messages";
 import { getParty } from "@/lib/parties";
 import { getTheme } from "@/themes";
 import { SectionObject } from "./SectionObject";
@@ -18,6 +19,7 @@ export default async function PartyHome({ params }: Props) {
   // Both are the host's own words when they've written them
   const tagline = party.tagline ?? defaultTagline(party.occasion);
   const welcome = party.welcomeMessage ?? defaultWelcome(party.guestOfHonorName);
+  const messageCount = party.sections.messages ? await countMessages(party.id) : 0;
 
   return (
     <>
@@ -103,8 +105,11 @@ export default async function PartyHome({ params }: Props) {
               theme={theme}
               href={`${base}/messages`}
               label="Messages"
-              detail="Notes, wishes & advice"
-              soon
+              detail={
+                messageCount > 0
+                  ? `${messageCount} ${messageCount === 1 ? "note" : "notes"} so far`
+                  : "Notes, wishes & advice"
+              }
               tilt={1.5}
             />
           )}

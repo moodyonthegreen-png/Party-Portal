@@ -6,7 +6,6 @@ type Props = { params: Promise<{ slug: string; section: string }> };
 
 const SOON: Record<string, { title: string; body: string }> = {
   album: { title: "Photo album", body: "Soon you'll be able to share photos here and see everyone else's." },
-  messages: { title: "Messages", body: "Soon you'll be able to leave notes, advice and wishes, even voice memos." },
   games: { title: "Games", body: "Soon there'll be games to play here, with a party leaderboard." },
 };
 
