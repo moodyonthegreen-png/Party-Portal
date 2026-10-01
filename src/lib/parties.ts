@@ -23,7 +23,7 @@ export type PublicParty = {
   tagline: string | null;
   /** When the celebration itself happens (optional) */
   eventDate: string | null;
-  /** Deadline for blanket squares */
+  /** Deadline for guests to add their design for the group gift */
   deadline: string;
   theme: string;
   sections: PartySections;

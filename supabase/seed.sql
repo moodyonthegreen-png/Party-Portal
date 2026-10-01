@@ -2,8 +2,8 @@
 insert into public.parties
   (slug, guest_of_honor_name, occasion, title, welcome_message, deadline, host_email, host_name)
 values
-  ('demo-shower', 'Baby Harper', 'Baby shower', 'A blanket for Baby Harper',
-   'We can''t all be in one room, so we''re making Harper a blanket together. Draw something, snap a photo, and it becomes part of the quilt.',
+  ('demo-shower', 'Jessica', 'Baby shower', null,
+   'We''re celebrating the mom-to-be! Leave Jessica a note, share a photo, and add your design to a gift made by everyone who loves her.',
    now() + interval '14 days', 'host@example.com', 'Jessie')
 on conflict (slug) do nothing;
 

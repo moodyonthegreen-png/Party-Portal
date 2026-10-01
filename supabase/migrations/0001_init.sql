@@ -69,7 +69,7 @@ create table public.designs (
   id             uuid primary key default gen_random_uuid(),
   party_id       uuid not null references public.parties(id) on delete cascade,
   guest_id       uuid not null references public.guests(id) on delete cascade,
-  -- Processed transparent PNG used on the blanket
+  -- Processed transparent PNG used on the group gift
   image_path     text not null,
   -- Untouched upload, kept so we can re-process at full quality later
   original_path  text not null,

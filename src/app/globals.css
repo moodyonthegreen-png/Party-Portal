@@ -29,7 +29,7 @@ body {
   min-height: 100dvh;
 }
 
-/* Soft woven texture used for the blanket preview */
+/* Soft woven texture used behind design previews */
 .blanket-texture {
   background-color: var(--blanket, #f3ece2);
   background-image:

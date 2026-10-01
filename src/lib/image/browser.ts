@@ -2,14 +2,14 @@
 
 import { processDrawing, type ProcessResult } from "./drawing";
 
-/** Longest side used for cleanup. Plenty for a blanket square, fast on phones. */
+/** Longest side used for cleanup. Plenty for printing on a gift, fast on phones. */
 const PROCESS_MAX = 2000;
 /** Longest side of the "original" we keep for re-processing later. */
 const ORIGINAL_MAX = 4000;
 
 export type PreparedDesign = {
   result: ProcessResult;
-  /** Transparent PNG for the blanket */
+  /** Transparent PNG used on the group gift */
   designBlob: Blob;
   designUrl: string;
   /** Lightly downsized JPEG of the untouched photo */

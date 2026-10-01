@@ -8,15 +8,13 @@
  *  3. (Optional) drop Canva exports in public/themes/your-id/ and list them in `art`
  */
 
-export type SectionKey = "blanket" | "album" | "messages" | "games" | "registry";
+export type SectionKey = "design" | "album" | "messages" | "games" | "registry";
 
 export type Theme = {
   id: string;
   name: string;
   /** Small symbol used on the wax seal and stamps */
   motif: "plane" | "heart" | "star";
-  /** Default line under the name, if the host doesn't write their own */
-  defaultTagline: (occasion: string) => string;
   /** Optional Canva artwork. Any piece left out falls back to the CSS drawing. */
   art?: Partial<Record<SectionKey | "background" | "envelope", string>>;
 };
@@ -26,8 +24,6 @@ export const THEMES: Record<string, Theme> = {
     id: "explorer",
     name: "Little Explorer",
     motif: "plane",
-    defaultTagline: (occasion) =>
-      occasion.toLowerCase().includes("baby") ? "A little explorer is landing soon" : "Adventure awaits",
   },
 };
 

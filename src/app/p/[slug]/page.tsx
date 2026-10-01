@@ -1,16 +1,13 @@
 import { notFound } from "next/navigation";
 import { TimeLeft, EventDate } from "@/components/LocalDate";
 import { Motif } from "@/components/Motif";
+import { defaultTagline, defaultWelcome } from "@/lib/copy";
 import { getParty } from "@/lib/parties";
 import { getTheme } from "@/themes";
 import { EnvelopeOpener } from "./EnvelopeOpener";
 import { SectionObject } from "./SectionObject";
 
 type Props = { params: Promise<{ slug: string }> };
-
-function withArticle(phrase: string) {
-  return /^[aeiou]/i.test(phrase) ? `An ${phrase}` : `A ${phrase}`;
-}
 
 export default async function PartyHome({ params }: Props) {
   const { slug } = await params;
@@ -19,7 +16,9 @@ export default async function PartyHome({ params }: Props) {
 
   const theme = getTheme(party.theme);
   const base = `/p/${party.slug}`;
-  const tagline = party.tagline ?? theme.defaultTagline(party.occasion);
+  // Both are the host's own words when they've written them
+  const tagline = party.tagline ?? defaultTagline(party.occasion);
+  const welcome = party.welcomeMessage ?? defaultWelcome(party.guestOfHonorName);
 
   return (
     <>
@@ -34,7 +33,7 @@ export default async function PartyHome({ params }: Props) {
           >
             <div className="pp-tape" style={{ left: "50%", top: "-12px", transform: "translateX(-50%) rotate(-3deg)" }} />
             <p className="pp-caps pp-soft" style={{ fontSize: "0.78rem" }}>
-              {withArticle(party.occasion.toLowerCase())} celebrating
+              We&apos;re celebrating
             </p>
             <h1
               className="pp-script"
@@ -47,17 +46,17 @@ export default async function PartyHome({ params }: Props) {
                 {party.title}
               </p>
             )}
-            <p className="pp-caps" style={{ fontSize: "0.92rem", lineHeight: 1.5 }}>
-              {tagline}
-            </p>
+            {tagline && (
+              <p className="pp-caps" style={{ fontSize: "0.92rem", lineHeight: 1.5 }}>
+                {tagline}
+              </p>
+            )}
             {party.eventDate && (
               <div style={{ margin: "1.3rem 0 0.2rem" }}>
                 <EventDate iso={party.eventDate} />
               </div>
             )}
-            {party.welcomeMessage && (
-              <p style={{ marginTop: "1.2rem", lineHeight: 1.55 }}>{party.welcomeMessage}</p>
-            )}
+            <p style={{ marginTop: "1.2rem", lineHeight: 1.55, whiteSpace: "pre-line" }}>{welcome}</p>
           </div>
           <div
             className="pp-stamp"
@@ -78,17 +77,17 @@ export default async function PartyHome({ params }: Props) {
         <div className="pp-board">
           {party.sections.design && (
             <SectionObject
-              section="blanket"
+              section="design"
               theme={theme}
               href={`${base}/design`}
-              label="Blanket square"
+              label="Add your design"
               detail={
                 party.isOpen ? (
                   <>
                     <TimeLeft iso={party.deadline} /> to add yours
                   </>
                 ) : (
-                  "Squares are closed"
+                  "Designs are closed"
                 )
               }
               tilt={-2}
@@ -127,7 +126,8 @@ export default async function PartyHome({ params }: Props) {
               tilt={-2.5}
             />
           )}
-          {party.sections.registry && party.registryUrl && (
+          {/* Shown whenever the host has added a registry link */}
+          {party.registryUrl && (
             <SectionObject
               section="registry"
               theme={theme}

@@ -55,10 +55,10 @@ export default async function DesignPage({ params }: Props) {
         {back}
         <div className="pp-paper" style={{ marginTop: "2rem", padding: "2.5rem 1.5rem", textAlign: "center" }}>
           <h1 className="pp-script" style={{ fontSize: "3.2rem", color: "var(--pp-accent)" }}>
-            Squares are closed
+            Designs are closed
           </h1>
           <p style={{ marginTop: "1rem", lineHeight: 1.55 }}>
-            The deadline has passed and {possessive} blanket is being made. Thank you for being part of it.
+            The deadline has passed and {possessive} gift is being made. Thank you for being part of it.
           </p>
         </div>
       </main>
@@ -77,14 +77,14 @@ export default async function DesignPage({ params }: Props) {
         <div className="pp-tape" style={{ left: "50%", top: "-12px", transform: "translateX(-50%) rotate(-2deg)" }} />
         <div style={{ textAlign: "center" }}>
           <p className="pp-caps pp-soft" style={{ fontSize: "0.75rem" }}>
-            A keepsake for {party.guestOfHonorName}
+            A gift from all of us
           </p>
           <h1 className="pp-script" style={{ fontSize: "3.3rem", color: "var(--pp-accent)", marginTop: "0.5rem" }}>
-            Your blanket square
+            Add your design
           </h1>
           <p className="pp-soft" style={{ marginTop: "0.6rem", lineHeight: 1.5 }}>
-            Every guest&apos;s drawing becomes a square on {possessive} blanket. You can replace yours any time before
-            the deadline.
+            Your drawing will be part of a one-of-a-kind gift for {party.guestOfHonorName}, made from designs by
+            everyone celebrating. You can replace yours any time before the deadline.
           </p>
         </div>
         <DesignFlow

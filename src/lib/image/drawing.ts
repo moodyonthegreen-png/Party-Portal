@@ -13,7 +13,7 @@
  *     paper colour (darkness + colourfulness) and turn that into opacity.
  *  4. Crop to the inked area with a little padding.
  *  5. Un-mix the white paper out of the colours so strokes stay vivid on any
- *     blanket background.
+ *     background colour.
  *  6. Measure sharpness so we can warn about blurry photos.
  */
 

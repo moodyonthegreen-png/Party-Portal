@@ -9,7 +9,7 @@ type Stroke = { color: string; size: number; points: { x: number; y: number }[] 
 
 /**
  * Finger/mouse drawing pad for the digital package. Draws on a transparent
- * square canvas so the result drops straight onto the blanket.
+ * square canvas so the result drops straight onto the group gift.
  */
 export function DrawPad({ onDone, onCancel }: { onDone: (canvas: HTMLCanvasElement) => void; onCancel: () => void }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);

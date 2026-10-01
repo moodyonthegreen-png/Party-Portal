@@ -213,7 +213,7 @@ export function DesignFlow({
               {typingName ? "Pick from the guest list instead" : "My name isn't listed"}
             </button>
           )}
-          <p className="mt-2 text-sm text-ink-soft">This is how your square will be labelled for the host.</p>
+          <p className="mt-2 text-sm text-ink-soft">So the host knows who made it.</p>
           <button type="submit" disabled={!nameIsValid} className={`${primary} mt-6 w-full`}>
             Next
           </button>
@@ -269,8 +269,8 @@ export function DesignFlow({
 
       {(step.kind === "review" || step.kind === "uploading") && (
         <section className="mt-6">
-          <h2 className="pp-script text-center" style={{ fontSize: "2.4rem", color: "var(--pp-accent)" }}>Here's your square</h2>
-          <BlanketPreview url={step.prepared.designUrl} />
+          <h2 className="pp-script text-center" style={{ fontSize: "2.4rem", color: "var(--pp-accent)" }}>Here's your design</h2>
+          <DesignPreview url={step.prepared.designUrl} />
 
           {step.prepared.result.warnings.map((w) => (
             <div key={w} className="mt-4 rounded-xl border border-warn/30 bg-warn-soft p-4">
@@ -286,7 +286,7 @@ export function DesignFlow({
               disabled={step.kind === "uploading" || step.prepared.result.warnings.includes("no-drawing")}
               onClick={() => submit(step.prepared, step.source)}
             >
-              {step.kind === "uploading" ? "Adding to the blanket…" : "Add to the blanket"}
+              {step.kind === "uploading" ? "Adding your design…" : "Add my design"}
             </button>
             <button
               type="button"
@@ -302,10 +302,10 @@ export function DesignFlow({
 
       {step.kind === "done" && (
         <section className="mt-6 text-center">
-          <BlanketPreview url={step.designUrl} />
-          <h2 className="pp-script mt-6" style={{ fontSize: "2.8rem", color: "var(--pp-accent)" }}>It's on the blanket!</h2>
+          <DesignPreview url={step.designUrl} />
+          <h2 className="pp-script mt-6" style={{ fontSize: "2.8rem", color: "var(--pp-accent)" }}>Your design is in!</h2>
           <p className="mt-2 text-ink-soft">
-            Thank you, {name.trim()}. You can come back and replace it any time before the deadline.
+            Thank you, {name.trim()}. It will be part of a gift made by everyone celebrating. You can come back and replace it any time before the deadline.
           </p>
           <div className="mt-6 flex flex-col gap-3">
             <a href={`/p/${slug}`} className={primary}>
@@ -328,12 +328,12 @@ export function DesignFlow({
   );
 }
 
-/** The design on a soft blanket square with a stitched edge. */
-function BlanketPreview({ url }: { url: string }) {
+/** The cleaned-up design on a soft fabric swatch with a stitched edge. */
+function DesignPreview({ url }: { url: string }) {
   return (
     <div className="blanket-texture mt-4 rounded-2xl border border-line p-3 shadow-sm">
       <div className="flex aspect-square items-center justify-center rounded-xl border-2 border-dashed border-ink/15 p-[10%]">
-        <img src={url} alt="Your design on the blanket" className="max-h-full max-w-full object-contain" />
+        <img src={url} alt="Your design" className="max-h-full max-w-full object-contain" />
       </div>
     </div>
   );

@@ -19,14 +19,14 @@ storage, Tailwind CSS.
   - Automatic cleanup in the browser: finds the card, drops the table around
     it, evens out shadows, removes the white paper, crops to the drawing
   - Warnings for blurry photos, very faint drawings, or no drawing found
-  - Preview on a blanket square before submitting
+  - Preview before submitting
   - Replace any time before the deadline, from the same phone or computer
 
 Photo cleanup lives in `src/lib/image/drawing.ts` and has tests (`npm test`).
 
 ## Not built yet
 
-Host portal, photo album, message board, games, blanket designer, themes,
+Host portal (including editing the welcome message, tagline and registry link), photo album, message board, games, the group-gift designer, more themes,
 Moody Celebrations admin view, and the Shopify and Printify connections.
 
 ## Setting it up
@@ -70,5 +70,5 @@ npm run dev
   token of the browser that added them, so only that browser can replace them.
   One browser can add designs for several people (a parent adding for the
   kids).
-- We keep both the cleaned PNG (for the blanket) and the original photo (so we
+- We keep both the cleaned PNG (for the group gift) and the original photo (so we
   can re-process at full quality later).

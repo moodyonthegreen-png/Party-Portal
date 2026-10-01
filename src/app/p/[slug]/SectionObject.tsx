@@ -5,7 +5,7 @@ import type { SectionKey, Theme } from "@/themes";
 /** The CSS-drawn scrapbook object for each party section. */
 function Drawing({ section, theme }: { section: SectionKey; theme: Theme }) {
   switch (section) {
-    case "blanket":
+    case "design":
       return (
         <div className="pp-swatch">
           <div className="pp-swatch-inner">
