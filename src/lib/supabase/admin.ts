@@ -1,5 +1,6 @@
 import "server-only";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { normalizeSupabaseUrl } from "./url";
 
 /**
  * Server-side Supabase client using the service-role key.
@@ -10,7 +11,7 @@ let cached: SupabaseClient | null = null;
 
 export function supabaseAdmin(): SupabaseClient {
   if (cached) return cached;
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const url = normalizeSupabaseUrl(process.env.NEXT_PUBLIC_SUPABASE_URL);
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !key) {
     throw new Error(
