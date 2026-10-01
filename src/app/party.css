@@ -1186,3 +1186,17 @@
   justify-items: start;
 }
 .gd-preview { display: grid; }
+.gd-photos { display: grid; gap: 0.4rem; }
+.gd-photo-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.4rem;
+}
+.gd-photo-grid img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid var(--pp-paper-edge);
+  background: #fff;
+}

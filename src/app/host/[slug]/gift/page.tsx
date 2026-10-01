@@ -2,11 +2,14 @@ import { notFound } from "next/navigation";
 import { listGiftSources, listSavedGifts } from "@/lib/gift";
 import { ownedProducts } from "@/lib/gift/products";
 import { getHostParty } from "@/lib/host";
+import { printifyConfigured } from "@/lib/printify";
 import { GiftDesigner } from "./GiftDesigner";
 
 type Props = { params: Promise<{ slug: string }> };
 
 export const dynamic = "force-dynamic";
+// Talking to Printify after finalizing can take a little while
+export const maxDuration = 60;
 
 export default async function GiftPage({ params }: Props) {
   const { slug } = await params;
@@ -33,6 +36,7 @@ export default async function GiftPage({ params }: Props) {
         saved={saved.map((s) => ({ ...s }))}
         designsOpen={party.isOpen}
         owned={ownedProducts(party.giftProduct, party.extraProducts)}
+        printify={printifyConfigured()}
       />
     </main>
   );

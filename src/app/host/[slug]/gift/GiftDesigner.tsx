@@ -4,11 +4,20 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { El, Layout, TextEl } from "@/lib/gift/layout";
 import { PRODUCTS, inches, type ProductKey } from "@/lib/gift/products";
 import { supabaseBrowser } from "@/lib/supabase/browser";
-import { finishGiftPrint, saveGiftLayout, startGiftPrint } from "../actions";
+import { finishGiftPrint, makeGiftMockups, saveGiftLayout, startGiftPrint } from "../actions";
 import { renderPrint } from "./render";
 import { freshLayout, layoutWarnings, Stage, SWATCHES, useSourceMap, type Source } from "./Stage";
 
-type Saved = { productKey: ProductKey; layout: Layout; status: "draft" | "final"; printUrl: string | null; finalizedAt: string | null };
+type Mockup = { src: string; position: string; isDefault: boolean };
+type Saved = {
+  productKey: ProductKey;
+  layout: Layout;
+  status: "draft" | "final";
+  printUrl: string | null;
+  finalizedAt: string | null;
+  mockups: Mockup[];
+  provider: string | null;
+};
 
 const btn: React.CSSProperties = { fontSize: "0.75rem", padding: "0.55rem 0.9rem" };
 
@@ -19,6 +28,7 @@ export function GiftDesigner({
   saved,
   designsOpen,
   owned,
+  printify,
 }: {
   slug: string;
   guestOfHonorName: string;
@@ -27,6 +37,8 @@ export function GiftDesigner({
   designsOpen: boolean;
   /** Products this party has bought; the rest are offered as extras */
   owned: ProductKey[];
+  /** Whether Printify is connected, for real product photos */
+  printify: boolean;
 }) {
   const sourceMap = useSourceMap(sources);
   const savedMap = useMemo(() => new Map(saved.map((s) => [s.productKey, s])), [saved]);
@@ -45,6 +57,11 @@ export function GiftDesigner({
     Object.fromEntries(saved.map((s) => [s.productKey, { final: s.status === "final", printUrl: s.printUrl }])),
   );
 
+  const [photos, setPhotos] = useState<Record<string, { mockups: Mockup[]; provider: string | null }>>(() =>
+    Object.fromEntries(saved.map((s) => [s.productKey, { mockups: s.mockups, provider: s.provider }])),
+  );
+  const [photoState, setPhotoState] = useState<"idle" | "loading" | "error">("idle");
+  const [photoError, setPhotoError] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [mode, setMode] = useState<"edit" | "flat" | "mockup">("edit");
   const [saveState, setSaveState] = useState<"saved" | "saving" | "unsaved" | "error">("saved");
@@ -221,6 +238,8 @@ export function GiftDesigner({
       if (fin.error) throw new Error(fin.error);
       setSaveState("saved");
       setStatus((s) => ({ ...s, [productKey]: { final: true, printUrl: URL.createObjectURL(blob) } }));
+      setPhotos((p) => ({ ...p, [productKey]: { mockups: [], provider: null } }));
+      if (printify) void fetchPhotos();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Something went wrong making the print file.");
     } finally {
@@ -228,7 +247,21 @@ export function GiftDesigner({
     }
   }
 
+  async function fetchPhotos() {
+    setPhotoState("loading");
+    setPhotoError(null);
+    const res = await makeGiftMockups(slug, productKey);
+    if (res.ok) {
+      setPhotos((p) => ({ ...p, [productKey]: { mockups: res.mockups, provider: res.provider } }));
+      setPhotoState("idle");
+    } else {
+      setPhotoError(res.error);
+      setPhotoState("error");
+    }
+  }
+
   const st = status[productKey];
+  const pics = st?.final ? (photos[productKey]?.mockups ?? []) : [];
   const { w: inW, h: inH } = inches(product);
 
   return (
@@ -452,6 +485,33 @@ export function GiftDesigner({
               <p className="pp-soft" style={{ fontSize: "0.9rem" }}>
                 When it looks just right, make the full-size print file. You can still change things afterwards and make it again.
               </p>
+            )}
+            {st?.final && printify && (
+              <div className="gd-photos">
+                {photoState === "loading" ? (
+                  <p className="pp-soft" style={{ fontSize: "0.9rem" }}>
+                    Getting product photos from Printify…
+                  </p>
+                ) : pics.length ? (
+                  <>
+                    <p className="gd-label">Your gift{photos[productKey]?.provider ? ` · printed by ${photos[productKey]?.provider}` : ""}</p>
+                    <div className="gd-photo-grid">
+                      {pics.slice(0, 6).map((m) => (
+                        <a key={m.src} href={m.src} target="_blank" rel="noopener noreferrer">
+                          <img src={m.src} alt={`${product.name} (${m.position})`} loading="lazy" />
+                        </a>
+                      ))}
+                    </div>
+                  </>
+                ) : (
+                  <div>
+                    {photoError && <p style={{ color: "var(--pp-leather)", fontSize: "0.9rem" }}>{photoError}</p>}
+                    <button type="button" className="pp-link" style={{ fontSize: "0.9rem" }} onClick={fetchPhotos}>
+                      {photoError ? "Try again" : "Show it on the real product"}
+                    </button>
+                  </div>
+                )}
+              </div>
             )}
             <button type="button" className="pp-btn" onClick={finalize} disabled={finalizing || !layout.elements.length}>
               {finalizing ? "Making print file…" : st?.final ? "Make it again" : "Finalize design"}

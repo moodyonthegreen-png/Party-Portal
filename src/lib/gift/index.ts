@@ -48,6 +48,8 @@ export type SavedGift = {
   printUrl: string | null;
   finalizedAt: string | null;
   updatedAt: string;
+  mockups: { src: string; position: string; isDefault: boolean }[];
+  provider: string | null;
 };
 
 export async function listSavedGifts(partyId: string): Promise<SavedGift[]> {
@@ -68,6 +70,8 @@ export async function listSavedGifts(partyId: string): Promise<SavedGift[]> {
       printUrl,
       finalizedAt: r.finalized_at,
       updatedAt: r.updated_at,
+      mockups: r.status === "final" && Array.isArray(r.mockups) ? r.mockups : [],
+      provider: r.printify_provider ?? null,
     });
   }
   return out;

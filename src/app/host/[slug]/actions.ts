@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { sanitizeLayout } from "@/lib/gift/layout";
 import { ownedProducts, PRODUCTS, type ProductKey } from "@/lib/gift/products";
 import { requireHost, type HostParty } from "@/lib/host";
+import { createDraftProduct, deleteProduct, PrintifyError, printifyConfigured, type Mockup } from "@/lib/printify";
 import { DESIGNS_BUCKET, supabaseAdmin } from "@/lib/supabase/admin";
 import { THEMES } from "@/themes";
 
@@ -483,4 +484,51 @@ export async function finishGiftPrint(slug: string, productKey: string, path: st
   if (error) return { error: "We couldn't save the finished design. Please try again." };
   refresh(party.slug);
   return { ok: true };
+}
+
+/**
+ * After finalizing: send the print file to Printify as an unpublished draft
+ * product and keep the product photos it makes.
+ */
+export async function makeGiftMockups(
+  slug: string,
+  productKey: string,
+): Promise<{ ok: true; mockups: Mockup[]; provider: string } | { ok: false; error: string }> {
+  const party = await host(slug);
+  if (isState(party)) return { ok: false, error: party.error ?? "Please open your host link again." };
+  if (!isProduct(productKey) || !owns(party, productKey)) return { ok: false, error: "Unknown product." };
+  if (!printifyConfigured()) return { ok: false, error: "Printify isn't connected yet." };
+
+  const db = supabaseAdmin();
+  const { data: gift } = await db
+    .from("gift_designs")
+    .select("print_path, printify_product_id, status")
+    .eq("party_id", party.id)
+    .eq("product_key", productKey)
+    .maybeSingle();
+  if (!gift?.print_path || gift.status !== "final") return { ok: false, error: "Finalize the design first." };
+
+  const { data: signed } = await db.storage.from("prints").createSignedUrl(gift.print_path, 60 * 30);
+  if (!signed?.signedUrl) return { ok: false, error: "We couldn't read the print file. Please try again." };
+
+  const product = PRODUCTS[productKey];
+  try {
+    const made = await createDraftProduct({
+      product,
+      title: `${party.guestOfHonorName}'s ${product.name} (${party.slug})`,
+      printFileUrl: signed.signedUrl,
+      fileName: gift.print_path.split("/").pop()!,
+    });
+    if (gift.printify_product_id && gift.printify_product_id !== made.productId) {
+      await deleteProduct(gift.printify_product_id);
+    }
+    await db
+      .from("gift_designs")
+      .update({ printify_product_id: made.productId, printify_provider: made.provider, mockups: made.mockups })
+      .eq("party_id", party.id)
+      .eq("product_key", productKey);
+    return { ok: true, mockups: made.mockups, provider: made.provider };
+  } catch (e) {
+    return { ok: false, error: e instanceof PrintifyError ? e.message : "Printify couldn't make the product photos." };
+  }
 }
