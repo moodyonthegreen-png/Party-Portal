@@ -1200,3 +1200,4 @@
   border: 1px solid var(--pp-paper-edge);
   background: #fff;
 }
+.gd-real { display: grid; gap: 0.5rem; }

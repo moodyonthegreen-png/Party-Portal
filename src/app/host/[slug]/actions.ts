@@ -532,3 +532,85 @@ export async function makeGiftMockups(
     return { ok: false, error: e instanceof PrintifyError ? e.message : "Printify couldn't make the product photos." };
   }
 }
+
+// ---------------------------------------------------------------------------
+// Printify photos for products the host is only previewing (upsells)
+// ---------------------------------------------------------------------------
+
+export async function startPreviewUpload(
+  slug: string,
+  productKey: string,
+): Promise<{ ok: true; path: string; token: string } | { ok: false; error: string }> {
+  const party = await host(slug);
+  if (isState(party)) return { ok: false, error: party.error ?? "Please open your host link again." };
+  if (!isProduct(productKey)) return { ok: false, error: "Unknown product." };
+  if (!printifyConfigured()) return { ok: false, error: "Printify isn't connected yet." };
+
+  // A little breathing room between requests, so Printify isn't flooded
+  const { data: last } = await supabaseAdmin()
+    .from("gift_previews")
+    .select("created_at")
+    .eq("party_id", party.id)
+    .eq("product_key", productKey)
+    .maybeSingle();
+  if (last && Date.now() - new Date(last.created_at).getTime() < 30_000) {
+    return { ok: false, error: "Those photos were just made. Give it a few seconds before trying again." };
+  }
+
+  const ext = PRODUCTS[productKey].format === "png" ? "png" : "jpg";
+  const path = `${party.id}/previews/${productKey}-${Date.now()}.${ext}`;
+  const { data, error } = await supabaseAdmin().storage.from("prints").createSignedUploadUrl(path);
+  if (error || !data) return { ok: false, error: "We couldn't get ready to make the preview." };
+  return { ok: true, path: data.path, token: data.token };
+}
+
+export async function makePreviewMockups(
+  slug: string,
+  productKey: string,
+  path: string,
+): Promise<{ ok: true; mockups: Mockup[]; provider: string } | { ok: false; error: string }> {
+  const party = await host(slug);
+  if (isState(party)) return { ok: false, error: party.error ?? "Please open your host link again." };
+  if (!isProduct(productKey)) return { ok: false, error: "Unknown product." };
+  if (!path.startsWith(`${party.id}/previews/${productKey}-`)) return { ok: false, error: "That preview doesn't belong to this party." };
+
+  const db = supabaseAdmin();
+  const { data: signed } = await db.storage.from("prints").createSignedUrl(path, 60 * 30);
+  if (!signed?.signedUrl) return { ok: false, error: "The preview didn't finish uploading. Please try again." };
+
+  const { data: old } = await db
+    .from("gift_previews")
+    .select("file_path, printify_product_id")
+    .eq("party_id", party.id)
+    .eq("product_key", productKey)
+    .maybeSingle();
+
+  const product = PRODUCTS[productKey];
+  try {
+    const made = await createDraftProduct({
+      product,
+      title: `PREVIEW ${party.guestOfHonorName}'s ${product.name} (${party.slug})`,
+      printFileUrl: signed.signedUrl,
+      fileName: path.split("/").pop()!,
+    });
+    await db.from("gift_previews").upsert(
+      {
+        party_id: party.id,
+        product_key: productKey,
+        file_path: path,
+        printify_product_id: made.productId,
+        printify_provider: made.provider,
+        mockups: made.mockups,
+        created_at: new Date().toISOString(),
+      },
+      { onConflict: "party_id,product_key" },
+    );
+    // Tidy up the previous preview
+    if (old?.printify_product_id && old.printify_product_id !== made.productId) await deleteProduct(old.printify_product_id);
+    if (old?.file_path && old.file_path !== path) await db.storage.from("prints").remove([old.file_path]);
+    return { ok: true, mockups: made.mockups, provider: made.provider };
+  } catch (e) {
+    await db.storage.from("prints").remove([path]);
+    return { ok: false, error: e instanceof PrintifyError ? e.message : "Printify couldn't make the product photos." };
+  }
+}

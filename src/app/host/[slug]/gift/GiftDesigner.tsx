@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { El, Layout, TextEl } from "@/lib/gift/layout";
 import { PRODUCTS, inches, type ProductKey } from "@/lib/gift/products";
 import { supabaseBrowser } from "@/lib/supabase/browser";
-import { finishGiftPrint, makeGiftMockups, saveGiftLayout, startGiftPrint } from "../actions";
+import { finishGiftPrint, makeGiftMockups, makePreviewMockups, saveGiftLayout, startGiftPrint, startPreviewUpload } from "../actions";
 import { renderPrint } from "./render";
 import { freshLayout, layoutWarnings, Stage, SWATCHES, useSourceMap, type Source } from "./Stage";
 
@@ -29,6 +29,7 @@ export function GiftDesigner({
   designsOpen,
   owned,
   printify,
+  previews,
 }: {
   slug: string;
   guestOfHonorName: string;
@@ -39,6 +40,8 @@ export function GiftDesigner({
   owned: ProductKey[];
   /** Whether Printify is connected, for real product photos */
   printify: boolean;
+  /** Printify photos already made for previewed products */
+  previews: { productKey: ProductKey; mockups: Mockup[]; provider: string | null; createdAt: string }[];
 }) {
   const sourceMap = useSourceMap(sources);
   const savedMap = useMemo(() => new Map(saved.map((s) => [s.productKey, s])), [saved]);
@@ -298,9 +301,13 @@ export function GiftDesigner({
 
       {previewKey && (
         <UpsellPreview
+          key={previewKey}
+          slug={slug}
           productKey={previewKey}
           layout={layout}
           sources={sourceMap}
+          printify={printify}
+          initialPhotos={previews.find((p) => p.productKey === previewKey) ?? null}
           mode={previewMode}
           setMode={setPreviewMode}
           onBack={() => setPreviewKey(null)}
@@ -565,21 +572,54 @@ export function GiftDesigner({
 
 /** Read-only look at the current arrangement on a product the party hasn't bought yet. */
 function UpsellPreview({
+  slug,
   productKey,
   layout,
   sources,
+  printify,
+  initialPhotos,
   mode,
   setMode,
   onBack,
 }: {
+  slug: string;
   productKey: ProductKey;
   layout: Layout;
   sources: Map<string, Source>;
+  printify: boolean;
+  initialPhotos: { mockups: Mockup[]; provider: string | null; createdAt: string } | null;
   mode: "mockup" | "flat";
   setMode: (m: "mockup" | "flat") => void;
   onBack: () => void;
 }) {
   const p = PRODUCTS[productKey];
+  const [photos, setPhotos] = useState(initialPhotos);
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+
+  async function realPhotos() {
+    setBusy(true);
+    setErr(null);
+    try {
+      // A smaller file is plenty for photos and much quicker to make
+      const scale = Math.min(1, 2000 / Math.max(p.widthPx, p.heightPx));
+      const small = { ...p, widthPx: Math.round(p.widthPx * scale), heightPx: Math.round(p.heightPx * scale) };
+      const blob = await renderPrint(small, layout, sources);
+      const start = await startPreviewUpload(slug, productKey);
+      if (!start.ok) throw new Error(start.error);
+      const { error: upErr } = await supabaseBrowser()
+        .storage.from("prints")
+        .uploadToSignedUrl(start.path, start.token, blob, { contentType: blob.type });
+      if (upErr) throw new Error("The preview didn't finish uploading. Check your connection and try again.");
+      const res = await makePreviewMockups(slug, productKey, start.path);
+      if (!res.ok) throw new Error(res.error);
+      setPhotos({ mockups: res.mockups, provider: res.provider, createdAt: new Date().toISOString() });
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : "Something went wrong.");
+    } finally {
+      setBusy(false);
+    }
+  }
   return (
     <section className="gd-preview">
       <div className="gd-toolbar">
@@ -609,6 +649,49 @@ function UpsellPreview({
         onChange={() => {}}
         onCommit={() => {}}
       />
+      {printify && (
+        <div className="gd-real" style={{ marginTop: "1.5rem" }}>
+          {photos?.mockups.length ? (
+            <>
+              <p className="gd-label">
+                The real {p.name.toLowerCase()}
+                {photos.provider ? ` · printed by ${photos.provider}` : ""}
+              </p>
+              <div className="gd-photo-grid" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))" }}>
+                {photos.mockups.slice(0, 8).map((m) => (
+                  <a key={m.src} href={m.src} target="_blank" rel="noopener noreferrer">
+                    <img src={m.src} alt={`${p.name} (${m.position})`} loading="lazy" />
+                  </a>
+                ))}
+              </div>
+              <p className="pp-soft" style={{ fontSize: "0.82rem" }}>
+                Made from your arrangement on{" "}
+                {new Date(photos.createdAt).toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}.{" "}
+                <button type="button" className="pp-link" onClick={realPhotos} disabled={busy}>
+                  {busy ? "Updating…" : "Update photos"}
+                </button>
+              </p>
+            </>
+          ) : (
+            <div style={{ textAlign: "center" }}>
+              <button type="button" className="pp-btn pp-btn-ghost" onClick={realPhotos} disabled={busy}>
+                {busy ? "Getting photos from Printify…" : "See it on the real product"}
+              </button>
+              {busy && (
+                <p className="pp-soft" style={{ fontSize: "0.85rem", marginTop: "0.4rem" }}>
+                  This takes about 10 seconds.
+                </p>
+              )}
+            </div>
+          )}
+          {err && (
+            <p role="alert" style={{ color: "var(--pp-leather)", fontSize: "0.9rem", marginTop: "0.4rem", textAlign: "center" }}>
+              {err}
+            </p>
+          )}
+        </div>
+      )}
+
       <div style={{ display: "grid", justifyItems: "center", gap: "0.4rem", marginTop: "1.25rem", textAlign: "center" }}>
         <button type="button" className="pp-btn" disabled title="Checkout opens when the store is connected">
           Add to my order

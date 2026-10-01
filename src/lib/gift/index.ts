@@ -76,3 +76,20 @@ export async function listSavedGifts(partyId: string): Promise<SavedGift[]> {
   }
   return out;
 }
+
+export type PreviewPhotos = { productKey: ProductKey; mockups: { src: string; position: string; isDefault: boolean }[]; provider: string | null; createdAt: string };
+
+/** Printify photos already made for products the host previewed. */
+export async function listPreviewPhotos(partyId: string): Promise<PreviewPhotos[]> {
+  const { data, error } = await supabaseAdmin()
+    .from("gift_previews")
+    .select("product_key, mockups, printify_provider, created_at")
+    .eq("party_id", partyId);
+  if (error) return []; // table may not exist yet
+  return (data ?? []).map((r) => ({
+    productKey: r.product_key,
+    mockups: Array.isArray(r.mockups) ? r.mockups : [],
+    provider: r.printify_provider ?? null,
+    createdAt: r.created_at,
+  }));
+}

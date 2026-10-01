@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { listGiftSources, listSavedGifts } from "@/lib/gift";
+import { listGiftSources, listPreviewPhotos, listSavedGifts } from "@/lib/gift";
 import { ownedProducts } from "@/lib/gift/products";
 import { getHostParty } from "@/lib/host";
 import { printifyConfigured } from "@/lib/printify";
@@ -16,7 +16,11 @@ export default async function GiftPage({ params }: Props) {
   const party = await getHostParty(slug);
   if (!party) notFound();
 
-  const [sources, saved] = await Promise.all([listGiftSources(party.id), listSavedGifts(party.id)]);
+  const [sources, saved, previews] = await Promise.all([
+    listGiftSources(party.id),
+    listSavedGifts(party.id),
+    listPreviewPhotos(party.id),
+  ]);
 
   return (
     <main style={{ paddingTop: "1.5rem", paddingBottom: "3rem" }}>
@@ -37,6 +41,7 @@ export default async function GiftPage({ params }: Props) {
         designsOpen={party.isOpen}
         owned={ownedProducts(party.giftProduct, party.extraProducts)}
         printify={printifyConfigured()}
+        previews={previews}
       />
     </main>
   );
