@@ -3,9 +3,12 @@
 import { revalidatePath } from "next/cache";
 import { sanitizeLayout } from "@/lib/gift/layout";
 import { ownedProducts, PRODUCTS, type ProductKey } from "@/lib/gift/products";
+import { EmailError, emailConfigured, isEmail, reminderEmail, sendEmails } from "@/lib/email";
+import { parseGuestLines } from "@/lib/guests";
 import { requireHost, type HostParty } from "@/lib/host";
 import { createDraftProduct, deleteProduct, PrintifyError, printifyConfigured, type Mockup } from "@/lib/printify";
 import { DESIGNS_BUCKET, supabaseAdmin } from "@/lib/supabase/admin";
+import { siteOrigin } from "@/lib/site";
 import { THEMES } from "@/themes";
 
 export type ActionState = { ok?: boolean; error?: string; message?: string };
@@ -42,39 +45,98 @@ export async function addGuests(slug: string, _prev: ActionState, formData: Form
   const party = await host(slug);
   if (isState(party)) return party;
 
-  const names = String(formData.get("names") ?? "")
-    .split(/[\n,;]+/)
-    .map((n) => n.trim().replace(/\s+/g, " "))
-    .filter((n) => n.length > 0 && n.length <= 80);
-  if (!names.length) return { error: "Type at least one name." };
-  if (names.length > 300) return { error: "That's a lot of names! Please add up to 300 at a time." };
+  const parsed = parseGuestLines(String(formData.get("names") ?? ""));
+  if (!parsed.length) return { error: "Type at least one name." };
+  if (parsed.length > 300) return { error: "That's a lot of names! Please add up to 300 at a time." };
 
   const db = supabaseAdmin();
-  const { data: existing, error: listErr } = await db.from("guests").select("name").eq("party_id", party.id);
+  const { data: existing, error: listErr } = await db.from("guests").select("id, name, email").eq("party_id", party.id);
   if (listErr) return { error: "Something went wrong. Please try again." };
 
-  const seen = new Set((existing ?? []).map((g) => String(g.name).toLowerCase()));
-  const fresh: string[] = [];
-  for (const n of names) {
-    const key = n.toLowerCase();
-    if (!seen.has(key)) {
-      seen.add(key);
-      fresh.push(n);
+  type Existing = { id: string; name: string; email: string | null };
+  const byName = new Map<string, Existing>(
+    ((existing ?? []) as Existing[]).map((g) => [String(g.name).toLowerCase(), g] as [string, Existing]),
+  );
+  const fresh: { name: string; email: string | null }[] = [];
+  let updated = 0;
+  for (const g of parsed) {
+    const key = g.name.toLowerCase();
+    const found = byName.get(key);
+    if (found) {
+      // Already listed: just add or change their email
+      if (g.email && g.email !== found.email) {
+        await db.from("guests").update({ email: g.email }).eq("id", found.id);
+        updated++;
+      }
+    } else if (!fresh.some((f) => f.name.toLowerCase() === key)) {
+      fresh.push(g);
     }
   }
-  if (!fresh.length) return { ok: true, message: "Everyone you typed is already on the list." };
 
-  const { error } = await db
-    .from("guests")
-    .insert(fresh.map((name) => ({ party_id: party.id, name, added_by: "host" })));
-  if (error) return { error: "We couldn't add those names. Please try again." };
+  if (fresh.length) {
+    const { error } = await db
+      .from("guests")
+      .insert(fresh.map((g) => ({ party_id: party.id, name: g.name, email: g.email, added_by: "host" })));
+    if (error) return { error: "We couldn't add those names. Please try again." };
+  }
+  if (!fresh.length && !updated) return { ok: true, message: "Everyone you typed is already on the list." };
 
   refresh(party.slug);
-  const skipped = names.length - fresh.length;
-  return {
-    ok: true,
-    message: `Added ${fresh.length} ${fresh.length === 1 ? "guest" : "guests"}${skipped ? ` (${skipped} already on the list)` : ""}.`,
-  };
+  const parts: string[] = [];
+  if (fresh.length) parts.push(`Added ${fresh.length} ${fresh.length === 1 ? "guest" : "guests"}`);
+  if (updated) parts.push(`updated ${updated} ${updated === 1 ? "email" : "emails"}`);
+  return { ok: true, message: `${parts.join(" and ")}.` };
+}
+
+/** Email a reminder to listed guests who haven't added a design (at most once a day each). */
+export async function sendReminders(slug: string): Promise<ActionState> {
+  const party = await host(slug);
+  if (isState(party)) return party;
+  if (!party.isOpen) return { error: "The deadline has passed." };
+  if (!emailConfigured()) return { error: "Email isn't set up yet." };
+
+  const db = supabaseAdmin();
+  const { data: guests, error } = await db
+    .from("guests")
+    .select("id, name, email, reminded_at, designs(id)")
+    .eq("party_id", party.id)
+    .not("email", "is", null);
+  if (error) return { error: "Something went wrong. Please try again." };
+
+  const dayAgo = Date.now() - 20 * 60 * 60 * 1000;
+  const due = (guests ?? []).filter((g) => {
+    const hasDesign = ((g.designs as unknown as unknown[] | null) ?? []).length > 0;
+    return !hasDesign && g.email && isEmail(g.email) && (!g.reminded_at || new Date(g.reminded_at).getTime() < dayAgo);
+  });
+  if (!due.length) return { ok: true, message: "Everyone with an email has either added a design or had a reminder today." };
+
+  const url = `${await siteOrigin()}/p/${party.slug}/design`;
+  try {
+    await sendEmails(
+      due.map((g) =>
+        reminderEmail({
+          to: g.email!,
+          guestName: g.name,
+          guestOfHonorName: party.guestOfHonorName,
+          deadline: party.deadline,
+          url,
+          hostName: party.hostName,
+          replyTo: isEmail(party.hostEmail) ? party.hostEmail : undefined,
+        }),
+      ),
+    );
+  } catch (e) {
+    return { error: e instanceof EmailError ? e.message : "We couldn't send the reminders. Please try again." };
+  }
+  await db
+    .from("guests")
+    .update({ reminded_at: new Date().toISOString() })
+    .in(
+      "id",
+      due.map((g) => g.id),
+    );
+  refresh(party.slug);
+  return { ok: true, message: `Sent ${due.length} ${due.length === 1 ? "reminder" : "reminders"}.` };
 }
 
 export async function removeGuest(slug: string, guestId: string): Promise<ActionState> {

@@ -58,3 +58,17 @@ export async function requireHost(slug: string): Promise<HostParty> {
   if (!party) throw new Error("Your host link has expired. Open the link from your email again.");
   return party;
 }
+
+/**
+ * Make a fresh host link for a party (switching off the old one) and return
+ * the path to open, e.g. "/h/3f9a...".
+ */
+export async function issueHostLink(partyId: string): Promise<string> {
+  const token = Buffer.from(crypto.getRandomValues(new Uint8Array(24))).toString("hex");
+  const { error } = await supabaseAdmin()
+    .from("parties")
+    .update({ host_token_hash: await sha256(token), host_link_sent_at: new Date().toISOString() })
+    .eq("id", partyId);
+  if (error) throw dbError("making a host link", error);
+  return `/h/${token}`;
+}

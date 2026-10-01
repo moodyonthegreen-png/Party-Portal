@@ -42,6 +42,11 @@ export default async function HostLayout({ children, params }: Props) {
               To open your host dashboard, use the host link from your email. It signs you in on this device.
             </p>
             <p style={{ marginTop: "1.25rem" }}>
+              <Link href="/host/login" className="pp-btn">
+                Email me my link
+              </Link>
+            </p>
+            <p style={{ marginTop: "1.25rem" }}>
               <Link href={`/p/${slug}`} className="pp-link">
                 Go to the guest page instead
               </Link>

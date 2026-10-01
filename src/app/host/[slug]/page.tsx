@@ -1,24 +1,18 @@
-import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { LocalDate, TimeLeft } from "@/components/LocalDate";
+import { emailConfigured } from "@/lib/email";
 import { getHostParty } from "@/lib/host";
+import { siteOrigin } from "@/lib/site";
 import { DESIGNS_BUCKET, dbError, supabaseAdmin } from "@/lib/supabase/admin";
-import { AddGuestsForm, CopyButton, GuestList, type GuestRow } from "./OverviewClient";
+import { AddGuestsForm, CopyButton, GuestList, ReminderButton, type GuestRow } from "./OverviewClient";
 
 type Props = { params: Promise<{ slug: string }> };
-
-async function siteOrigin() {
-  const h = await headers();
-  const host = h.get("x-forwarded-host") ?? h.get("host") ?? "localhost:3000";
-  const proto = h.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
-  return `${proto}://${host}`;
-}
 
 async function loadGuests(partyId: string): Promise<GuestRow[]> {
   const db = supabaseAdmin();
   const { data, error } = await db
     .from("guests")
-    .select("id, name, added_by, created_at, designs(image_path, status, updated_at)")
+    .select("id, name, email, added_by, reminded_at, created_at, designs(image_path, status, updated_at)")
     .eq("party_id", partyId)
     .order("name");
   if (error) throw dbError("loading guest list", error);
@@ -29,6 +23,8 @@ async function loadGuests(partyId: string): Promise<GuestRow[]> {
       id: g.id as string,
       name: g.name as string,
       addedBy: g.added_by as "host" | "guest",
+      email: (g.email as string | null) ?? null,
+      remindedAt: (g.reminded_at as string | null) ?? null,
       design: d ? { path: d.image_path, hidden: d.status === "hidden", updatedAt: d.updated_at, url: null as string | null } : null,
     };
   });
@@ -40,10 +36,12 @@ async function loadGuests(partyId: string): Promise<GuestRow[]> {
     for (const r of rows) if (r.design) r.design.url = byPath.get(r.design.path) ?? null;
   }
 
-  return rows.map(({ id, name, addedBy, design }) => ({
+  return rows.map(({ id, name, addedBy, email, remindedAt, design }) => ({
     id,
     name,
     addedBy,
+    email,
+    remindedAt,
     design: design ? { url: design.url, hidden: design.hidden, updatedAt: design.updatedAt } : null,
   }));
 }
@@ -124,11 +122,20 @@ export default async function HostOverview({ params }: Props) {
           )}
         </p>
         {party.isOpen && total > added && (
-          <div style={{ marginTop: "0.9rem" }}>
-            <CopyButton text={reminderText} label="Copy a reminder message" ghost />
-            <p className="pp-soft" style={{ marginTop: "0.4rem", fontSize: "0.85rem" }}>
-              Paste it into your group text or email. Automatic email reminders are coming soon.
-            </p>
+          <div style={{ marginTop: "0.9rem", display: "grid", gap: "0.6rem" }}>
+            {emailConfigured() && (
+              <ReminderButton
+                slug={party.slug}
+                count={guests.filter((g) => !g.design && g.email).length}
+                missingEmails={guests.filter((g) => !g.design && !g.email).length}
+              />
+            )}
+            <div>
+              <CopyButton text={reminderText} label="Copy a reminder message" ghost />
+              <p className="pp-soft" style={{ marginTop: "0.4rem", fontSize: "0.85rem" }}>
+                Paste it into a group text for anyone without an email on the list.
+              </p>
+            </div>
           </div>
         )}
       </section>
@@ -145,7 +152,7 @@ export default async function HostOverview({ params }: Props) {
             ? "Right now only guests on this list can add a design (you can change that in Party details)."
             : "Guests who aren't listed can still type their own name."}
         </p>
-        <AddGuestsForm slug={party.slug} />
+        <AddGuestsForm slug={party.slug} withEmails={emailConfigured()} />
         <GuestList slug={party.slug} guests={guests} />
       </section>
     </main>

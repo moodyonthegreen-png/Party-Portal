@@ -12,8 +12,13 @@ export default function HostLinkExpired() {
             That link didn&apos;t work
           </h1>
           <p style={{ marginTop: "1rem", lineHeight: 1.55 }}>
-            Your host link may have been replaced with a newer one. Check your email for the latest link, or contact
-            Moody Celebrations and we&apos;ll send you a fresh one.
+            Your host link may have been replaced with a newer one. Check your email for the latest link, or get a
+            fresh one now.
+          </p>
+          <p style={{ marginTop: "1.25rem" }}>
+            <a href="/host/login" className="pp-btn">
+              Email me my link
+            </a>
           </p>
         </div>
       </main>
