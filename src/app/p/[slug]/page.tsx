@@ -1,114 +1,144 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
-import { LocalDate, TimeLeft } from "@/components/LocalDate";
+import { TimeLeft, EventDate } from "@/components/LocalDate";
+import { Motif } from "@/components/Motif";
 import { getParty } from "@/lib/parties";
+import { getTheme } from "@/themes";
+import { EnvelopeOpener } from "./EnvelopeOpener";
+import { SectionObject } from "./SectionObject";
 
 type Props = { params: Promise<{ slug: string }> };
 
-const STEPS = [
-  { title: "Draw", body: "Use the drawing card from your envelope. Anything goes: a doodle, a wish, a little picture." },
-  { title: "Snap", body: "Take a photo of your card in good light, straight on, so it fills most of the frame." },
-  { title: "Send", body: "Add it here. We clean it up and it becomes a square on the blanket." },
-];
+function withArticle(phrase: string) {
+  return /^[aeiou]/i.test(phrase) ? `An ${phrase}` : `A ${phrase}`;
+}
 
-export default async function PartyWelcome({ params }: Props) {
+export default async function PartyHome({ params }: Props) {
   const { slug } = await params;
   const party = await getParty(slug);
   if (!party) notFound();
 
+  const theme = getTheme(party.theme);
   const base = `/p/${party.slug}`;
-  const sections = [
-    party.sections.album && { href: `${base}/album`, label: "Photo album", soon: true },
-    party.sections.messages && { href: `${base}/messages`, label: "Message board", soon: true },
-    party.sections.games && { href: `${base}/games`, label: "Games", soon: true },
-    party.sections.registry && party.registryUrl && { href: party.registryUrl, label: "Registry", soon: false },
-  ].filter(Boolean) as { href: string; label: string; soon: boolean }[];
+  const tagline = party.tagline ?? theme.defaultTagline(party.occasion);
 
   return (
-    <main className="mx-auto max-w-xl px-5 pt-10 pb-16">
-      <header>
-        <p className="text-sm tracking-wide text-ink-soft uppercase">{party.occasion}</p>
-        <h1 className="mt-2 font-display text-4xl leading-tight sm:text-5xl">
-          {party.title ?? `Celebrating ${party.guestOfHonorName}`}
-        </h1>
-        {party.welcomeMessage && <p className="mt-4 text-lg leading-relaxed text-ink-soft">{party.welcomeMessage}</p>}
-      </header>
+    <>
+      <EnvelopeOpener slug={party.slug} name={party.guestOfHonorName} occasion={party.occasion} motif={theme.motif} />
 
-      <section className="mt-8 rounded-2xl border border-line bg-card p-5">
-        {party.isOpen ? (
-          <>
-            <p className="text-sm text-ink-soft">Add your design by</p>
-            <p className="mt-1 text-lg font-medium">
-              <LocalDate iso={party.deadline} />
+      <main className="pp-wrap">
+        {/* The guest of honor */}
+        <section style={{ position: "relative", marginTop: "1.75rem" }}>
+          <div
+            className="pp-paper"
+            style={{ transform: "rotate(-1.2deg)", padding: "2.6rem 1.5rem 2.2rem", textAlign: "center" }}
+          >
+            <div className="pp-tape" style={{ left: "50%", top: "-12px", transform: "translateX(-50%) rotate(-3deg)" }} />
+            <p className="pp-caps pp-soft" style={{ fontSize: "0.78rem" }}>
+              {withArticle(party.occasion.toLowerCase())} celebrating
             </p>
-            <p className="mt-1 text-sm font-medium text-moss">
-              <TimeLeft iso={party.deadline} />
-            </p>
-          </>
-        ) : (
-          <>
-            <p className="text-lg font-medium">Designs are closed</p>
-            <p className="mt-1 text-sm text-ink-soft">
-              The deadline has passed and the blanket is being made. Thank you for being part of it.
-            </p>
-          </>
-        )}
-      </section>
-
-      {party.sections.design && (
-        <section className="mt-10">
-          <h2 className="font-display text-2xl">How it works</h2>
-          <ol className="mt-5 space-y-5">
-            {STEPS.map((step, i) => (
-              <li key={step.title} className="flex gap-4">
-                <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-blush-soft font-display text-lg text-moss-dark">
-                  {i + 1}
-                </span>
-                <div>
-                  <p className="font-medium">{step.title}</p>
-                  <p className="mt-0.5 text-ink-soft">{step.body}</p>
-                </div>
-              </li>
-            ))}
-          </ol>
-
-          {party.isOpen && (
-            <Link
-              href={`${base}/design`}
-              className="mt-8 block rounded-xl bg-moss px-4 py-4 text-center text-lg font-medium text-white hover:bg-moss-dark"
+            <h1
+              className="pp-script"
+              style={{ fontSize: "clamp(3.6rem, 18vw, 5rem)", margin: "0.7rem 0 0.4rem", color: "var(--pp-accent)" }}
             >
-              Add my design
-            </Link>
-          )}
+              {party.guestOfHonorName}
+            </h1>
+            {party.title && (
+              <p className="pp-display" style={{ fontSize: "1.35rem", fontStyle: "italic", marginBottom: "0.4rem" }}>
+                {party.title}
+              </p>
+            )}
+            <p className="pp-caps" style={{ fontSize: "0.92rem", lineHeight: 1.5 }}>
+              {tagline}
+            </p>
+            {party.eventDate && (
+              <div style={{ margin: "1.3rem 0 0.2rem" }}>
+                <EventDate iso={party.eventDate} />
+              </div>
+            )}
+            {party.welcomeMessage && (
+              <p style={{ marginTop: "1.2rem", lineHeight: 1.55 }}>{party.welcomeMessage}</p>
+            )}
+          </div>
+          <div
+            className="pp-stamp"
+            style={{ position: "absolute", right: "-4px", bottom: "-24px", width: 68, height: 82, transform: "rotate(8deg)" }}
+            aria-hidden="true"
+          >
+            <div className="pp-stamp-inner">
+              <Motif motif={theme.motif} size={26} />
+            </div>
+          </div>
         </section>
-      )}
 
-      {sections.length > 0 && (
-        <nav className="mt-12" aria-label="More at this party">
-          <h2 className="font-display text-2xl">More at the party</h2>
-          <ul className="mt-4 grid grid-cols-2 gap-3">
-            {sections.map((s) => (
-              <li key={s.label}>
-                {s.soon ? (
-                  <span className="block rounded-xl border border-dashed border-line p-4 text-ink-soft">
-                    {s.label}
-                    <span className="mt-1 block text-xs">Coming soon</span>
-                  </span>
+        {/* Things to do */}
+        <p className="pp-caps pp-soft" style={{ textAlign: "center", margin: "3.25rem 0 1.5rem", fontSize: "0.8rem" }}>
+          Things to do at the party
+        </p>
+
+        <div className="pp-board">
+          {party.sections.design && (
+            <SectionObject
+              section="blanket"
+              theme={theme}
+              href={`${base}/design`}
+              label="Blanket square"
+              detail={
+                party.isOpen ? (
+                  <>
+                    <TimeLeft iso={party.deadline} /> to add yours
+                  </>
                 ) : (
-                  <a
-                    href={s.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block rounded-xl border border-line bg-card p-4 hover:border-moss"
-                  >
-                    {s.label}
-                  </a>
-                )}
-              </li>
-            ))}
-          </ul>
-        </nav>
-      )}
-    </main>
+                  "Squares are closed"
+                )
+              }
+              tilt={-2}
+            />
+          )}
+          {party.sections.album && (
+            <SectionObject
+              section="album"
+              theme={theme}
+              href={`${base}/album`}
+              label="Photo album"
+              detail="Share your snapshots"
+              soon
+              tilt={2}
+            />
+          )}
+          {party.sections.messages && (
+            <SectionObject
+              section="messages"
+              theme={theme}
+              href={`${base}/messages`}
+              label="Messages"
+              detail="Notes, wishes & advice"
+              soon
+              tilt={1.5}
+            />
+          )}
+          {party.sections.games && (
+            <SectionObject
+              section="games"
+              theme={theme}
+              href={`${base}/games`}
+              label="Games"
+              detail="Play & top the leaderboard"
+              soon
+              tilt={-2.5}
+            />
+          )}
+          {party.sections.registry && party.registryUrl && (
+            <SectionObject
+              section="registry"
+              theme={theme}
+              href={party.registryUrl}
+              external
+              tilt={3}
+              style={{ gridColumn: "1 / -1", width: "50%", justifySelf: "center" }}
+            />
+          )}
+        </div>
+      </main>
+    </>
   );
 }

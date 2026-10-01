@@ -38,11 +38,10 @@ const WARNING_TEXT: Record<Warning, { title: string; body: string }> = {
   },
 };
 
-const field =
-  "w-full rounded-xl border border-line bg-card px-4 py-3 text-base outline-none focus:border-moss focus:ring-2 focus:ring-moss/20";
-const primary =
-  "rounded-xl bg-moss px-4 py-3 font-medium text-white hover:bg-moss-dark disabled:opacity-50 disabled:cursor-not-allowed";
-const secondary = "rounded-xl border border-line bg-card px-4 py-3 font-medium hover:border-moss";
+// Themed styles live in party.css
+const field = "pp-field";
+const primary = "pp-btn";
+const secondary = "pp-btn pp-btn-ghost";
 
 export function DesignFlow({
   slug,
@@ -270,7 +269,7 @@ export function DesignFlow({
 
       {(step.kind === "review" || step.kind === "uploading") && (
         <section className="mt-6">
-          <h2 className="font-display text-2xl">Here's how it will look</h2>
+          <h2 className="pp-script text-center" style={{ fontSize: "2.4rem", color: "var(--pp-accent)" }}>Here's your square</h2>
           <BlanketPreview url={step.prepared.designUrl} />
 
           {step.prepared.result.warnings.map((w) => (
@@ -304,7 +303,7 @@ export function DesignFlow({
       {step.kind === "done" && (
         <section className="mt-6 text-center">
           <BlanketPreview url={step.designUrl} />
-          <h2 className="mt-6 font-display text-3xl">It's on the blanket!</h2>
+          <h2 className="pp-script mt-6" style={{ fontSize: "2.8rem", color: "var(--pp-accent)" }}>It's on the blanket!</h2>
           <p className="mt-2 text-ink-soft">
             Thank you, {name.trim()}. You can come back and replace it any time before the deadline.
           </p>

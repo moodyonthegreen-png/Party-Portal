@@ -40,3 +40,43 @@ export function TimeLeft({ iso }: { iso: string }) {
 
   return <span>{text ?? " "}</span>;
 }
+
+/** Invitation-style date: SEPTEMBER | 25 | 2:00 PM, in the viewer's time zone. */
+export function EventDate({ iso }: { iso: string }) {
+  const [parts, setParts] = useState<{ month: string; day: string; time: string } | null>(null);
+
+  useEffect(() => {
+    const d = new Date(iso);
+    setParts({
+      month: d.toLocaleString(undefined, { month: "long" }),
+      day: d.toLocaleString(undefined, { day: "numeric" }),
+      time: d.toLocaleString(undefined, { hour: "numeric", minute: "2-digit" }),
+    });
+  }, [iso]);
+
+  const rule: React.CSSProperties = {
+    borderTop: "1px solid currentColor",
+    borderBottom: "1px solid currentColor",
+    padding: "0.2rem 0.6rem",
+    fontSize: "0.8rem",
+    minWidth: "6.5rem",
+  };
+
+  return (
+    <time
+      dateTime={iso}
+      className="pp-caps"
+      style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.8rem", minHeight: "3.2rem" }}
+    >
+      {parts && (
+        <>
+          <span style={rule}>{parts.month}</span>
+          <span className="pp-display" style={{ fontSize: "2.6rem", letterSpacing: 0, lineHeight: 1 }}>
+            {parts.day}
+          </span>
+          <span style={rule}>{parts.time}</span>
+        </>
+      )}
+    </time>
+  );
+}

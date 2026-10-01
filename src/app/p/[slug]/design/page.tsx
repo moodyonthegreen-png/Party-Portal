@@ -41,19 +41,26 @@ export default async function DesignPage({ params }: Props) {
   if (!party) notFound();
 
   const back = (
-    <Link href={`/p/${party.slug}`} className="text-sm font-medium text-moss underline-offset-4 hover:underline">
+    <Link href={`/p/${party.slug}`} className="pp-caps pp-link" style={{ fontSize: "0.8rem" }}>
       ← Back to the party
     </Link>
   );
+  const possessive = party.guestOfHonorName.endsWith("s")
+    ? `${party.guestOfHonorName}'`
+    : `${party.guestOfHonorName}'s`;
 
   if (!party.sections.design || !party.isOpen) {
     return (
-      <main className="mx-auto max-w-xl px-5 pt-8 pb-16">
+      <main className="pp-wrap">
         {back}
-        <h1 className="mt-6 font-display text-3xl">Designs are closed</h1>
-        <p className="mt-3 text-ink-soft">
-          The deadline has passed and the blanket is being made. Thank you for being part of it.
-        </p>
+        <div className="pp-paper" style={{ marginTop: "2rem", padding: "2.5rem 1.5rem", textAlign: "center" }}>
+          <h1 className="pp-script" style={{ fontSize: "3.2rem", color: "var(--pp-accent)" }}>
+            Squares are closed
+          </h1>
+          <p style={{ marginTop: "1rem", lineHeight: 1.55 }}>
+            The deadline has passed and {possessive} blanket is being made. Thank you for being part of it.
+          </p>
+        </div>
       </main>
     );
   }
@@ -64,19 +71,30 @@ export default async function DesignPage({ params }: Props) {
   ]);
 
   return (
-    <main className="mx-auto max-w-xl px-5 pt-8 pb-16">
+    <main className="pp-wrap">
       {back}
-      <h1 className="mt-6 font-display text-3xl sm:text-4xl">Add my design</h1>
-      <p className="mt-2 text-ink-soft">
-        For {party.guestOfHonorName}'s blanket. You can replace it any time before the deadline.
-      </p>
-      <DesignFlow
-        slug={party.slug}
-        guestNames={guestNames}
-        requireGuestList={party.requireGuestList}
-        allowDrawing
-        myDesigns={myDesigns}
-      />
+      <div className="pp-paper" style={{ marginTop: "2rem", padding: "2.25rem 1.25rem 1.75rem" }}>
+        <div className="pp-tape" style={{ left: "50%", top: "-12px", transform: "translateX(-50%) rotate(-2deg)" }} />
+        <div style={{ textAlign: "center" }}>
+          <p className="pp-caps pp-soft" style={{ fontSize: "0.75rem" }}>
+            A keepsake for {party.guestOfHonorName}
+          </p>
+          <h1 className="pp-script" style={{ fontSize: "3.3rem", color: "var(--pp-accent)", marginTop: "0.5rem" }}>
+            Your blanket square
+          </h1>
+          <p className="pp-soft" style={{ marginTop: "0.6rem", lineHeight: 1.5 }}>
+            Every guest&apos;s drawing becomes a square on {possessive} blanket. You can replace yours any time before
+            the deadline.
+          </p>
+        </div>
+        <DesignFlow
+          slug={party.slug}
+          guestNames={guestNames}
+          requireGuestList={party.requireGuestList}
+          allowDrawing
+          myDesigns={myDesigns}
+        />
+      </div>
     </main>
   );
 }

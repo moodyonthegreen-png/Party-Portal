@@ -10,34 +10,31 @@ export function PasswordGate({ slug, guestOfHonorName }: { slug: string; guestOf
   );
 
   return (
-    <main className="mx-auto flex min-h-dvh max-w-md flex-col justify-center px-5 py-12">
-      <p className="text-sm tracking-wide text-ink-soft uppercase">You're invited</p>
-      <h1 className="mt-2 font-display text-4xl leading-tight">{guestOfHonorName}'s party</h1>
-      <p className="mt-3 text-ink-soft">This party has a password. You'll find it on your invitation.</p>
-      <form action={action} className="mt-8 flex flex-col gap-3">
-        <label htmlFor="password" className="text-sm font-medium">
-          Party password
-        </label>
-        <input
-          id="password"
-          name="password"
-          type="password"
-          autoComplete="off"
-          required
-          className="rounded-xl border border-line bg-card px-4 py-3 text-base outline-none focus:border-moss focus:ring-2 focus:ring-moss/20"
-        />
-        {state.error && (
-          <p role="alert" className="text-sm text-warn">
-            {state.error}
-          </p>
-        )}
-        <button
-          disabled={pending}
-          className="rounded-xl bg-moss px-4 py-3 font-medium text-white hover:bg-moss-dark disabled:opacity-60"
-        >
-          {pending ? "Checking…" : "Join the party"}
-        </button>
-      </form>
+    <main className="pp-wrap" style={{ minHeight: "100dvh", display: "grid", alignContent: "center" }}>
+      <div className="pp-paper" style={{ padding: "2.5rem 1.5rem", textAlign: "center", transform: "rotate(-1deg)" }}>
+        <div className="pp-tape" style={{ left: "50%", top: "-12px", transform: "translateX(-50%) rotate(-3deg)" }} />
+        <p className="pp-caps pp-soft" style={{ fontSize: "0.78rem" }}>
+          You&apos;re invited to celebrate
+        </p>
+        <h1 className="pp-script" style={{ fontSize: "3.8rem", color: "var(--pp-accent)", margin: "0.6rem 0" }}>
+          {guestOfHonorName}
+        </h1>
+        <p className="pp-soft">This party has a password. You&apos;ll find it on your invitation.</p>
+        <form action={action} style={{ marginTop: "1.5rem", display: "grid", gap: "0.75rem", textAlign: "left" }}>
+          <label htmlFor="password" className="pp-caps" style={{ fontSize: "0.75rem" }}>
+            Party password
+          </label>
+          <input id="password" name="password" type="password" autoComplete="off" required className="pp-field" />
+          {state.error && (
+            <p role="alert" style={{ color: "var(--pp-leather)", fontSize: "0.95rem" }}>
+              {state.error}
+            </p>
+          )}
+          <button disabled={pending} className="pp-btn" style={{ marginTop: "0.5rem" }}>
+            {pending ? "Checking…" : "Join the party"}
+          </button>
+        </form>
+      </div>
     </main>
   );
 }

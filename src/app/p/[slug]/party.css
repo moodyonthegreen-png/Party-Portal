@@ -1,0 +1,593 @@
+/*
+ * Party portal look. Every theme sets the same custom properties on
+ * [data-theme="..."]; the scrapbook objects below only read those, so a new
+ * theme is mostly new colours, fonts and (later) Canva artwork.
+ *
+ * Objects are drawn in CSS for now. When a theme supplies artwork exported
+ * from Canva, <SectionObject> shows the image instead.
+ */
+
+/* ------------------------------------------------------------------ */
+/* Theme: Explorer (travel)                                            */
+/* ------------------------------------------------------------------ */
+[data-theme="explorer"] {
+  --pp-bg: #e9e3d6;
+  --pp-ink: #2c3458;
+  --pp-ink-soft: #5b6283;
+  --pp-paper: #faf6ec;
+  --pp-paper-edge: #e9e1cf;
+  --pp-kraft: #c6a47c;
+  --pp-kraft-dark: #a9865d;
+  --pp-gold: #c9a14a;
+  --pp-gold-light: #ecd28c;
+  --pp-gold-dark: #8f6a22;
+  --pp-accent: #39467a;
+  --pp-accent-soft: #dfe4f0;
+  --pp-leather: #a9663a;
+  --pp-map: #8ea2c2;
+  --pp-tape-a: #2f3d74;
+  --pp-tape-b: #f4f1ea;
+  --pp-swatch: #dbe4ef;
+  --pp-script: var(--font-allura), "Brush Script MT", cursive;
+  --pp-display: var(--font-cormorant), "Cormorant Garamond", Georgia, serif;
+  --pp-body: var(--font-ebgaramond), "EB Garamond", Georgia, serif;
+  /* Faint map: latitude curves, dashed flight paths, a compass rose */
+  --pp-bg-art: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='640' height='640' viewBox='0 0 640 640'%3E%3Cg fill='none' stroke='%238ea2c2' stroke-opacity='.38' stroke-width='1.2'%3E%3Cpath d='M-20 120 C 160 80 300 170 660 110'/%3E%3Cpath d='M-20 300 C 200 250 380 360 660 290'/%3E%3Cpath d='M-20 480 C 180 440 420 540 660 470'/%3E%3Cpath d='M120 -20 C 90 200 170 420 110 660'/%3E%3Cpath d='M420 -20 C 470 220 380 430 450 660'/%3E%3C/g%3E%3Cg fill='none' stroke='%232c3458' stroke-opacity='.22' stroke-width='1.6' stroke-dasharray='6 7'%3E%3Cpath d='M40 560 C 180 380 300 420 380 250 S 560 120 610 70'/%3E%3C/g%3E%3Cg transform='translate(520 520)' stroke='%238ea2c2' stroke-opacity='.45' fill='none'%3E%3Ccircle r='46'/%3E%3Ccircle r='38' stroke-dasharray='2 4'/%3E%3Cpath d='M0 -62 L8 0 L0 62 L-8 0 Z M-62 0 L0 -8 L62 0 L0 8 Z' fill='%238ea2c2' fill-opacity='.18'/%3E%3C/g%3E%3Cg transform='translate(608 66) rotate(-35)' fill='%232c3458' fill-opacity='.22'%3E%3Cpath d='M0 -14 L3 -3 L16 3 L16 6 L3 4 L2 12 L6 15 L6 17 L0 15 L-6 17 L-6 15 L-2 12 L-3 4 L-16 6 L-16 3 L-3 -3 Z'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* ------------------------------------------------------------------ */
+/* Page                                                                */
+/* ------------------------------------------------------------------ */
+.pp-page {
+  min-height: 100dvh;
+  color: var(--pp-ink);
+  font-family: var(--pp-body);
+  font-size: 1.125rem;
+  background-color: var(--pp-bg);
+  background-image:
+    var(--pp-bg-art),
+    repeating-linear-gradient(0deg, rgb(255 255 255 / 0.18) 0 1px, transparent 1px 3px),
+    repeating-linear-gradient(90deg, rgb(120 100 70 / 0.06) 0 1px, transparent 1px 3px);
+  background-size: 640px 640px, auto, auto;
+  overflow-x: hidden;
+}
+
+.pp-wrap {
+  max-width: 34rem;
+  margin: 0 auto;
+  padding: 1.25rem 1.25rem 4rem;
+}
+
+.pp-script {
+  font-family: var(--pp-script);
+  font-weight: 400;
+  line-height: 1;
+}
+.pp-caps {
+  font-family: var(--pp-display);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-weight: 500;
+}
+.pp-display {
+  font-family: var(--pp-display);
+}
+.pp-soft {
+  color: var(--pp-ink-soft);
+}
+
+/* ------------------------------------------------------------------ */
+/* Paper, tape, stamps                                                 */
+/* ------------------------------------------------------------------ */
+.pp-paper {
+  position: relative;
+  background:
+    radial-gradient(120% 90% at 30% 20%, rgb(255 255 255 / 0.65), transparent 60%),
+    var(--pp-paper);
+  border: 1px solid var(--pp-paper-edge);
+  box-shadow:
+    0 1px 1px rgb(60 45 20 / 0.08),
+    0 10px 24px -10px rgb(60 45 20 / 0.35);
+}
+
+.pp-tape {
+  position: absolute;
+  width: 6.5rem;
+  height: 1.6rem;
+  opacity: 0.92;
+  background-color: var(--pp-tape-b);
+  background-image:
+    linear-gradient(90deg, color-mix(in srgb, var(--pp-tape-a) 55%, transparent) 50%, transparent 50%),
+    linear-gradient(0deg, color-mix(in srgb, var(--pp-tape-a) 55%, transparent) 50%, transparent 50%);
+  background-size: 10px 10px;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.15);
+  clip-path: polygon(3% 0, 97% 4%, 100% 50%, 97% 96%, 3% 100%, 0 50%);
+}
+
+.pp-stamp {
+  --perf: 5px;
+  position: relative;
+  display: grid;
+  padding: var(--perf);
+  /* perforated edge: paper-coloured dots with holes, the inner panel covers the middle */
+  background: radial-gradient(circle, transparent calc(var(--perf) * 0.5), var(--pp-paper) calc(var(--perf) * 0.55))
+    calc(var(--perf) * -1) calc(var(--perf) * -1) / calc(var(--perf) * 2) calc(var(--perf) * 2);
+  filter: drop-shadow(0 2px 3px rgb(0 0 0 / 0.2));
+}
+.pp-stamp-inner {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  background: var(--pp-accent);
+  color: var(--pp-paper);
+  /* paper border inside the perforations */
+  box-shadow: 0 0 0 calc(var(--perf) * 0.8) var(--pp-paper);
+}
+
+.pp-seal {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 4.75rem;
+  height: 4.75rem;
+  border-radius: 46% 54% 50% 50% / 52% 48% 52% 48%;
+  background:
+    radial-gradient(circle at 35% 30%, var(--pp-gold-light), var(--pp-gold) 45%, var(--pp-gold-dark) 100%);
+  box-shadow:
+    inset 0 0 0 5px rgb(255 255 255 / 0.12),
+    inset 0 -4px 8px rgb(0 0 0 / 0.25),
+    0 4px 10px rgb(0 0 0 / 0.3);
+  color: var(--pp-gold-dark);
+}
+.pp-seal::after {
+  content: "";
+  position: absolute;
+  inset: 10px;
+  border-radius: 50%;
+  box-shadow: inset 0 2px 4px rgb(0 0 0 / 0.25), 0 1px 0 rgb(255 255 255 / 0.4);
+}
+
+/* ------------------------------------------------------------------ */
+/* Envelope opener                                                     */
+/* ------------------------------------------------------------------ */
+.pp-opener {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  transition: opacity 0.6s ease 0.9s, visibility 0s linear 1.5s;
+}
+.pp-opener[data-open="true"] {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.pp-envelope {
+  position: relative;
+  width: min(88vw, 26rem);
+  aspect-ratio: 1.45;
+  perspective: 900px;
+  cursor: pointer;
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+}
+.pp-envelope-body {
+  position: absolute;
+  inset: 0;
+  border-radius: 4px;
+  background:
+    radial-gradient(130% 100% at 50% 0%, rgb(255 255 255 / 0.18), transparent 60%),
+    repeating-linear-gradient(115deg, rgb(0 0 0 / 0.025) 0 2px, transparent 2px 5px),
+    var(--pp-kraft);
+  box-shadow: 0 18px 40px -16px rgb(40 30 10 / 0.55), 0 2px 4px rgb(0 0 0 / 0.12);
+}
+/* the folded side seams */
+.pp-envelope-body::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to top right, transparent 49.6%, rgb(0 0 0 / 0.08) 50%, transparent 50.6%),
+    linear-gradient(to top left, transparent 49.6%, rgb(0 0 0 / 0.08) 50%, transparent 50.6%);
+}
+.pp-envelope-flap {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 62%;
+  transform-origin: top center;
+  background: var(--pp-kraft);
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  filter: drop-shadow(0 3px 2px rgb(0 0 0 / 0.2));
+  /* drop behind the card halfway through opening */
+  transition: transform 0.7s cubic-bezier(0.5, 0, 0.3, 1), z-index 0s linear 0.35s;
+  z-index: 3;
+}
+.pp-envelope-flap::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgb(255 255 255 / 0.12), rgb(0 0 0 / 0.08));
+}
+/* front pocket: side and bottom flaps, in front of the card */
+.pp-envelope-pocket {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: 4px;
+  background:
+    repeating-linear-gradient(115deg, rgb(0 0 0 / 0.025) 0 2px, transparent 2px 5px),
+    linear-gradient(to top right, transparent 49.6%, rgb(0 0 0 / 0.07) 50%, transparent 50.6%),
+    linear-gradient(to top left, transparent 49.6%, rgb(0 0 0 / 0.07) 50%, transparent 50.6%),
+    var(--pp-kraft);
+  clip-path: polygon(0 0, 50% 56%, 100% 0, 100% 100%, 0 100%);
+}
+.pp-envelope-card {
+  position: absolute;
+  left: 7%;
+  right: 7%;
+  top: 8%;
+  bottom: 8%;
+  z-index: 1;
+  transition: transform 0.8s cubic-bezier(0.3, 0.7, 0.2, 1) 0.45s;
+}
+.pp-envelope-seal {
+  position: absolute;
+  left: 50%;
+  top: 62%;
+  transform: translate(-50%, -50%);
+  z-index: 4;
+  transition: opacity 0.25s ease;
+}
+.pp-envelope-tape {
+  position: absolute;
+  z-index: 4;
+  width: 46%;
+  top: 34%;
+}
+.pp-envelope[data-open="true"] .pp-envelope-flap {
+  transform: rotateX(180deg);
+  z-index: 0;
+}
+.pp-envelope[data-open="true"] .pp-envelope-seal,
+.pp-envelope[data-open="true"] .pp-envelope-tape {
+  opacity: 0;
+}
+.pp-envelope[data-open="true"] .pp-envelope-card {
+  transform: translateY(-58%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pp-envelope-flap,
+  .pp-envelope-card,
+  .pp-opener {
+    transition: none;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Scrapbook section objects                                           */
+/* ------------------------------------------------------------------ */
+.pp-board {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.75rem 1rem;
+  align-items: start;
+}
+.pp-object {
+  position: relative;
+  display: block;
+  color: var(--pp-ink);
+  text-decoration: none;
+  transition: transform 0.25s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.pp-object:hover,
+.pp-object:focus-visible {
+  transform: translateY(-3px) rotate(0deg) !important;
+}
+.pp-object:focus-visible {
+  outline: 2px solid var(--pp-accent);
+  outline-offset: 6px;
+  border-radius: 4px;
+}
+.pp-object-label {
+  margin-top: 0.6rem;
+  text-align: center;
+}
+.pp-object-label .pp-script {
+  display: block;
+  font-size: 1.9rem;
+}
+.pp-object-label small {
+  display: block;
+  margin-top: 0.15rem;
+  font-size: 0.9rem;
+  color: var(--pp-ink-soft);
+}
+.pp-soon {
+  display: inline-block;
+  margin-top: 0.3rem;
+  padding: 0.05rem 0.5rem;
+  border: 1px dashed var(--pp-ink-soft);
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-family: var(--pp-display);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--pp-ink-soft);
+}
+
+/* Polaroids (photo album) */
+.pp-polaroids {
+  position: relative;
+  aspect-ratio: 1 / 1.05;
+}
+.pp-polaroid {
+  position: absolute;
+  inset: 4% 8% 0 8%;
+  padding: 8% 8% 26%;
+  background: #fffdf8;
+  box-shadow: 0 8px 18px -8px rgb(40 30 10 / 0.45), 0 1px 2px rgb(0 0 0 / 0.1);
+}
+.pp-polaroid:first-child {
+  transform: rotate(-8deg) translate(-6%, 2%);
+}
+.pp-polaroid:last-child {
+  transform: rotate(5deg) translate(4%, -2%);
+}
+.pp-polaroid-photo {
+  width: 100%;
+  height: 100%;
+  background:
+    radial-gradient(60% 50% at 70% 30%, rgb(255 255 255 / 0.5), transparent 70%),
+    linear-gradient(160deg, var(--pp-map), var(--pp-accent));
+  background-size: cover;
+  background-position: center;
+}
+
+/* Postcard (message board) */
+.pp-postcard {
+  position: relative;
+  aspect-ratio: 1.45;
+  padding: 10% 9%;
+  margin-top: 1.25rem;
+  background:
+    linear-gradient(90deg, transparent 54%, var(--pp-paper-edge) 54%, var(--pp-paper-edge) calc(54% + 1px), transparent calc(54% + 1px)),
+    var(--pp-paper);
+  box-shadow: 0 8px 18px -8px rgb(40 30 10 / 0.45), 0 1px 2px rgb(0 0 0 / 0.1);
+}
+.pp-postcard-lines {
+  position: absolute;
+  left: 60%;
+  right: 8%;
+  top: 46%;
+  height: 34%;
+  background: repeating-linear-gradient(180deg, transparent 0 9px, var(--pp-paper-edge) 9px 10px);
+}
+.pp-postcard-stamp {
+  position: absolute;
+  right: 7%;
+  top: 9%;
+  width: 22%;
+  aspect-ratio: 0.82;
+}
+.pp-postcard-note {
+  position: absolute;
+  left: 8%;
+  top: 14%;
+  width: 42%;
+  font-size: 1.15rem;
+  line-height: 1.1;
+  transform: rotate(-4deg);
+}
+
+/* Fabric swatch (blanket square) */
+.pp-swatch {
+  position: relative;
+  aspect-ratio: 1;
+  padding: 9%;
+  background:
+    repeating-linear-gradient(45deg, rgb(255 255 255 / 0.35) 0 2px, transparent 2px 6px),
+    repeating-linear-gradient(-45deg, rgb(0 0 0 / 0.03) 0 2px, transparent 2px 6px),
+    var(--pp-swatch);
+  border-radius: 6px;
+  box-shadow: 0 8px 18px -8px rgb(40 30 10 / 0.45), inset 0 0 0 1px rgb(0 0 0 / 0.04);
+}
+.pp-swatch-inner {
+  height: 100%;
+  display: grid;
+  place-items: center;
+  border: 2px dashed color-mix(in srgb, var(--pp-ink) 35%, transparent);
+  border-radius: 4px;
+  color: var(--pp-accent);
+}
+
+/* Boarding pass (games) */
+.pp-pass {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 30%;
+  margin-top: 1rem;
+  aspect-ratio: 1.6;
+  background: var(--pp-paper);
+  box-shadow: 0 8px 18px -8px rgb(40 30 10 / 0.45), 0 1px 2px rgb(0 0 0 / 0.1);
+  /* notches top and bottom at the tear line */
+  -webkit-mask:
+    radial-gradient(circle at 70% 0, transparent 9px, #000 9.5px) top / 100% 51% no-repeat,
+    radial-gradient(circle at 70% 100%, transparent 9px, #000 9.5px) bottom / 100% 51% no-repeat;
+  mask:
+    radial-gradient(circle at 70% 0, transparent 9px, #000 9.5px) top / 100% 51% no-repeat,
+    radial-gradient(circle at 70% 100%, transparent 9px, #000 9.5px) bottom / 100% 51% no-repeat;
+}
+.pp-pass-main {
+  padding: 10% 9%;
+  border-right: 2px dashed var(--pp-paper-edge);
+}
+.pp-pass-band {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 22%;
+  background: var(--pp-accent);
+}
+.pp-pass-band span {
+  position: absolute;
+  left: 8%;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--pp-paper);
+  font-size: 0.62rem;
+}
+.pp-pass-body {
+  margin-top: 26%;
+  font-family: var(--pp-display);
+  font-size: 0.66rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--pp-ink-soft);
+}
+.pp-pass-body strong {
+  display: block;
+  font-size: 1.25rem;
+  letter-spacing: 0.04em;
+  color: var(--pp-ink);
+  font-weight: 600;
+}
+.pp-pass-stub {
+  display: grid;
+  place-items: center;
+  padding-top: 22%;
+}
+.pp-barcode {
+  width: 60%;
+  height: 52%;
+  background: repeating-linear-gradient(90deg, var(--pp-ink) 0 2px, transparent 2px 3px, var(--pp-ink) 3px 4px, transparent 4px 7px);
+  opacity: 0.75;
+}
+
+/* Luggage tag (registry) */
+.pp-tag {
+  position: relative;
+  margin: 0.5rem auto 0;
+  width: 78%;
+  aspect-ratio: 0.62;
+  padding: 26% 9% 10%;
+  background: var(--pp-leather);
+  border-radius: 10px 10px 14px 14px;
+  clip-path: polygon(22% 0, 78% 0, 100% 14%, 100% 100%, 0 100%, 0 14%);
+  box-shadow: inset 0 0 0 3px rgb(0 0 0 / 0.12);
+  transform-origin: top center;
+}
+.pp-tag::before {
+  /* eyelet */
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 8%;
+  width: 16%;
+  aspect-ratio: 1;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: var(--pp-bg);
+  box-shadow: 0 0 0 3px var(--pp-gold);
+}
+.pp-tag-card {
+  height: 100%;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 0.4rem;
+  background: var(--pp-paper);
+  border-radius: 3px;
+  text-align: center;
+  padding: 8%;
+}
+.pp-tag-wrap {
+  filter: drop-shadow(0 8px 10px rgb(40 30 10 / 0.35));
+}
+
+/* ------------------------------------------------------------------ */
+/* Buttons and fields on themed pages                                  */
+/* ------------------------------------------------------------------ */
+.pp-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.85rem 1.25rem;
+  border-radius: 999px;
+  background: var(--pp-accent);
+  color: var(--pp-paper);
+  font-family: var(--pp-display);
+  font-size: 1rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 600;
+  text-decoration: none;
+  border: 0;
+  cursor: pointer;
+  box-shadow: 0 6px 14px -8px rgb(20 20 50 / 0.6);
+}
+.pp-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.pp-btn-ghost {
+  background: transparent;
+  color: var(--pp-accent);
+  box-shadow: inset 0 0 0 1.5px var(--pp-accent);
+}
+.pp-field {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  border-radius: 10px;
+  border: 1px solid var(--pp-paper-edge);
+  background: #fffdf8;
+  color: var(--pp-ink);
+  font-family: var(--pp-body);
+  font-size: 1.1rem;
+  outline: none;
+}
+.pp-field:focus {
+  border-color: var(--pp-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--pp-accent) 20%, transparent);
+}
+.pp-link {
+  color: var(--pp-accent);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+}
+.pp-note {
+  border-radius: 12px;
+  padding: 0.9rem 1rem;
+  background: color-mix(in srgb, var(--pp-gold-light) 35%, var(--pp-paper));
+  border: 1px solid color-mix(in srgb, var(--pp-gold) 45%, transparent);
+}
+
+/* ------------------------------------------------------------------ */
+/* Point the site-wide Tailwind colours at the theme, so pages built   */
+/* with utility classes (bg-moss, text-ink-soft, ...) follow the theme */
+/* ------------------------------------------------------------------ */
+[data-theme] {
+  --color-paper: var(--pp-bg);
+  --color-card: #fffdf8;
+  --color-ink: var(--pp-ink);
+  --color-ink-soft: var(--pp-ink-soft);
+  --color-moss: var(--pp-accent);
+  --color-moss-dark: color-mix(in srgb, var(--pp-accent) 78%, black);
+  --color-blush: var(--pp-gold-light);
+  --color-blush-soft: color-mix(in srgb, var(--pp-gold-light) 35%, var(--pp-paper));
+  --color-line: var(--pp-paper-edge);
+  --font-display: var(--pp-display);
+  --font-sans: var(--pp-body);
+}

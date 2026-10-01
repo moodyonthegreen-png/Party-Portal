@@ -19,6 +19,11 @@ export type PublicParty = {
   occasion: string;
   title: string | null;
   welcomeMessage: string | null;
+  /** Line under the name, e.g. "A little explorer is landing soon" */
+  tagline: string | null;
+  /** When the celebration itself happens (optional) */
+  eventDate: string | null;
+  /** Deadline for blanket squares */
   deadline: string;
   theme: string;
   sections: PartySections;
@@ -31,9 +36,8 @@ export type PublicParty = {
 export const getParty = cache(async (slug: string): Promise<PublicParty | null> => {
   const { data, error } = await supabaseAdmin()
     .from("parties")
-    .select(
-      "id, slug, guest_of_honor_name, occasion, title, welcome_message, deadline, theme, sections, registry_url, require_guest_list, password_hash",
-    )
+    // "*" so newer optional columns (tagline, event_date) don't break older databases
+    .select("*")
     .eq("slug", slug.toLowerCase())
     .maybeSingle();
 
@@ -47,6 +51,8 @@ export const getParty = cache(async (slug: string): Promise<PublicParty | null> 
     occasion: data.occasion,
     title: data.title,
     welcomeMessage: data.welcome_message,
+    tagline: data.tagline ?? null,
+    eventDate: data.event_date ?? null,
     deadline: data.deadline,
     theme: data.theme,
     sections: data.sections as PartySections,
