@@ -1,7 +1,7 @@
 import "server-only";
 import { cache } from "react";
 import { cookies } from "next/headers";
-import { supabaseAdmin } from "@/lib/supabase/admin";
+import { dbError, supabaseAdmin } from "@/lib/supabase/admin";
 
 export type PartySections = {
   design: boolean;
@@ -37,7 +37,7 @@ export const getParty = cache(async (slug: string): Promise<PublicParty | null> 
     .eq("slug", slug.toLowerCase())
     .maybeSingle();
 
-  if (error) throw error;
+  if (error) throw dbError("loading party", error);
   if (!data) return null;
 
   return {
@@ -63,7 +63,7 @@ export async function getGuestNames(partyId: string): Promise<string[]> {
     .select("name")
     .eq("party_id", partyId)
     .order("name");
-  if (error) throw error;
+  if (error) throw dbError("loading guest list", error);
   return (data ?? []).map((g) => g.name);
 }
 
@@ -73,7 +73,7 @@ export async function getSubmittedGuestNames(partyId: string): Promise<string[]>
     .from("designs")
     .select("guests(name)")
     .eq("party_id", partyId);
-  if (error) throw error;
+  if (error) throw dbError("loading submitted designs", error);
   return (data ?? [])
     .map((d) => (d.guests as unknown as { name: string } | null)?.name)
     .filter((n): n is string => Boolean(n));
@@ -119,6 +119,6 @@ export async function checkPartyPassword(slug: string, password: string) {
     p_slug: slug,
     p_password: password,
   });
-  if (error) throw error;
+  if (error) throw dbError("checking party password", error);
   return data === true;
 }

@@ -24,3 +24,17 @@ export function supabaseAdmin(): SupabaseClient {
 }
 
 export const DESIGNS_BUCKET = "designs";
+
+/**
+ * Turn a Supabase error into a readable Error and log the details, so the
+ * Vercel logs say what actually went wrong (e.g. a bad key or a missing grant).
+ */
+export function dbError(context: string, err: { message?: string; code?: string; hint?: string | null; details?: string | null }) {
+  const parts = [`[supabase] ${context} failed: ${err.message ?? "unknown error"}`];
+  if (err.code) parts.push(`code=${err.code}`);
+  if (err.hint) parts.push(`hint=${err.hint}`);
+  if (err.details) parts.push(`details=${err.details}`);
+  const message = parts.join(" | ");
+  console.error(message);
+  return new Error(message);
+}
