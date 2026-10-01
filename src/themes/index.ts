@@ -4,7 +4,7 @@
  * optional artwork exported from Canva.
  *
  * Adding a theme:
- *  1. Add a [data-theme="your-id"] block in src/app/p/[slug]/party.css
+ *  1. Add a [data-theme="your-id"] block in src/app/party.css
  *  2. Add an entry below
  *  3. (Optional) drop Canva exports in public/themes/your-id/ and list them in `art`
  */
