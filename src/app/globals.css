@@ -1,0 +1,50 @@
+@import "tailwindcss";
+
+/* Base theme tokens. Party themes will override these per party later. */
+@theme {
+  --color-paper: #fbf7f1;
+  --color-card: #ffffff;
+  --color-ink: #23302a;
+  --color-ink-soft: #5b6760;
+  --color-moss: #3f5a4a;
+  --color-moss-dark: #2e4337;
+  --color-blush: #e9c6bd;
+  --color-blush-soft: #f6e6e1;
+  --color-line: #e7dfd3;
+  --color-warn: #a4561f;
+  --color-warn-soft: #fbeee2;
+
+  --font-display: var(--font-fraunces), Georgia, serif;
+  --font-sans: var(--font-dm-sans), system-ui, sans-serif;
+}
+
+html {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: var(--font-sans);
+  min-height: 100dvh;
+}
+
+/* Soft woven texture used for the blanket preview */
+.blanket-texture {
+  background-color: var(--blanket, #f3ece2);
+  background-image:
+    repeating-linear-gradient(0deg, rgb(0 0 0 / 0.025) 0 2px, transparent 2px 5px),
+    repeating-linear-gradient(90deg, rgb(0 0 0 / 0.025) 0 2px, transparent 2px 5px);
+}
+
+/* Checkerboard to show transparent areas of a processed design */
+.checker {
+  background-color: #fff;
+  background-image:
+    linear-gradient(45deg, #eee 25%, transparent 25%),
+    linear-gradient(-45deg, #eee 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #eee 75%),
+    linear-gradient(-45deg, transparent 75%, #eee 75%);
+  background-size: 16px 16px;
+  background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+}
