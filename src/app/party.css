@@ -738,3 +738,111 @@
   justify-content: space-between;
   margin-top: 0.9rem;
 }
+
+/* ------------------------------------------------------------------ */
+/* Photo album                                                         */
+/* ------------------------------------------------------------------ */
+.pp-album {
+  list-style: none;
+  padding: 0;
+  margin: 2.5rem 0 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.6rem 1rem;
+}
+@media (min-width: 640px) {
+  .pp-album { grid-template-columns: repeat(3, 1fr); }
+}
+.pp-album-item {
+  transition: transform 0.25s ease;
+}
+.pp-album-item:hover {
+  transform: rotate(0deg) translateY(-3px) !important;
+}
+.pp-print {
+  position: relative;
+  margin: 0;
+  padding: 8px 8px 12px;
+  background: #fffdf8;
+  box-shadow: 0 10px 20px -10px rgb(40 30 10 / 0.5), 0 1px 2px rgb(0 0 0 / 0.1);
+}
+/* a strip of tape on every other print */
+.pp-album-item:nth-child(odd) .pp-print::before {
+  content: "";
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  width: 46%;
+  height: 20px;
+  transform: translateX(-50%) rotate(-4deg);
+  background-color: var(--pp-tape-b);
+  background-image:
+    linear-gradient(90deg, color-mix(in srgb, var(--pp-tape-a) 55%, transparent) 50%, transparent 50%),
+    linear-gradient(0deg, color-mix(in srgb, var(--pp-tape-a) 55%, transparent) 50%, transparent 50%);
+  background-size: 8px 8px;
+  opacity: 0.9;
+  z-index: 1;
+}
+.pp-print-photo {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  padding: 0;
+  border: 0;
+  cursor: zoom-in;
+  background: linear-gradient(160deg, var(--pp-map), var(--pp-accent));
+  overflow: hidden;
+}
+.pp-print-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.pp-print figcaption {
+  padding: 8px 2px 0;
+  min-height: 2.6rem;
+  padding-right: 2.6rem;
+}
+.pp-print-caption {
+  display: block;
+  font-size: 1.25rem;
+  line-height: 1.15;
+  color: var(--pp-ink);
+  word-break: break-word;
+}
+.pp-print-by {
+  display: block;
+  margin-top: 2px;
+  font-family: var(--pp-display);
+  font-size: 0.85rem;
+  color: var(--pp-ink-soft);
+}
+.pp-heart {
+  position: absolute;
+  right: 8px;
+  bottom: 10px;
+  border: 0;
+  background: transparent;
+  color: var(--pp-ink-soft);
+  font-family: var(--pp-display);
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 4px;
+}
+.pp-heart span {
+  font-size: 1.35rem;
+  vertical-align: -2px;
+}
+.pp-heart[data-on="true"] {
+  color: #c95b6b;
+}
+.pp-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgb(30 30 25 / 0.72);
+}

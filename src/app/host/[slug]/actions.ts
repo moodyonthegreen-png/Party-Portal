@@ -249,3 +249,42 @@ export async function deleteMessage(slug: string, id: string): Promise<ActionSta
   refresh(party.slug);
   return { ok: true };
 }
+
+// ---------------------------------------------------------------------------
+// Photo album moderation
+// ---------------------------------------------------------------------------
+
+export async function setPhotoHidden(slug: string, id: string, hidden: boolean): Promise<ActionState> {
+  const party = await host(slug);
+  if (isState(party)) return party;
+  if (!UUID.test(id)) return { error: "That photo wasn't found." };
+
+  const { error } = await supabaseAdmin()
+    .from("photos")
+    .update({ status: hidden ? "hidden" : "visible" })
+    .eq("id", id)
+    .eq("party_id", party.id)
+    .neq("status", "pending");
+  if (error) return { error: "We couldn't update that photo. Please try again." };
+  refresh(party.slug);
+  return { ok: true };
+}
+
+export async function deletePhoto(slug: string, id: string): Promise<ActionState> {
+  const party = await host(slug);
+  if (isState(party)) return party;
+  if (!UUID.test(id)) return { error: "That photo wasn't found." };
+
+  const db = supabaseAdmin();
+  const { data } = await db
+    .from("photos")
+    .select("image_path, original_path")
+    .eq("id", id)
+    .eq("party_id", party.id)
+    .maybeSingle();
+  if (data) await db.storage.from("photos").remove([data.image_path, data.original_path]);
+  const { error } = await db.from("photos").delete().eq("id", id).eq("party_id", party.id);
+  if (error) return { error: "We couldn't delete that photo. Please try again." };
+  refresh(party.slug);
+  return { ok: true };
+}

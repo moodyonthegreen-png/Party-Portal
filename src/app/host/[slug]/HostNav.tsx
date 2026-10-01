@@ -9,6 +9,7 @@ export function HostNav({ slug }: { slug: string }) {
   const items = [
     { href: base, label: "Overview" },
     { href: `${base}/messages`, label: "Guest book" },
+    { href: `${base}/photos`, label: "Photos" },
     { href: `${base}/settings`, label: "Party details" },
   ];
 

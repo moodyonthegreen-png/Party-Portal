@@ -3,6 +3,7 @@ import { TimeLeft, EventDate } from "@/components/LocalDate";
 import { Badge } from "@/components/Badge";
 import { defaultTagline, defaultWelcome } from "@/lib/copy";
 import { countMessages } from "@/lib/messages";
+import { albumPreview } from "@/lib/photos";
 import { getParty } from "@/lib/parties";
 import { getTheme } from "@/themes";
 import { SectionObject } from "./SectionObject";
@@ -19,7 +20,10 @@ export default async function PartyHome({ params }: Props) {
   // Both are the host's own words when they've written them
   const tagline = party.tagline ?? defaultTagline(party.occasion);
   const welcome = party.welcomeMessage ?? defaultWelcome(party.guestOfHonorName);
-  const messageCount = party.sections.messages ? await countMessages(party.id) : 0;
+  const [messageCount, album] = await Promise.all([
+    party.sections.messages ? countMessages(party.id) : 0,
+    party.sections.album ? albumPreview(party.id) : { count: 0, urls: [] },
+  ]);
 
   return (
     <>
@@ -94,8 +98,8 @@ export default async function PartyHome({ params }: Props) {
               theme={theme}
               href={`${base}/album`}
               label="Photo album"
-              detail="Share your snapshots"
-              soon
+              detail={album.count > 0 ? `${album.count} ${album.count === 1 ? "photo" : "photos"} so far` : "Share your snapshots"}
+              photos={album.urls}
               tilt={2}
             />
           )}

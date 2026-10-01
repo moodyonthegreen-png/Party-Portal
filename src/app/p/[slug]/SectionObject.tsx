@@ -3,7 +3,7 @@ import { Motif } from "@/components/Motif";
 import type { SectionKey, Theme } from "@/themes";
 
 /** The CSS-drawn scrapbook object for each party section. */
-function Drawing({ section, theme }: { section: SectionKey; theme: Theme }) {
+function Drawing({ section, theme, photos }: { section: SectionKey; theme: Theme; photos?: string[] }) {
   switch (section) {
     case "design":
       return (
@@ -18,12 +18,12 @@ function Drawing({ section, theme }: { section: SectionKey; theme: Theme }) {
     case "album":
       return (
         <div className="pp-polaroids">
-          <div className="pp-polaroid">
-            <div className="pp-polaroid-photo" />
-          </div>
-          <div className="pp-polaroid">
-            <div className="pp-polaroid-photo" />
-          </div>
+          {/* Back print shows the second-newest photo, front print the newest */}
+          {[photos?.[1], photos?.[0]].map((url, i) => (
+            <div className="pp-polaroid" key={i}>
+              <div className="pp-polaroid-photo" style={url ? { backgroundImage: `url("${url}")` } : undefined} />
+            </div>
+          ))}
         </div>
       );
     case "messages":
@@ -110,6 +110,7 @@ export function SectionObject({
   soon = false,
   external = false,
   tilt = 0,
+  photos,
   className,
   style,
 }: {
@@ -121,6 +122,8 @@ export function SectionObject({
   soon?: boolean;
   external?: boolean;
   tilt?: number;
+  /** Recent photos to show on the album's polaroids */
+  photos?: string[];
   className?: string;
   style?: React.CSSProperties;
 }) {
@@ -130,7 +133,7 @@ export function SectionObject({
       {art ? (
         <img src={art} alt="" style={{ width: "100%", height: "auto", display: "block" }} />
       ) : (
-        <Drawing section={section} theme={theme} />
+        <Drawing section={section} theme={theme} photos={photos} />
       )}
       {(label || detail || soon) && (
         <div className="pp-object-label">
