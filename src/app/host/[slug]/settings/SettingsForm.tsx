@@ -248,7 +248,7 @@ export function SettingsForm({
             [
               ["section_design", "Add your design (for the group gift)", initial.sections.design],
               ["section_album", "Photo album", initial.sections.album],
-              ["section_messages", "Message board", initial.sections.messages],
+              ["section_messages", "Guest book (notes, voice memos, videos)", initial.sections.messages],
               ["section_games", "Games", initial.sections.games],
             ] as const
           ).map(([nameAttr, text, on]) => (

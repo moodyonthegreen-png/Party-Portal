@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Badge } from "@/components/Badge";
+import { Motif } from "@/components/Motif";
 import type { SectionKey, Theme } from "@/themes";
 
 /** The CSS-drawn scrapbook object for each party section. */
@@ -28,11 +28,14 @@ function Drawing({ section, theme }: { section: SectionKey; theme: Theme }) {
       );
     case "messages":
       return (
-        <div className="pp-postcard">
-          <div className="pp-postcard-note pp-script">{theme.postcardNote}</div>
-          <div className="pp-postcard-lines" />
-          <div className="pp-postcard-stamp">
-            <Badge theme={theme} size={34} />
+        <div className="pp-gbook">
+          <div className="pp-gbook-plate">
+            <span className="pp-script" style={{ fontSize: "1.7rem", display: "block", color: "var(--pp-accent)" }}>
+              Guest book
+            </span>
+            <span style={{ display: "inline-block", marginTop: 4, color: "var(--pp-gold)" }}>
+              <Motif motif={theme.motif} size={16} />
+            </span>
           </div>
         </div>
       );

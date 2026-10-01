@@ -20,8 +20,6 @@ export type Theme = {
   badge: "stamp" | "sticker";
   /** Which drawn object stands for games and registry */
   objects: { games: "blocks" | "boarding-pass"; registry: "gift" | "luggage-tag" };
-  /** Handwritten line on the message-board postcard */
-  postcardNote: string;
   /** Optional Canva artwork. Any piece left out falls back to the CSS drawing. */
   art?: Partial<Record<SectionKey | "background", string>>;
 };
@@ -33,7 +31,6 @@ export const THEMES: Record<string, Theme> = {
     motif: "star",
     badge: "sticker",
     objects: { games: "blocks", registry: "gift" },
-    postcardNote: "Welcome, little one!",
   },
   explorer: {
     id: "explorer",
@@ -41,7 +38,6 @@ export const THEMES: Record<string, Theme> = {
     motif: "plane",
     badge: "stamp",
     objects: { games: "boarding-pass", registry: "luggage-tag" },
-    postcardNote: "Wish you were here!",
   },
 };
 

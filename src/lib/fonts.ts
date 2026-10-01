@@ -1,4 +1,4 @@
-import { Allura, Cormorant_Garamond, EB_Garamond } from "next/font/google";
+import { Allura, Caveat, Cormorant_Garamond, EB_Garamond } from "next/font/google";
 
 // Theme fonts. Every theme's CSS picks from these variables.
 const allura = Allura({ subsets: ["latin"], weight: "400", variable: "--font-allura", display: "swap" });
@@ -9,6 +9,8 @@ const cormorant = Cormorant_Garamond({
   display: "swap",
 });
 const ebGaramond = EB_Garamond({ subsets: ["latin"], variable: "--font-ebgaramond", display: "swap" });
+// Handwriting, for the guest book
+const caveat = Caveat({ subsets: ["latin"], variable: "--font-caveat", display: "swap" });
 
 /** Class names that make the theme font variables available. */
-export const themeFontVars = `${allura.variable} ${cormorant.variable} ${ebGaramond.variable}`;
+export const themeFontVars = `${allura.variable} ${cormorant.variable} ${ebGaramond.variable} ${caveat.variable}`;

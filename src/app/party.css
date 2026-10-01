@@ -589,3 +589,152 @@
   0%, 100% { opacity: 1; }
   50% { opacity: 0.3; }
 }
+
+/* ------------------------------------------------------------------ */
+/* Guest book                                                          */
+/* ------------------------------------------------------------------ */
+.pp-hand {
+  font-family: var(--font-caveat), "Segoe Print", "Bradley Hand", cursive;
+}
+
+/* Closed book on the party page */
+.pp-gbook {
+  position: relative;
+  aspect-ratio: 0.82;
+  width: 78%;
+  margin: 0.4rem auto 0;
+  border-radius: 4px 10px 10px 4px;
+  background:
+    linear-gradient(90deg, rgb(0 0 0 / 0.22) 0 7%, rgb(255 255 255 / 0.08) 7% 8.5%, transparent 8.5%),
+    var(--pp-accent);
+  box-shadow:
+    4px 4px 0 -1px var(--pp-paper),
+    5px 5px 0 -1px var(--pp-paper-edge),
+    8px 8px 0 -2px var(--pp-paper),
+    0 12px 20px -10px rgb(40 30 10 / 0.55);
+  display: grid;
+  place-items: center;
+}
+.pp-gbook-plate {
+  width: 66%;
+  margin-left: 8%;
+  padding: 0.6rem 0.3rem 0.7rem;
+  background: var(--pp-paper);
+  border-radius: 3px;
+  text-align: center;
+  box-shadow: inset 0 0 0 2px var(--pp-paper), inset 0 0 0 3px var(--pp-gold);
+}
+
+/* Open book */
+.pp-book {
+  position: relative;
+  margin: 1.75rem auto 0;
+  padding: 10px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--pp-accent) 88%, black);
+  box-shadow: 0 22px 40px -22px rgb(30 25 10 / 0.7), inset 0 0 0 2px rgb(255 255 255 / 0.08);
+}
+.pp-book-pages {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+.pp-book[data-wide="true"] .pp-book-pages {
+  grid-template-columns: 1fr 1fr;
+}
+.pp-bpage {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  background:
+    repeating-linear-gradient(180deg, transparent 0 31px, color-mix(in srgb, var(--pp-accent) 18%, transparent) 31px 32px) 0 74px / 100% calc(100% - 110px) no-repeat,
+    var(--pp-paper);
+  padding: 26px 22px 20px 30px;
+  display: flex;
+  flex-direction: column;
+}
+/* shading toward the spine: single page binds on the left */
+.pp-bpage::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(90deg, rgb(0 0 0 / 0.16), transparent 9%);
+}
+/* stacked page edges on the outer side */
+.pp-bpage {
+  box-shadow: 2px 0 0 var(--pp-paper-edge), 4px 0 0 var(--pp-paper), 5px 0 0 var(--pp-paper-edge);
+}
+.pp-book[data-wide="true"] .pp-bpage:first-child {
+  padding: 26px 30px 20px 22px;
+  box-shadow: -2px 0 0 var(--pp-paper-edge), -4px 0 0 var(--pp-paper), -5px 0 0 var(--pp-paper-edge);
+}
+.pp-book[data-wide="true"] .pp-bpage:first-child .pp-bpage-num {
+  right: auto;
+  left: 14px;
+}
+.pp-book[data-wide="true"] .pp-bpage:first-child::before {
+  background: linear-gradient(270deg, rgb(0 0 0 / 0.16), transparent 9%);
+}
+.pp-book-turn {
+  animation: pp-turn 0.35s ease;
+}
+@keyframes pp-turn {
+  from { opacity: 0.2; transform: translateX(var(--turn-from, 12px)); }
+  to { opacity: 1; transform: none; }
+}
+.pp-bpage-scroll {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+.pp-bpage-text {
+  font-family: var(--font-caveat), "Segoe Print", "Bradley Hand", cursive;
+  font-size: 1.45rem;
+  line-height: 32px;
+  color: var(--pp-ink);
+  white-space: pre-line;
+  word-break: break-word;
+}
+.pp-bpage-num {
+  position: absolute;
+  bottom: 8px;
+  right: 14px;
+  font-family: var(--pp-display);
+  font-size: 0.75rem;
+  color: var(--pp-ink-soft);
+}
+.pp-book-write {
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  border: 0;
+  outline: none;
+  resize: none;
+  background: transparent;
+  font-family: var(--font-caveat), "Segoe Print", "Bradley Hand", cursive;
+  font-size: 1.45rem;
+  line-height: 32px;
+  color: var(--pp-ink);
+  padding: 0;
+}
+.pp-book-write::placeholder,
+.pp-book-sign::placeholder {
+  color: color-mix(in srgb, var(--pp-ink-soft) 60%, transparent);
+}
+.pp-book-sign {
+  border: 0;
+  border-bottom: 1px solid var(--pp-ink-soft);
+  background: transparent;
+  outline: none;
+  font-family: var(--font-caveat), "Segoe Print", "Bradley Hand", cursive;
+  font-size: 1.5rem;
+  color: var(--pp-ink);
+  width: 70%;
+  padding: 0 0.2rem;
+}
+.pp-book-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.9rem;
+}

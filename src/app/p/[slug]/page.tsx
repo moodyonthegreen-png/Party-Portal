@@ -104,11 +104,11 @@ export default async function PartyHome({ params }: Props) {
               section="messages"
               theme={theme}
               href={`${base}/messages`}
-              label="Messages"
+              label="Guest book"
               detail={
                 messageCount > 0
                   ? `${messageCount} ${messageCount === 1 ? "note" : "notes"} so far`
-                  : "Notes, wishes & advice"
+                  : "Sign it with a note"
               }
               tilt={1.5}
             />
