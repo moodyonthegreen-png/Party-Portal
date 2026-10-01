@@ -20,7 +20,7 @@ export default async function HostLayout({ children, params }: Props) {
       {party ? (
         <>
           <header style={{ borderBottom: "1px solid var(--pp-paper-edge)", background: "rgb(255 253 246 / 0.85)" }}>
-            <div className="pp-wrap" style={{ paddingTop: "1rem", paddingBottom: "0.75rem", maxWidth: "48rem" }}>
+            <div className="pp-wrap pp-host-body" style={{ paddingTop: "1rem", paddingBottom: "0.75rem" }}>
               <p className="pp-caps pp-soft" style={{ fontSize: "0.7rem" }}>
                 Host dashboard
               </p>
@@ -30,9 +30,7 @@ export default async function HostLayout({ children, params }: Props) {
               <HostNav slug={party.slug} />
             </div>
           </header>
-          <div className="pp-wrap" style={{ maxWidth: "48rem" }}>
-            {children}
-          </div>
+          <div className="pp-wrap pp-host-body">{children}</div>
         </>
       ) : (
         <main className="pp-wrap" style={{ minHeight: "100dvh", display: "grid", alignContent: "center" }}>

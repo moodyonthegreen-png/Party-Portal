@@ -11,6 +11,7 @@ export function HostNav({ slug }: { slug: string }) {
     { href: `${base}/messages`, label: "Guest book" },
     { href: `${base}/photos`, label: "Photos" },
     { href: `${base}/games`, label: "Games" },
+    { href: `${base}/gift`, label: "Gift designer" },
     { href: `${base}/settings`, label: "Party details" },
   ];
 

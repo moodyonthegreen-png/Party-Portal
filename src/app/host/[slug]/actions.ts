@@ -1,6 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { sanitizeLayout } from "@/lib/gift/layout";
+import { PRODUCTS, type ProductKey } from "@/lib/gift/products";
 import { requireHost, type HostParty } from "@/lib/host";
 import { DESIGNS_BUCKET, supabaseAdmin } from "@/lib/supabase/admin";
 import { THEMES } from "@/themes";
@@ -394,6 +396,87 @@ export async function deleteBabyPhoto(slug: string, id: string): Promise<ActionS
   const { data } = await db.from("baby_photos").select("image_path").eq("id", id).eq("party_id", party.id).maybeSingle();
   if (data) await db.storage.from("photos").remove([data.image_path]);
   await db.from("baby_photos").delete().eq("id", id).eq("party_id", party.id);
+  refresh(party.slug);
+  return { ok: true };
+}
+
+// ---------------------------------------------------------------------------
+// Group-gift designer
+// ---------------------------------------------------------------------------
+
+
+const isProduct = (k: string): k is ProductKey => k in PRODUCTS;
+
+export async function saveGiftLayout(slug: string, productKey: string, layout: unknown): Promise<ActionState> {
+  const party = await host(slug);
+  if (isState(party)) return party;
+  if (!isProduct(productKey)) return { error: "Unknown product." };
+
+  const { error } = await supabaseAdmin()
+    .from("gift_designs")
+    .upsert(
+      {
+        party_id: party.id,
+        product_key: productKey,
+        layout: sanitizeLayout(layout),
+        // Any edit after finalizing means the print file needs making again
+        status: "draft",
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "party_id,product_key" },
+    );
+  if (error) return { error: "We couldn't save your layout. Please try again." };
+  return { ok: true };
+}
+
+export async function startGiftPrint(
+  slug: string,
+  productKey: string,
+): Promise<{ ok: true; path: string; token: string } | { ok: false; error: string }> {
+  const party = await host(slug);
+  if (isState(party)) return { ok: false, error: party.error ?? "Please open your host link again." };
+  if (!isProduct(productKey)) return { ok: false, error: "Unknown product." };
+  const ext = PRODUCTS[productKey].format === "png" ? "png" : "jpg";
+  const path = `${party.id}/${productKey}-${Date.now()}.${ext}`;
+  const { data, error } = await supabaseAdmin().storage.from("prints").createSignedUploadUrl(path);
+  if (error || !data) return { ok: false, error: "We couldn't get ready to save the print file." };
+  return { ok: true, path: data.path, token: data.token };
+}
+
+export async function finishGiftPrint(slug: string, productKey: string, path: string, layout: unknown): Promise<ActionState> {
+  const party = await host(slug);
+  if (isState(party)) return party;
+  if (!isProduct(productKey)) return { error: "Unknown product." };
+  if (!path.startsWith(`${party.id}/${productKey}-`)) return { error: "That print file doesn't belong to this party." };
+
+  const db = supabaseAdmin();
+  const name = path.split("/").pop()!;
+  const { data: files } = await db.storage.from("prints").list(party.id, { search: name, limit: 2 });
+  if (!files?.some((f) => f.name === name)) return { error: "The print file didn't finish uploading. Please try again." };
+
+  // Keep only the newest print file for this product
+  const { data: old } = await db
+    .from("gift_designs")
+    .select("print_path")
+    .eq("party_id", party.id)
+    .eq("product_key", productKey)
+    .maybeSingle();
+  if (old?.print_path && old.print_path !== path) await db.storage.from("prints").remove([old.print_path]);
+
+  const now = new Date().toISOString();
+  const { error } = await db.from("gift_designs").upsert(
+    {
+      party_id: party.id,
+      product_key: productKey,
+      layout: sanitizeLayout(layout),
+      status: "final",
+      print_path: path,
+      finalized_at: now,
+      updated_at: now,
+    },
+    { onConflict: "party_id,product_key" },
+  );
+  if (error) return { error: "We couldn't save the finished design. Please try again." };
   refresh(party.slug);
   return { ok: true };
 }
