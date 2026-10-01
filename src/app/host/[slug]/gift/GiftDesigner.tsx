@@ -18,16 +18,22 @@ export function GiftDesigner({
   sources,
   saved,
   designsOpen,
+  owned,
 }: {
   slug: string;
   guestOfHonorName: string;
   sources: Source[];
   saved: Saved[];
   designsOpen: boolean;
+  /** Products this party has bought; the rest are offered as extras */
+  owned: ProductKey[];
 }) {
   const sourceMap = useSourceMap(sources);
   const savedMap = useMemo(() => new Map(saved.map((s) => [s.productKey, s])), [saved]);
-  const [productKey, setProductKey] = useState<ProductKey>(saved[0]?.productKey ?? "fleece-blanket");
+  const [productKey, setProductKey] = useState<ProductKey>(owned[0]);
+  const [previewKey, setPreviewKey] = useState<ProductKey | null>(null);
+  const [previewMode, setPreviewMode] = useState<"mockup" | "flat">("mockup");
+  const extras = Object.values(PRODUCTS).filter((p) => !owned.includes(p.key));
   const product = PRODUCTS[productKey];
 
   // One layout per product, kept while switching between them
@@ -227,37 +233,54 @@ export function GiftDesigner({
 
   return (
     <div className="gd">
-      {/* Product picker */}
-      <div className="gd-products" role="tablist" aria-label="Product">
-        {Object.values(PRODUCTS).map((p) => (
-          <button
-            key={p.key}
-            type="button"
-            role="tab"
-            aria-selected={p.key === productKey}
-            className="gd-product"
-            onClick={() => {
-              setProductKey(p.key);
-              setSelectedId(null);
-              history.current = [];
-              future.current = [];
-            }}
-          >
-            <span>{p.name}</span>
-            <small>
-              {savedMap.get(p.key) || layouts[p.key] ? (status[p.key]?.final ? "Ready to print ✓" : "Draft") : "Not started"}
-            </small>
-          </button>
-        ))}
-      </div>
+      {/* Product picker (only when the party has more than one gift) */}
+      {owned.length > 1 && (
+        <div className="gd-products" role="tablist" aria-label="Product">
+          {owned.map((key) => {
+            const p = PRODUCTS[key];
+            return (
+              <button
+                key={p.key}
+                type="button"
+                role="tab"
+                aria-selected={p.key === productKey && !previewKey}
+                className="gd-product"
+                onClick={() => {
+                  setProductKey(p.key);
+                  setPreviewKey(null);
+                  setSelectedId(null);
+                  history.current = [];
+                  future.current = [];
+                }}
+              >
+                <span>{p.name}</span>
+                <small>
+                  {savedMap.get(p.key) || layouts[p.key] ? (status[p.key]?.final ? "Ready to print ✓" : "Draft") : "Not started"}
+                </small>
+              </button>
+            );
+          })}
+        </div>
+      )}
 
-      {designsOpen && (
+      {previewKey && (
+        <UpsellPreview
+          productKey={previewKey}
+          layout={layout}
+          sources={sourceMap}
+          mode={previewMode}
+          setMode={setPreviewMode}
+          onBack={() => setPreviewKey(null)}
+        />
+      )}
+
+      {!previewKey && designsOpen && (
         <p className="pp-note" style={{ fontSize: "0.95rem" }}>
           Guests can still add or change designs until the deadline. You can start arranging now; new designs show up in the tray below.
         </p>
       )}
 
-      <div className="gd-main">
+      <div className="gd-main" hidden={Boolean(previewKey)}>
         <div className="gd-canvas-col">
           {/* Toolbar */}
           <div className="gd-toolbar">
@@ -441,6 +464,99 @@ export function GiftDesigner({
           </section>
         </aside>
       </div>
+
+      {/* Extras the host can add to their order */}
+      {extras.length > 0 && !previewKey && (
+        <section className="gd-extras">
+          <h3 className="pp-script" style={{ fontSize: "2rem", color: "var(--pp-accent)" }}>
+            Put these designs on more gifts
+          </h3>
+          <p className="pp-soft" style={{ fontSize: "0.95rem" }}>
+            Preview your arrangement on another product, then add it to your order.
+          </p>
+          <div className="gd-extras-grid">
+            {extras.map((p) => (
+              <div key={p.key} className="gd-extra">
+                <p style={{ fontWeight: 600 }}>{p.name}</p>
+                <p className="pp-soft" style={{ fontSize: "0.85rem" }}>
+                  {p.blurb}
+                </p>
+                <button
+                  type="button"
+                  className="pp-btn pp-btn-ghost"
+                  style={btn}
+                  onClick={() => {
+                    setPreviewKey(p.key);
+                    setPreviewMode("mockup");
+                    setSelectedId(null);
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                  }}
+                >
+                  Preview it
+                </button>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
     </div>
+  );
+}
+
+/** Read-only look at the current arrangement on a product the party hasn't bought yet. */
+function UpsellPreview({
+  productKey,
+  layout,
+  sources,
+  mode,
+  setMode,
+  onBack,
+}: {
+  productKey: ProductKey;
+  layout: Layout;
+  sources: Map<string, Source>;
+  mode: "mockup" | "flat";
+  setMode: (m: "mockup" | "flat") => void;
+  onBack: () => void;
+}) {
+  const p = PRODUCTS[productKey];
+  return (
+    <section className="gd-preview">
+      <div className="gd-toolbar">
+        <button type="button" className="pp-link" onClick={onBack}>
+          ← Back to my gift
+        </button>
+        <div className="gd-seg" role="tablist" aria-label="View">
+          {(["mockup", "flat"] as const).map((m) => (
+            <button key={m} type="button" role="tab" aria-selected={mode === m} onClick={() => setMode(m)}>
+              {m === "mockup" ? "On the product" : "Print view"}
+            </button>
+          ))}
+        </div>
+      </div>
+      <p className="pp-note" style={{ fontSize: "0.95rem", marginBottom: "1rem" }}>
+        <strong>{p.name}</strong> preview, using your current arrangement. Once it&apos;s added to your order you can fine-tune
+        the layout for this product and make its print file.
+      </p>
+      <Stage
+        product={p}
+        layout={layout}
+        sources={sources}
+        mode={mode}
+        selectedId={null}
+        warnIds={new Set()}
+        onSelect={() => {}}
+        onChange={() => {}}
+        onCommit={() => {}}
+      />
+      <div style={{ display: "grid", justifyItems: "center", gap: "0.4rem", marginTop: "1.25rem", textAlign: "center" }}>
+        <button type="button" className="pp-btn" disabled title="Checkout opens when the store is connected">
+          Add to my order
+        </button>
+        <p className="pp-soft" style={{ fontSize: "0.85rem" }}>
+          Checkout through the Moody Celebrations shop is coming soon.
+        </p>
+      </div>
+    </section>
   );
 }

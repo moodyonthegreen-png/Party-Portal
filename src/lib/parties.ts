@@ -29,6 +29,9 @@ export type PublicParty = {
   theme: string;
   sections: PartySections;
   games: GameSettings;
+  /** Gift product in the party package, and any extras bought as upsells */
+  giftProduct: string;
+  extraProducts: string[];
   registryUrl: string | null;
   requireGuestList: boolean;
   hasPassword: boolean;
@@ -59,6 +62,8 @@ export const getParty = cache(async (slug: string): Promise<PublicParty | null> 
     theme: data.theme,
     sections: data.sections as PartySections,
     games: parseGames(data.games),
+    giftProduct: data.gift_product ?? "fleece-blanket",
+    extraProducts: Array.isArray(data.extra_products) ? data.extra_products : [],
     registryUrl: data.registry_url,
     requireGuestList: data.require_guest_list,
     hasPassword: data.password_hash !== null,

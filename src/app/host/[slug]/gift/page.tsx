@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { listGiftSources, listSavedGifts } from "@/lib/gift";
+import { ownedProducts } from "@/lib/gift/products";
 import { getHostParty } from "@/lib/host";
 import { GiftDesigner } from "./GiftDesigner";
 
@@ -31,6 +32,7 @@ export default async function GiftPage({ params }: Props) {
         sources={sources}
         saved={saved.map((s) => ({ ...s }))}
         designsOpen={party.isOpen}
+        owned={ownedProducts(party.giftProduct, party.extraProducts)}
       />
     </main>
   );

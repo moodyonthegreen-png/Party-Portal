@@ -80,6 +80,12 @@ export const PRODUCTS: Record<ProductKey, Product> = {
 
 export const PRODUCT_LIST = Object.values(PRODUCTS);
 
+/** Products this party can design and print: the package product plus paid extras. */
+export function ownedProducts(giftProduct: string, extras: string[]): ProductKey[] {
+  const keys = [giftProduct, ...extras].filter((k): k is ProductKey => k in PRODUCTS);
+  return keys.length ? [...new Set(keys)] : ["fleece-blanket"];
+}
+
 export function inches(p: Product) {
   return { w: p.widthPx / p.dpi, h: p.heightPx / p.dpi };
 }

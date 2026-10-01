@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { sanitizeLayout } from "@/lib/gift/layout";
-import { PRODUCTS, type ProductKey } from "@/lib/gift/products";
+import { ownedProducts, PRODUCTS, type ProductKey } from "@/lib/gift/products";
 import { requireHost, type HostParty } from "@/lib/host";
 import { DESIGNS_BUCKET, supabaseAdmin } from "@/lib/supabase/admin";
 import { THEMES } from "@/themes";
@@ -406,11 +406,13 @@ export async function deleteBabyPhoto(slug: string, id: string): Promise<ActionS
 
 
 const isProduct = (k: string): k is ProductKey => k in PRODUCTS;
+const owns = (party: HostParty, k: string) => ownedProducts(party.giftProduct, party.extraProducts).includes(k as ProductKey);
 
 export async function saveGiftLayout(slug: string, productKey: string, layout: unknown): Promise<ActionState> {
   const party = await host(slug);
   if (isState(party)) return party;
   if (!isProduct(productKey)) return { error: "Unknown product." };
+  if (!owns(party, productKey)) return { error: "Add this product to your order to save a design for it." };
 
   const { error } = await supabaseAdmin()
     .from("gift_designs")
@@ -436,6 +438,7 @@ export async function startGiftPrint(
   const party = await host(slug);
   if (isState(party)) return { ok: false, error: party.error ?? "Please open your host link again." };
   if (!isProduct(productKey)) return { ok: false, error: "Unknown product." };
+  if (!owns(party, productKey)) return { ok: false, error: "Add this product to your order to print it." };
   const ext = PRODUCTS[productKey].format === "png" ? "png" : "jpg";
   const path = `${party.id}/${productKey}-${Date.now()}.${ext}`;
   const { data, error } = await supabaseAdmin().storage.from("prints").createSignedUploadUrl(path);
@@ -447,6 +450,7 @@ export async function finishGiftPrint(slug: string, productKey: string, path: st
   const party = await host(slug);
   if (isState(party)) return party;
   if (!isProduct(productKey)) return { error: "Unknown product." };
+  if (!owns(party, productKey)) return { error: "Add this product to your order to print it." };
   if (!path.startsWith(`${party.id}/${productKey}-`)) return { error: "That print file doesn't belong to this party." };
 
   const db = supabaseAdmin();
