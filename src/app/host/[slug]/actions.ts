@@ -288,3 +288,112 @@ export async function deletePhoto(slug: string, id: string): Promise<ActionState
   refresh(party.slug);
   return { ok: true };
 }
+
+// ---------------------------------------------------------------------------
+// Games
+// ---------------------------------------------------------------------------
+
+async function saveGames(party: HostParty, games: HostParty["games"]): Promise<ActionState> {
+  const { error } = await supabaseAdmin().from("parties").update({ games }).eq("id", party.id);
+  if (error) return { error: "We couldn't save that. Please try again." };
+  refresh(party.slug);
+  return { ok: true };
+}
+
+export async function setBabyPhotoGame(slug: string, patch: { on?: boolean; revealed?: boolean }): Promise<ActionState> {
+  const party = await host(slug);
+  if (isState(party)) return party;
+  return saveGames(party, { ...party.games, babyPhotos: { ...party.games.babyPhotos, ...patch } });
+}
+
+export async function setPoolGame(slug: string, patch: { on?: boolean; closed?: boolean }): Promise<ActionState> {
+  const party = await host(slug);
+  if (isState(party)) return party;
+  return saveGames(party, { ...party.games, pool: { ...party.games.pool, ...patch } });
+}
+
+/** Post the real birth details (closes guessing and shows results), or clear them. */
+export async function setPoolResults(
+  slug: string,
+  input: { date: string; time: string; weightLb: number; weightOz: number; lengthIn: string } | null,
+): Promise<ActionState> {
+  const party = await host(slug);
+  if (isState(party)) return party;
+
+  if (!input) return saveGames(party, { ...party.games, pool: { ...party.games.pool, actual: null } });
+
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(input.date)) return { error: "Please enter the birth date." };
+  const lb = Math.floor(Number(input.weightLb));
+  const oz = Math.floor(Number(input.weightOz));
+  if (!(lb >= 1 && lb <= 15 && oz >= 0 && oz <= 15)) return { error: "Please enter the weight (1 to 15 lb)." };
+  let lengthIn: number | null = null;
+  if (input.lengthIn.trim()) {
+    lengthIn = Math.round(Number(input.lengthIn) * 10) / 10;
+    if (!(lengthIn >= 10 && lengthIn <= 30)) return { error: "Length should be between 10 and 30 inches, or blank." };
+  }
+  return saveGames(party, {
+    ...party.games,
+    pool: {
+      ...party.games.pool,
+      closed: true,
+      actual: {
+        date: input.date,
+        time: /^\d{2}:\d{2}$/.test(input.time) ? input.time : null,
+        weightOz: lb * 16 + oz,
+        lengthIn,
+      },
+    },
+  });
+}
+
+export async function startBabyPhoto(
+  slug: string,
+  answer: string,
+): Promise<{ ok: true; id: string; path: string; token: string } | { ok: false; error: string }> {
+  const party = await host(slug);
+  if (isState(party)) return { ok: false, error: party.error ?? "Please open your host link again." };
+  const name = answer.trim().replace(/\s+/g, " ");
+  if (!name) return { ok: false, error: "Add who's in the photo." };
+  if (name.length > 80) return { ok: false, error: "That name is a bit long." };
+
+  const id = crypto.randomUUID();
+  const { data, error } = await supabaseAdmin().storage.from("photos").createSignedUploadUrl(`${party.id}/baby/${id}.jpg`);
+  if (error || !data) return { ok: false, error: "We couldn't get ready to upload. Please try again." };
+  return { ok: true, id, path: data.path, token: data.token };
+}
+
+export async function finishBabyPhoto(slug: string, id: string, answer: string): Promise<ActionState> {
+  const party = await host(slug);
+  if (isState(party)) return party;
+  if (!UUID.test(id)) return { error: "That photo wasn't found." };
+  const name = answer.trim().replace(/\s+/g, " ").slice(0, 80);
+  if (!name) return { error: "Add who's in the photo." };
+
+  const db = supabaseAdmin();
+  const { data: files } = await db.storage.from("photos").list(`${party.id}/baby`, { search: id, limit: 2 });
+  if (!files?.some((f) => f.name === `${id}.jpg`)) return { error: "The photo didn't finish uploading. Please try again." };
+
+  const { count } = await db.from("baby_photos").select("id", { count: "exact", head: true }).eq("party_id", party.id);
+  const { error } = await db.from("baby_photos").insert({
+    id,
+    party_id: party.id,
+    image_path: `${party.id}/baby/${id}.jpg`,
+    answer: name,
+    sort: count ?? 0,
+  });
+  if (error) return { error: "We couldn't save that photo. Please try again." };
+  refresh(party.slug);
+  return { ok: true };
+}
+
+export async function deleteBabyPhoto(slug: string, id: string): Promise<ActionState> {
+  const party = await host(slug);
+  if (isState(party)) return party;
+  if (!UUID.test(id)) return { error: "That photo wasn't found." };
+  const db = supabaseAdmin();
+  const { data } = await db.from("baby_photos").select("image_path").eq("id", id).eq("party_id", party.id).maybeSingle();
+  if (data) await db.storage.from("photos").remove([data.image_path]);
+  await db.from("baby_photos").delete().eq("id", id).eq("party_id", party.id);
+  refresh(party.slug);
+  return { ok: true };
+}

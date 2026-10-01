@@ -1,6 +1,7 @@
 import "server-only";
 import { cache } from "react";
 import { cookies } from "next/headers";
+import { parseGames, type GameSettings } from "@/lib/games/settings";
 import { dbError, supabaseAdmin } from "@/lib/supabase/admin";
 
 export type PartySections = {
@@ -27,6 +28,7 @@ export type PublicParty = {
   deadline: string;
   theme: string;
   sections: PartySections;
+  games: GameSettings;
   registryUrl: string | null;
   requireGuestList: boolean;
   hasPassword: boolean;
@@ -56,6 +58,7 @@ export const getParty = cache(async (slug: string): Promise<PublicParty | null> 
     deadline: data.deadline,
     theme: data.theme,
     sections: data.sections as PartySections,
+    games: parseGames(data.games),
     registryUrl: data.registry_url,
     requireGuestList: data.require_guest_list,
     hasPassword: data.password_hash !== null,

@@ -123,8 +123,11 @@ export default async function PartyHome({ params }: Props) {
               theme={theme}
               href={`${base}/games`}
               label="Games"
-              detail="Play & top the leaderboard"
-              soon
+              detail={
+                party.games.pool.actual || party.games.babyPhotos.revealed
+                  ? "Results are in!"
+                  : "Play & top the leaderboard"
+              }
               tilt={-2.5}
             />
           )}

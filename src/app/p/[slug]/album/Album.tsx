@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import type { Photo } from "@/lib/photos";
+import { resizeToJpeg } from "@/lib/image/resize";
 import { supabaseBrowser } from "@/lib/supabase/browser";
 import { deleteMyPhoto, finishPhoto, startPhoto, toggleHeart } from "./actions";
 
@@ -17,23 +18,6 @@ function mimeOf(file: File): string {
   if (file.type) return file.type;
   const ext = file.name.split(".").pop()?.toLowerCase();
   return ext === "heic" ? "image/heic" : ext === "heif" ? "image/heif" : "image/jpeg";
-}
-
-/** Resized JPEG for the album (keeps phone photos the right way up). */
-async function makeDisplayCopy(file: File) {
-  const bmp = await createImageBitmap(file, { imageOrientation: "from-image" });
-  const scale = Math.min(1, DISPLAY_MAX / Math.max(bmp.width, bmp.height));
-  const w = Math.round(bmp.width * scale);
-  const h = Math.round(bmp.height * scale);
-  const canvas = document.createElement("canvas");
-  canvas.width = w;
-  canvas.height = h;
-  canvas.getContext("2d")!.drawImage(bmp, 0, 0, w, h);
-  bmp.close();
-  const blob = await new Promise<Blob>((res, rej) =>
-    canvas.toBlob((b) => (b ? res(b) : rej(new Error("encode"))), "image/jpeg", 0.85),
-  );
-  return { blob, width: w, height: h };
 }
 
 export function Album({ slug, guestOfHonorName, photos }: { slug: string; guestOfHonorName: string; photos: Photo[] }) {
@@ -99,7 +83,7 @@ export function Album({ slug, guestOfHonorName, photos }: { slug: string; guestO
       try {
         let display;
         try {
-          display = await makeDisplayCopy(item.file);
+          display = await resizeToJpeg(item.file, DISPLAY_MAX);
         } catch {
           throw new Error("This photo format couldn't be opened here. Try a JPEG.");
         }

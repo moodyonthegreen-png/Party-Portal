@@ -846,3 +846,89 @@
   padding: 1rem;
   background: rgb(30 30 25 / 0.72);
 }
+
+/* ------------------------------------------------------------------ */
+/* Games                                                               */
+/* ------------------------------------------------------------------ */
+.pp-calendar {
+  width: 92px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fffdf8;
+  box-shadow: 0 8px 16px -8px rgb(40 30 10 / 0.5);
+  text-align: center;
+  flex-shrink: 0;
+}
+.pp-calendar-top {
+  background: var(--pp-accent);
+  color: var(--pp-paper);
+  font-family: var(--pp-display);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.7rem;
+  padding: 5px 0;
+}
+.pp-calendar-day {
+  font-family: var(--pp-display);
+  font-weight: 600;
+  font-size: 2.4rem;
+  line-height: 1.2;
+  padding: 4px 0 8px;
+  color: var(--pp-ink);
+}
+.pp-mini-polaroid {
+  width: 88px;
+  padding: 6px 6px 18px;
+  background: #fffdf8;
+  box-shadow: 0 8px 16px -8px rgb(40 30 10 / 0.5);
+  transform: rotate(-4deg);
+  flex-shrink: 0;
+}
+.pp-mini-polaroid > div {
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(160deg, var(--pp-map), var(--pp-accent));
+  color: var(--pp-paper);
+  font-family: var(--pp-script);
+  font-size: 2.6rem;
+}
+.pp-board-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 1rem;
+}
+.pp-board-table th {
+  text-align: left;
+  font-family: var(--pp-display);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--pp-ink-soft);
+  padding: 0 0.4rem 0.4rem;
+}
+.pp-board-table td {
+  padding: 0.55rem 0.4rem;
+  border-top: 1px solid var(--pp-paper-edge);
+  vertical-align: top;
+}
+.pp-board-table tr[data-mine="true"] td {
+  background: color-mix(in srgb, var(--pp-gold-light) 35%, transparent);
+}
+.pp-place {
+  display: inline-grid;
+  place-items: center;
+  width: 1.7rem;
+  height: 1.7rem;
+  border-radius: 999px;
+  font-family: var(--pp-display);
+  font-weight: 700;
+  font-size: 0.9rem;
+  background: var(--pp-accent-soft);
+  color: var(--pp-ink);
+}
+.pp-place[data-top="true"] {
+  background: var(--pp-gold);
+  color: #fff;
+}
