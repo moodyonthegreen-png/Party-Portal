@@ -17,6 +17,9 @@ export type Photo = {
   id: string;
   authorName: string;
   caption: string | null;
+  /** Photo booth: what they wrote, and which prompt they answered */
+  prompt: "intro" | "memory" | null;
+  story: string | null;
   url: string | null;
   /** Full-quality original (host view only) */
   originalUrl?: string | null;
@@ -36,7 +39,7 @@ export async function listPhotos(
   const db = supabaseAdmin();
   let q = db
     .from("photos")
-    .select("id, author_name, caption, image_path, original_path, width, height, status, device_hash, created_at, photo_hearts(device_hash)")
+    .select("*, photo_hearts(device_hash)")
     .eq("party_id", partyId)
     .order("created_at", { ascending: false })
     .limit(opts.limit ?? 1000);
@@ -59,6 +62,8 @@ export async function listPhotos(
       id: r.id,
       authorName: r.author_name,
       caption: r.caption,
+      prompt: r.prompt === "intro" || r.prompt === "memory" ? r.prompt : null,
+      story: r.story ?? null,
       url: urls.get(r.image_path) ?? null,
       originalUrl: opts.withOriginals ? (urls.get(r.original_path) ?? null) : undefined,
       width: r.width,

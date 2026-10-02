@@ -166,8 +166,12 @@ export default async function PartyHome({ params }: Props) {
         {party.sections.album && (
           <Entry
             href={`${base}/album`}
-            title="Photo album"
-            detail={album.count > 0 ? `${album.count} ${album.count === 1 ? "photo" : "photos"} shared` : "Share a favorite photo."}
+            title="Photo booth"
+            detail={
+              album.count > 0
+                ? `Strike a pose, add stickers and say hello. ${album.count} ${album.count === 1 ? "photo" : "photos"} so far.`
+                : "Strike a pose, add stickers and say hello."
+            }
             art={
               album.urls.length ? (
                 <span className="pp-thumbs">

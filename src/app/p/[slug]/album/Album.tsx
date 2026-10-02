@@ -6,6 +6,7 @@ import type { Photo } from "@/lib/photos";
 import { resizeToJpeg } from "@/lib/image/resize";
 import { supabaseBrowser } from "@/lib/supabase/browser";
 import { deleteMyPhoto, finishPhoto, startPhoto, toggleHeart } from "./actions";
+import { PhotoBooth } from "./PhotoBooth";
 
 const DISPLAY_MAX = 1600;
 const MAX_BYTES = 25 * 1024 * 1024;
@@ -20,7 +21,22 @@ function mimeOf(file: File): string {
   return ext === "heic" ? "image/heic" : ext === "heif" ? "image/heif" : "image/jpeg";
 }
 
-export function Album({ slug, guestOfHonorName, photos }: { slug: string; guestOfHonorName: string; photos: Photo[] }) {
+export function Album({
+  slug,
+  guestOfHonorName,
+  photos,
+  theme,
+  occasion,
+  eventDate,
+}: {
+  slug: string;
+  guestOfHonorName: string;
+  photos: Photo[];
+  theme: string;
+  occasion: string;
+  eventDate: string | null;
+}) {
+  const [quick, setQuick] = useState(false);
   const router = useRouter();
   const nameKey = `pp_name_${slug}`;
   const input = useRef<HTMLInputElement>(null);
@@ -135,7 +151,17 @@ export function Album({ slug, guestOfHonorName, photos }: { slug: string; guestO
 
   return (
     <>
-      {/* Add photos */}
+      <PhotoBooth
+        slug={slug}
+        theme={theme}
+        guestOfHonorName={guestOfHonorName}
+        occasion={occasion}
+        eventDate={eventDate}
+        onQuickUpload={() => setQuick(true)}
+      />
+
+      {/* Add several photos at once, without the booth */}
+      {quick && (
       <section
         className="pp-paper"
         style={{ maxWidth: "34rem", margin: "1.75rem auto 0", padding: "1.5rem 1.25rem" }}
@@ -210,6 +236,7 @@ export function Album({ slug, guestOfHonorName, photos }: { slug: string; guestO
           )}
         </div>
       </section>
+      )}
 
       {/* The album */}
       {photos.length === 0 ? (
@@ -228,6 +255,11 @@ export function Album({ slug, guestOfHonorName, photos }: { slug: string; guestO
                   </button>
                   <figcaption>
                     {p.caption && <span className="pp-hand pp-print-caption">{p.caption}</span>}
+                    {p.story && (
+                      <span className="pp-print-story">
+                        <span className="pp-print-prompt">{p.prompt === "memory" ? "A memory" : "Hello!"}</span> {p.story}
+                      </span>
+                    )}
                     <span className="pp-print-by">— {p.authorName}</span>
                   </figcaption>
                   <button
@@ -254,6 +286,13 @@ export function Album({ slug, guestOfHonorName, photos }: { slug: string; guestO
             {open.url && <img src={open.url} alt={open.caption ?? ""} style={{ width: "100%", maxHeight: "70vh", objectFit: "contain", background: "#f4f1ea" }} />}
             <figcaption>
               {open.caption && <span className="pp-hand pp-print-caption">{open.caption}</span>}
+              {open.story && (
+                <span className="pp-print-story" data-full="true">
+                  <span className="pp-print-prompt">{open.prompt === "memory" ? `A memory of ${guestOfHonorName.split(" ")[0]}` : `How I know ${guestOfHonorName.split(" ")[0]}`}</span>
+                  <br />
+                  {open.story}
+                </span>
+              )}
               <span className="pp-print-by">— {open.authorName}</span>
             </figcaption>
             <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6 }}>

@@ -33,7 +33,15 @@ function refresh(slug: string) {
  */
 export async function startPhoto(
   slug: string,
-  input: { name: string; caption: string; originalMime: string; originalSize: number },
+  input: {
+    name: string;
+    caption: string;
+    originalMime: string;
+    originalSize: number;
+    /** Photo booth answers (optional) */
+    prompt?: "intro" | "memory" | null;
+    story?: string;
+  },
 ): Promise<StartPhotoResult> {
   const party = await openAlbum(slug);
   if ("ok" in party) return party;
@@ -43,6 +51,9 @@ export async function startPhoto(
   if (!name) return fail("Please add your name.");
   if (name.length > 80) return fail("That name is a bit long.");
   if (caption.length > 200) return fail("Captions can be up to 200 characters.");
+  const story = (input.story ?? "").trim();
+  if (story.length > 600) return fail("Please keep it under 600 characters.");
+  const prompt = story && (input.prompt === "intro" || input.prompt === "memory") ? input.prompt : null;
 
   const ext = PHOTO_TYPES[input.originalMime.toLowerCase()];
   if (!ext) return fail("That kind of file isn't supported. Try a JPEG or PNG photo.");
@@ -58,6 +69,7 @@ export async function startPhoto(
     party_id: party.id,
     author_name: name,
     caption: caption || null,
+    ...(story ? { story, prompt } : {}),
     image_path: imagePath,
     original_path: originalPath,
     device_hash: await ensureDeviceHash(party),

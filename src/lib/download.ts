@@ -91,7 +91,7 @@ export async function buildDownload(party: HostParty, section: DownloadSection):
           files.push({ name: shown, url: p.url });
         }
         html.push(
-          `<figure><a href="${attr(file)}"><img loading="lazy" src="${attr(shown)}" alt=""></a><figcaption>${esc(p.caption || p.authorName)}${p.caption ? `<br><span>${esc(p.authorName)}</span>` : ""}${p.hearts ? ` <span>♥ ${p.hearts}</span>` : ""}</figcaption></figure>`,
+          `<figure><a href="${attr(file)}"><img loading="lazy" src="${attr(shown)}" alt=""></a><figcaption>${esc(p.caption || p.authorName)}${p.caption ? `<br><span>${esc(p.authorName)}</span>` : ""}${p.hearts ? ` <span>♥ ${p.hearts}</span>` : ""}${p.story ? `<p class="story"><b>${p.prompt === "memory" ? "A memory" : "Hello"}</b> ${esc(p.story)}</p>` : ""}</figcaption></figure>`,
         );
       });
       html.push(`</div>`);
@@ -189,7 +189,7 @@ audio{width:100%;margin-bottom:8px}video{width:100%;max-height:70vh;background:#
 figure{margin:0;background:#fff;padding:8px 8px 4px;box-shadow:0 8px 16px -12px rgba(40,30,10,.5)}
 figure img{width:100%;aspect-ratio:1;object-fit:cover;display:block}.designs img{object-fit:contain}
 figcaption{font-size:14px;text-align:center;padding:6px 2px}figcaption span{color:#8a937f;font-size:12px}
-.soft{color:#66735f;font-size:14px}.names{text-align:center;font-family:"Segoe Print","Bradley Hand",cursive;font-size:20px}
+.soft{color:#66735f;font-size:14px}.story{font-style:italic;font-size:15px;text-align:left;margin:6px 0 0;line-height:1.4}.story b{font-style:normal;font-size:11px;color:#56704f;font-family:Arial,sans-serif}.names{text-align:center;font-family:"Segoe Print","Bradley Hand",cursive;font-size:20px}
 a{color:#56704f}
 </style></head><body><main>
 <header><p class="kicker">Moody Celebrations</p><h1>${esc(title)}</h1><p class="soft">Saved ${day(new Date().toISOString())}. Everything here is also in the folders next to this page.</p></header>

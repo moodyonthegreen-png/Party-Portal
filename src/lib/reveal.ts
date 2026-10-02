@@ -77,7 +77,7 @@ export async function markRevealOpened(partyId: string) {
 
 export type RevealData = {
   notes: { id: string; author: string; body: string | null; mediaType: "audio" | "video" | null; mediaUrl: string | null }[];
-  photos: { id: string; author: string; caption: string | null; url: string }[];
+  photos: { id: string; author: string; caption: string | null; url: string; prompt: "intro" | "memory" | null; story: string | null }[];
   designs: { name: string; url: string }[];
   games: {
     babyPhoto: { name: string; correct: number; total: number }[] | null;
@@ -141,7 +141,7 @@ export async function getRevealData(party: PublicParty): Promise<RevealData> {
     photos: [...photos]
       .reverse()
       .filter((p) => p.url)
-      .map((p) => ({ id: p.id, author: p.authorName, caption: p.caption, url: p.url! })),
+      .map((p) => ({ id: p.id, author: p.authorName, caption: p.caption, url: p.url!, prompt: p.prompt, story: p.story })),
     designs: designs.filter((d) => d.url).map((d) => ({ name: d.guestName, url: d.url! })),
     games: { babyPhoto, pool, raffle },
     gift,

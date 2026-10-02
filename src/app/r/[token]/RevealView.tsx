@@ -11,6 +11,7 @@ type Slide =
   | { t: "title"; kicker: string; title: string; sub?: string }
   | { t: "note"; note: RevealData["notes"][number] }
   | { t: "photos"; photos: RevealData["photos"] }
+  | { t: "booth"; photo: RevealData["photos"][number] }
   | { t: "games" }
   | { t: "designs" }
   | { t: "gift" }
@@ -46,7 +47,10 @@ export function RevealView({
     }
     if (data.photos.length) {
       s.push({ t: "title", kicker: "The album", title: "Moments shared", sub: plural(data.photos.length, "photo") });
-      for (let i = 0; i < data.photos.length; i += PHOTOS_PER_SLIDE) s.push({ t: "photos", photos: data.photos.slice(i, i + PHOTOS_PER_SLIDE) });
+      // Photos with a hello or a memory get a page of their own
+      for (const p of data.photos) if (p.story) s.push({ t: "booth", photo: p });
+      const plain = data.photos.filter((p) => !p.story);
+      for (let i = 0; i < plain.length; i += PHOTOS_PER_SLIDE) s.push({ t: "photos", photos: plain.slice(i, i + PHOTOS_PER_SLIDE) });
     }
     if (hasGames) s.push({ t: "games" });
     if (data.designs.length) s.push({ t: "designs" });
@@ -71,7 +75,7 @@ export function RevealView({
   // Warm up the next slide's images
   useEffect(() => {
     const n = slides[i + 1];
-    const urls = n?.t === "photos" ? n.photos.map((p) => p.url) : n?.t === "gift" && data.gift ? [data.gift.imageUrl] : [];
+    const urls = n?.t === "photos" ? n.photos.map((p) => p.url) : n?.t === "booth" ? [n.photo.url] : n?.t === "gift" && data.gift ? [data.gift.imageUrl] : [];
     for (const u of urls) {
       const img = new Image();
       img.src = u;
@@ -150,6 +154,21 @@ export function RevealView({
                 <figcaption>{p.caption || p.author}</figcaption>
               </figure>
             ))}
+          </div>
+        )}
+
+        {slide.t === "booth" && (
+          <div className="rv-booth">
+            <img src={slide.photo.url} alt={`Photo from ${slide.photo.author}`} />
+            <div>
+              <p className="pp-page-kicker" style={{ marginTop: 0 }}>
+                {slide.photo.prompt === "memory" ? `A memory of ${first}` : `How I know ${first}`}
+              </p>
+              <p className="rv-hand" style={{ marginTop: "0.6rem" }}>
+                {slide.photo.story}
+              </p>
+              <p className="rv-from">— {slide.photo.author}</p>
+            </div>
           </div>
         )}
 

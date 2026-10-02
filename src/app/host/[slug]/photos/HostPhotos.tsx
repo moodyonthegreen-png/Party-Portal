@@ -59,6 +59,11 @@ export function HostPhotos({ slug, photos }: { slug: string; photos: Photo[] }) 
                 {p.caption}
               </p>
             )}
+            {p.story && (
+              <p style={{ fontSize: "0.85rem", lineHeight: 1.35, marginTop: 2 }}>
+                <span className="pp-print-prompt">{p.prompt === "memory" ? "A memory" : "Hello"}</span> {p.story}
+              </p>
+            )}
             <p className="pp-soft" style={{ fontSize: "0.8rem" }}>
               ♥ {p.hearts}
               {p.hidden ? " · Hidden" : ""}

@@ -22,10 +22,10 @@ export default async function AlbumPage({ params }: Props) {
         ← Back to the party
       </Link>
       <header className="pp-head">
-        <h1 className="pp-page-title">Photo album</h1>
-        <p className="pp-page-kicker">Snapshots from everyone celebrating</p>
+        <h1 className="pp-page-title">Photo booth</h1>
+        <p className="pp-page-kicker">Strike a pose for {party.guestOfHonorName.split(" ")[0]}</p>
       </header>
-      <Album slug={party.slug} guestOfHonorName={party.guestOfHonorName} photos={photos} />
+      <Album slug={party.slug} guestOfHonorName={party.guestOfHonorName} photos={photos} theme={party.theme} occasion={party.occasion} eventDate={party.eventDate} />
     </main>
   );
 }
