@@ -14,7 +14,7 @@ export function BrandShell({ children, footer }: { children: React.ReactNode; fo
         <header className="mc-logo">
           <span className="mc-icon mc-sparkle" aria-hidden="true" />
           <Link href="/" aria-label="Moody Celebrations home">
-            <img src="/brand/wordmark-black.png" alt="Moody Celebrations" width={683} height={244} />
+            <img src="/brand/wordmark-color.png" alt="Moody Celebrations" width={1018} height={360} />
           </Link>
           <span className="mc-icon mc-sparkle" aria-hidden="true" />
         </header>
