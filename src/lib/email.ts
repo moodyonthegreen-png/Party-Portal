@@ -128,3 +128,18 @@ export function reminderEmail(opts: {
     text: `Hi ${opts.guestName},\n\nThere's still time to add your design for ${opts.guestOfHonorName}'s gift, by ${when}: ${opts.url}`,
   };
 }
+
+export function thankYouEmail(opts: { to: string; message: string; fromName: string; replyTo?: string }): Email {
+  const paragraphs = opts.message
+    .trim()
+    .split(/\n{2,}/)
+    .map((p) => `<p style="margin:0 0 14px">${esc(p).replace(/\n/g, "<br>")}</p>`)
+    .join("");
+  return {
+    to: opts.to,
+    replyTo: opts.replyTo,
+    subject: `A thank-you from ${opts.fromName}`,
+    html: layout({ preheader: "Thank you for celebrating with us", heading: "Thank you", body: paragraphs }),
+    text: opts.message,
+  };
+}

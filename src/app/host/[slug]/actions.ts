@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { sanitizeLayout } from "@/lib/gift/layout";
 import { ownedProducts, PRODUCTS, type ProductKey } from "@/lib/gift/products";
-import { EmailError, emailConfigured, isEmail, reminderEmail, sendEmails } from "@/lib/email";
+import { EmailError, emailConfigured, isEmail, reminderEmail, sendEmails, thankYouEmail } from "@/lib/email";
 import { parseGuestLines } from "@/lib/guests";
 import { requireHost, type HostParty } from "@/lib/host";
 import { createDraftProduct, deleteProduct, PrintifyError, printifyConfigured, type Mockup } from "@/lib/printify";
@@ -675,4 +675,75 @@ export async function makePreviewMockups(
     await db.storage.from("prints").remove([path]);
     return { ok: false, error: e instanceof PrintifyError ? e.message : "Printify couldn't make the product photos." };
   }
+}
+
+// ---------------------------------------------------------------------------
+// Thank-you helper
+// ---------------------------------------------------------------------------
+
+function cleanKey(key: string) {
+  return key.trim().toLowerCase().replace(/\s+/g, " ").slice(0, 80);
+}
+
+async function saveThank(partyId: string, key: string, patch: Record<string, unknown>) {
+  return supabaseAdmin()
+    .from("thank_yous")
+    .upsert({ party_id: partyId, person_key: key, ...patch, updated_at: new Date().toISOString() }, { onConflict: "party_id,person_key" });
+}
+
+export async function setThanked(slug: string, key: string, thanked: boolean): Promise<ActionState> {
+  const party = await host(slug);
+  if (isState(party)) return party;
+  const k = cleanKey(key);
+  if (!k) return { error: "That person wasn't found." };
+  const { error } = await saveThank(party.id, k, { thanked_at: thanked ? new Date().toISOString() : null });
+  if (error) return { error: "We couldn't save that. Please try again." };
+  return { ok: true };
+}
+
+export async function setGiftNote(slug: string, key: string, note: string): Promise<ActionState> {
+  const party = await host(slug);
+  if (isState(party)) return party;
+  const k = cleanKey(key);
+  if (!k) return { error: "That person wasn't found." };
+  const { error } = await saveThank(party.id, k, { gift_note: note.trim().slice(0, 300) || null });
+  if (error) return { error: "We couldn't save that. Please try again." };
+  return { ok: true };
+}
+
+export async function emailThankYou(slug: string, key: string, to: string, message: string): Promise<ActionState> {
+  const party = await host(slug);
+  if (isState(party)) return party;
+  const k = cleanKey(key);
+  if (!k) return { error: "That person wasn't found." };
+  if (!isEmail(to)) return { error: "That email address doesn't look right." };
+  if (!message.trim()) return { error: "Write a message first." };
+  if (message.length > 5000) return { error: "That message is a bit long." };
+  if (!emailConfigured()) return { error: "Email isn't set up yet." };
+
+  // Remember the address on the guest list for next time
+  const db = supabaseAdmin();
+  const { data: guest } = await db
+    .from("guests")
+    .select("id, email, name")
+    .eq("party_id", party.id)
+    .ilike("name", k.replace(/[\\%_]/g, (c) => `\\${c}`))
+    .maybeSingle();
+  if (guest && !guest.email) await db.from("guests").update({ email: to.trim().toLowerCase() }).eq("id", guest.id);
+
+  try {
+    await sendEmails([
+      thankYouEmail({
+        to: to.trim(),
+        message,
+        fromName: party.hostName ?? `${party.guestOfHonorName}'s ${party.occasion.toLowerCase()}`,
+        replyTo: isEmail(party.hostEmail) ? party.hostEmail : undefined,
+      }),
+    ]);
+  } catch (e) {
+    return { error: e instanceof EmailError ? e.message : "The email didn't send. Please try again." };
+  }
+  const now = new Date().toISOString();
+  await saveThank(party.id, k, { emailed_at: now, thanked_at: now });
+  return { ok: true, message: "Sent!" };
 }
