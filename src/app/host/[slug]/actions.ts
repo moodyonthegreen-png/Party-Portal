@@ -5,6 +5,7 @@ import { drawEntrant, raffleEntrants, secureRandom } from "@/lib/games/raffle";
 import { MAX_PRIZES, type RaffleRules } from "@/lib/games/settings";
 import { sanitizeLayout } from "@/lib/gift/layout";
 import { listThankYous } from "@/lib/thanks";
+import { buildDownload, type DownloadManifest, type DownloadSection } from "@/lib/download";
 import { ensureRevealToken, getRevealSettings, sendReveal } from "@/lib/reveal";
 import { ownedProducts, PRODUCTS, type ProductKey } from "@/lib/gift/products";
 import { coHostInviteEmail, EmailError, raffleWinnerEmail, emailConfigured, isEmail, reminderEmail, sendEmails, thankYouCardEmail } from "@/lib/email";
@@ -1089,4 +1090,21 @@ export async function sendRevealNow(slug: string, email: string): Promise<Action
   }
   refresh(party.slug);
   return { ok: true, message: `Sent to ${to}! 💛` };
+}
+
+// ---------------------------------------------------------------------------
+// Download everything
+// ---------------------------------------------------------------------------
+
+/** The files to zip (fresh signed links) and the "Open me first" page. */
+export async function getDownloadManifest(slug: string, section: DownloadSection): Promise<ActionState & { manifest?: DownloadManifest }> {
+  const party = await host(slug);
+  if (isState(party)) return party;
+  if (!["all", "photos", "guestbook", "designs"].includes(section)) return { error: "Pick what to download." };
+  try {
+    return { ok: true, manifest: await buildDownload(party, section) };
+  } catch (e) {
+    console.error("[download] manifest failed", e);
+    return { error: "We couldn't gather the files. Please try again." };
+  }
 }

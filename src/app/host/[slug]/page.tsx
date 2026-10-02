@@ -4,6 +4,7 @@ import { emailConfigured } from "@/lib/email";
 import { getHostParty } from "@/lib/host";
 import { siteOrigin } from "@/lib/site";
 import { DESIGNS_BUCKET, dbError, supabaseAdmin } from "@/lib/supabase/admin";
+import { DownloadAll } from "./DownloadAll";
 import { AddGuestsForm, CopyButton, GuestList, ReminderButton, type GuestRow } from "./OverviewClient";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -51,7 +52,14 @@ export default async function HostOverview({ params }: Props) {
   const party = await getHostParty(slug);
   if (!party) notFound(); // the layout already shows the "hosts only" message
 
-  const [guests, origin] = await Promise.all([loadGuests(party.id), siteOrigin()]);
+  const db = supabaseAdmin();
+  const [guests, origin, notes, media, photos] = await Promise.all([
+    loadGuests(party.id),
+    siteOrigin(),
+    db.from("messages").select("id", { count: "exact", head: true }).eq("party_id", party.id).eq("status", "visible"),
+    db.from("messages").select("id", { count: "exact", head: true }).eq("party_id", party.id).eq("status", "visible").not("media_path", "is", null),
+    db.from("photos").select("id", { count: "exact", head: true }).eq("party_id", party.id).eq("status", "visible"),
+  ]);
   const guestLink = `${origin}/p/${party.slug}`;
   const added = guests.filter((g) => g.design).length;
   const total = guests.length;
@@ -155,6 +163,16 @@ export default async function HostOverview({ params }: Props) {
         <AddGuestsForm slug={party.slug} withEmails={emailConfigured()} />
         <GuestList slug={party.slug} guests={guests} />
       </section>
+
+      <DownloadAll
+        slug={party.slug}
+        counts={{
+          notes: notes.count ?? 0,
+          media: media.count ?? 0,
+          photos: photos.count ?? 0,
+          designs: guests.filter((g) => g.design && !g.design.hidden).length,
+        }}
+      />
     </main>
   );
 }
