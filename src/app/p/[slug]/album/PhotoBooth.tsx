@@ -363,7 +363,7 @@ export function PhotoBooth({
   }
 
   const questions: Record<Prompt, { title: string; ask: string; placeholder: string }> = {
-    note: { title: "Just a note", ask: `Anything you'd like to say to ${first}?`, placeholder: "Working on a little something for you…" },
+    note: { title: "Just a note", ask: "Add a caption for your photo", placeholder: "Working on a little something for you…" },
     intro: { title: "Introduce yourself", ask: `How do you know ${first}?`, placeholder: `I'm ${first}'s college roommate! We…` },
     memory: { title: "Share a memory", ask: `What's a favorite memory with ${first}?`, placeholder: "I'll never forget the time…" },
   };
