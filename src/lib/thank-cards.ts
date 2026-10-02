@@ -17,19 +17,31 @@ export function newCardToken() {
 }
 
 export async function getThankCard(token: string): Promise<ThankCard | null> {
-  if (!/^[A-Za-z0-9_-]{20,40}$/.test(token)) return null;
+  if (!/^[A-Za-z0-9_-]{20,40}$/.test(token)) {
+    console.error(`[thank-card] link doesn't look like a card code (length ${token.length})`);
+    return null;
+  }
   const db = supabaseAdmin();
   const { data, error } = await db
     .from("thank_cards")
-    .select("token, recipient_name, message, design_path, opened_at, parties(slug, host_name)")
+    .select("token, party_id, recipient_name, message, design_path, opened_at")
     .eq("token", token)
     .maybeSingle();
   if (error) throw dbError("loading a thank-you card", error);
-  if (!data) return null;
+  if (!data) {
+    console.error(`[thank-card] no card saved with code ${token.slice(0, 6)}…`);
+    return null;
+  }
 
-  const p = data.parties as unknown as { slug: string; host_name: string | null } | null;
-  const party = p ? await getParty(p.slug) : null;
-  if (!party) return null;
+  // Look the party up separately (no embedded join), so this works even if
+  // the database hasn't refreshed its list of table relationships yet.
+  const { data: p, error: pErr } = await db.from("parties").select("slug, host_name").eq("id", data.party_id).maybeSingle();
+  if (pErr) throw dbError("loading a thank-you card's party", pErr);
+  const party = p ? await getParty(p.slug as string) : null;
+  if (!party) {
+    console.error(`[thank-card] card ${token.slice(0, 6)}… belongs to a party that no longer exists`);
+    return null;
+  }
 
   let designUrl: string | null = null;
   if (data.design_path) {
