@@ -37,11 +37,11 @@ export default async function GiftPage({ params }: Props) {
         slug={party.slug}
         guestOfHonorName={party.guestOfHonorName}
         sources={sources}
-        saved={saved.map((s) => ({ ...s }))}
+        saved={saved.map((s) => ({ ...s, provider: null }))}
         designsOpen={party.isOpen}
         owned={ownedProducts(party.giftProduct, party.extraProducts)}
         printify={printifyConfigured()}
-        previews={previews}
+        previews={previews.map((p) => ({ ...p, provider: null }))}
       />
     </main>
   );

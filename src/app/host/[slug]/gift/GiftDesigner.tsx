@@ -6,6 +6,7 @@ import { PRODUCTS, inches, type ProductKey } from "@/lib/gift/products";
 import { supabaseBrowser } from "@/lib/supabase/browser";
 import { finishGiftPrint, getGiftOptions, makeGiftMockups, makePreviewMockups, saveGiftLayout, startGiftPrint, startPreviewUpload } from "../actions";
 import { isDark, swatchFor } from "@/lib/gift/colors";
+import { previewImageUrl } from "@/lib/gift/preview-url";
 import { renderPrint } from "./render";
 import { freshLayout, layoutWarnings, Stage, useSourceMap, type Source } from "./Stage";
 
@@ -391,7 +392,7 @@ export function GiftDesigner({
             <section>
               <h3>Color and size</h3>
               {!printify ? (
-                <p className="pp-soft" style={{ fontSize: "0.9rem" }}>Connect Printify to choose from the real colors and sizes.</p>
+                <p className="pp-soft" style={{ fontSize: "0.9rem" }}>Colors and sizes aren&apos;t available right now. Please check back soon.</p>
               ) : garment.state === "loading" || garment.state === "idle" ? (
                 <p className="pp-soft" style={{ fontSize: "0.9rem" }}>Loading colors and sizes…</p>
               ) : garment.state === "error" ? (
@@ -440,11 +441,9 @@ export function GiftDesigner({
                     </>
                   )}
                   {!layout.variant && <p className="pp-soft" style={{ fontSize: "0.85rem" }}>Pick a color, then a size.</p>}
-                  {garment.provider && (
-                    <p className="pp-soft" style={{ fontSize: "0.8rem" }}>
-                      Printed by {garment.provider}. Colors here are approximate; the photos below show the real thing.
-                    </p>
-                  )}
+                  <p className="pp-soft" style={{ fontSize: "0.8rem" }}>
+                    Colors here are approximate. Finalize to see preview images of the real product.
+                  </p>
                 </>
               )}
             </section>
@@ -576,15 +575,15 @@ export function GiftDesigner({
               <div className="gd-photos">
                 {photoState === "loading" ? (
                   <p className="pp-soft" style={{ fontSize: "0.9rem" }}>
-                    Getting product photos from Printify…
+                    Loading preview images…
                   </p>
                 ) : pics.length ? (
                   <>
-                    <p className="gd-label">Your gift{photos[productKey]?.provider ? ` · printed by ${photos[productKey]?.provider}` : ""}</p>
+                    <p className="gd-label">Your gift</p>
                     <div className="gd-photo-grid">
                       {pics.slice(0, 6).map((m) => (
-                        <a key={m.src} href={m.src} target="_blank" rel="noopener noreferrer">
-                          <img src={m.src} alt={`${product.name} (${m.position})`} loading="lazy" />
+                        <a key={m.src} href={previewImageUrl(m.src)} target="_blank" rel="noopener noreferrer">
+                          <img src={previewImageUrl(m.src)} alt={`${product.name} (${m.position})`} loading="lazy" />
                         </a>
                       ))}
                     </div>
@@ -593,7 +592,7 @@ export function GiftDesigner({
                   <div>
                     {photoError && <p style={{ color: "var(--pp-leather)", fontSize: "0.9rem" }}>{photoError}</p>}
                     <button type="button" className="pp-link" style={{ fontSize: "0.9rem" }} onClick={fetchPhotos}>
-                      {photoError ? "Try again" : "Show it on the real product"}
+                      {photoError ? "Try again" : "Show preview images"}
                     </button>
                   </div>
                 )}
@@ -734,12 +733,11 @@ function UpsellPreview({
             <>
               <p className="gd-label">
                 The real {p.name.toLowerCase()}
-                {photos.provider ? ` · printed by ${photos.provider}` : ""}
               </p>
               <div className="gd-photo-grid" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))" }}>
                 {photos.mockups.slice(0, 8).map((m) => (
-                  <a key={m.src} href={m.src} target="_blank" rel="noopener noreferrer">
-                    <img src={m.src} alt={`${p.name} (${m.position})`} loading="lazy" />
+                  <a key={m.src} href={previewImageUrl(m.src)} target="_blank" rel="noopener noreferrer">
+                    <img src={previewImageUrl(m.src)} alt={`${p.name} (${m.position})`} loading="lazy" />
                   </a>
                 ))}
               </div>
@@ -754,7 +752,7 @@ function UpsellPreview({
           ) : (
             <div style={{ textAlign: "center" }}>
               <button type="button" className="pp-btn pp-btn-ghost" onClick={realPhotos} disabled={busy}>
-                {busy ? "Getting photos from Printify…" : "See it on the real product"}
+                {busy ? "Loading preview images…" : "See it on the real product"}
               </button>
               {busy && (
                 <p className="pp-soft" style={{ fontSize: "0.85rem", marginTop: "0.4rem" }}>

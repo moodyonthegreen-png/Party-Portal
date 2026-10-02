@@ -4,6 +4,7 @@ import { listBabyGuesses, listBabyPhotos, listPoolEntries } from "@/lib/games";
 import { scoreBabyPhotos, scorePool } from "@/lib/games/scoring";
 import { listGiftSources, listSavedGifts } from "@/lib/gift";
 import { PRODUCTS, type ProductKey } from "@/lib/gift/products";
+import { previewImageUrl } from "@/lib/gift/preview-url";
 import { listMessages } from "@/lib/messages";
 import { getParty, type PublicParty } from "@/lib/parties";
 import { listPhotos } from "@/lib/photos";
@@ -124,7 +125,7 @@ export async function getRevealData(party: PublicParty): Promise<RevealData> {
     .sort((a, b) => order.indexOf(a.productKey) - order.indexOf(b.productKey));
   if (finals[0]) {
     const m = finals[0].mockups.find((x) => x.isDefault) ?? finals[0].mockups[0];
-    gift = { productName: PRODUCTS[finals[0].productKey as ProductKey]?.name ?? "Your gift", imageUrl: m.src };
+    gift = { productName: PRODUCTS[finals[0].productKey as ProductKey]?.name ?? "Your gift", imageUrl: previewImageUrl(m.src) };
   }
 
   const names = people

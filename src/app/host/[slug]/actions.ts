@@ -565,7 +565,7 @@ export async function makeGiftMockups(
   const party = await host(slug);
   if (isState(party)) return { ok: false, error: party.error ?? "Please open your host link again." };
   if (!isProduct(productKey) || !owns(party, productKey)) return { ok: false, error: "Unknown product." };
-  if (!printifyConfigured()) return { ok: false, error: "Printify isn't connected yet." };
+  if (!printifyConfigured()) return { ok: false, error: "Preview images aren't available right now." };
 
   const db = supabaseAdmin();
   const { data: gift } = await db
@@ -597,9 +597,10 @@ export async function makeGiftMockups(
       .update({ printify_product_id: made.productId, printify_provider: made.provider, mockups: made.mockups })
       .eq("party_id", party.id)
       .eq("product_key", productKey);
-    return { ok: true, mockups: made.mockups, provider: made.provider };
+    return { ok: true, mockups: made.mockups, provider: "" };
   } catch (e) {
-    return { ok: false, error: e instanceof PrintifyError ? e.message : "Printify couldn't make the product photos." };
+    console.error("[gift] preview images failed", e instanceof PrintifyError ? e.message : e);
+    return { ok: false, error: "We couldn't load the preview images. Please try again in a minute." };
   }
 }
 
@@ -614,7 +615,7 @@ export async function startPreviewUpload(
   const party = await host(slug);
   if (isState(party)) return { ok: false, error: party.error ?? "Please open your host link again." };
   if (!isProduct(productKey)) return { ok: false, error: "Unknown product." };
-  if (!printifyConfigured()) return { ok: false, error: "Printify isn't connected yet." };
+  if (!printifyConfigured()) return { ok: false, error: "Preview images aren't available right now." };
 
   // A little breathing room between requests, so Printify isn't flooded
   const { data: last } = await supabaseAdmin()
@@ -678,10 +679,11 @@ export async function makePreviewMockups(
     // Tidy up the previous preview
     if (old?.printify_product_id && old.printify_product_id !== made.productId) await deleteProduct(old.printify_product_id);
     if (old?.file_path && old.file_path !== path) await db.storage.from("prints").remove([old.file_path]);
-    return { ok: true, mockups: made.mockups, provider: made.provider };
+    return { ok: true, mockups: made.mockups, provider: "" };
   } catch (e) {
     await db.storage.from("prints").remove([path]);
-    return { ok: false, error: e instanceof PrintifyError ? e.message : "Printify couldn't make the product photos." };
+    console.error("[gift] preview images failed", e instanceof PrintifyError ? e.message : e);
+    return { ok: false, error: "We couldn't load the preview images. Please try again in a minute." };
   }
 }
 
@@ -1125,11 +1127,13 @@ export async function getGiftOptions(
   const party = await host(slug);
   if (isState(party)) return { ok: false, error: party.error ?? "Please open your host link again." };
   if (!isProduct(productKey) || !HAS_OPTIONS.has(productKey)) return { ok: false, error: "This product has no options." };
-  if (!printifyConfigured()) return { ok: false, error: "Printify isn't connected yet." };
+  if (!printifyConfigured()) return { ok: false, error: "Preview images aren't available right now." };
   try {
     const res = await listGarmentOptions(PRODUCTS[productKey]);
-    return { ok: true, ...res };
+    // Who prints it stays behind the scenes
+    return { ok: true, provider: "", options: res.options };
   } catch (e) {
-    return { ok: false, error: e instanceof PrintifyError ? e.message : "We couldn't load the colors and sizes." };
+    console.error("[gift] colors and sizes failed", e instanceof PrintifyError ? e.message : e);
+    return { ok: false, error: "We couldn't load the colors and sizes. Please try again in a minute." };
   }
 }
