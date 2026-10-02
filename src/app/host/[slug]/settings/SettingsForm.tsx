@@ -71,10 +71,13 @@ export function SettingsForm({
   slug,
   themes,
   initial,
+  beforeLook,
 }: {
   slug: string;
   themes: { id: string; name: string }[];
   initial: Initial;
+  /** Shown between the dates and "Look and activities" (the welcome video and photos) */
+  beforeLook?: React.ReactNode;
 }) {
   const [state, action, pending] = useActionState<ActionState, FormData>(updateDetails.bind(null, slug), {});
   const [name, setName] = useState(initial.guestOfHonorName);
@@ -140,7 +143,7 @@ export function SettingsForm({
             placeholder={taglineDefault ?? "e.g. The mom-to-be"}
           />
         </Field>
-        <Field id="welcome_message" title="Welcome message" help="Shown at the top of the party page. Leave blank to use the friendly default shown. You can add a welcome video and photos further down this page.">
+        <Field id="welcome_message" title="Welcome message" help="Shown at the top of the party page. Leave blank to use the friendly default shown. You can add a welcome video and photos below.">
           <textarea
             id="welcome_message"
             name="welcome_message"
@@ -187,6 +190,8 @@ export function SettingsForm({
           <input type="hidden" name="deadline_iso" value={toIso(deadlineLocal)} />
         </Field>
       </section>
+
+      {beforeLook}
 
       <section className="pp-paper" style={card}>
         <h2 className="pp-caps" style={{ fontSize: "0.8rem" }}>

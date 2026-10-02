@@ -183,6 +183,12 @@ export function WelcomeMedia({
                       defaultValue={p.caption ?? ""}
                       maxLength={140}
                       placeholder="Caption (optional)"
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          e.currentTarget.blur();
+                        }
+                      }}
                       onBlur={(e) => {
                         if (e.target.value !== (p.caption ?? "")) run(() => setWelcomePhotoCaption(slug, p.id, e.target.value));
                       }}

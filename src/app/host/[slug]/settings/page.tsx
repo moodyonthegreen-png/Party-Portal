@@ -34,14 +34,16 @@ export default async function HostSettings({ params }: Props) {
           requireGuestList: party.requireGuestList,
           hostName: party.hostName ?? "",
         }}
-      />
-      <WelcomeMedia
+        beforeLook={
+          <WelcomeMedia
         slug={party.slug}
         firstName={party.guestOfHonorName.split(" ")[0]}
         video={welcome.video}
         photos={welcome.photos}
         ready={welcome.ready}
         maxPhotos={MAX_WELCOME_PHOTOS}
+      />
+        }
       />
       <CoHosts
         slug={party.slug}
