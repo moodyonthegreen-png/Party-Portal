@@ -4,9 +4,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { El, Layout, TextEl } from "@/lib/gift/layout";
 import { PRODUCTS, inches, type ProductKey } from "@/lib/gift/products";
 import { supabaseBrowser } from "@/lib/supabase/browser";
-import { finishGiftPrint, makeGiftMockups, makePreviewMockups, saveGiftLayout, startGiftPrint, startPreviewUpload } from "../actions";
+import { finishGiftPrint, getGiftOptions, makeGiftMockups, makePreviewMockups, saveGiftLayout, startGiftPrint, startPreviewUpload } from "../actions";
+import { isDark, swatchFor } from "@/lib/gift/colors";
 import { renderPrint } from "./render";
-import { freshLayout, layoutWarnings, Stage, SWATCHES, useSourceMap, type Source } from "./Stage";
+import { freshLayout, layoutWarnings, Stage, useSourceMap, type Source } from "./Stage";
 
 type Mockup = { src: string; position: string; isDefault: boolean };
 type Saved = {
@@ -55,7 +56,7 @@ export function GiftDesigner({
   const [layouts, setLayouts] = useState<Record<string, Layout>>(() =>
     Object.fromEntries(saved.map((s) => [s.productKey, s.layout])),
   );
-  const layout = layouts[productKey] ?? freshLayout(product, sources, "#fffdf6");
+  const layout = layouts[productKey] ?? freshLayout(product, sources, "#ffffff");
   const [status, setStatus] = useState<Record<string, { final: boolean; printUrl: string | null }>>(() =>
     Object.fromEntries(saved.map((s) => [s.productKey, { final: s.status === "final", printUrl: s.printUrl }])),
   );
@@ -74,6 +75,31 @@ export function GiftDesigner({
   const future = useRef<Layout[]>([]);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const seed = useRef(7);
+
+  // ---- color and size (products with options) ------------------------------
+  const hasOptions = product.key === "bodysuit";
+  const [garment, setGarment] = useState<{ state: "idle" | "loading" | "ready" | "error"; provider?: string; options: { id: number; color: string; size: string }[]; error?: string }>({ state: "idle", options: [] });
+  useEffect(() => {
+    if (!hasOptions || !printify) return;
+    let live = true;
+    setGarment({ state: "loading", options: [] });
+    getGiftOptions(slug, productKey).then((res) => {
+      if (!live) return;
+      setGarment(res.ok ? { state: "ready", provider: res.provider, options: res.options } : { state: "error", options: [], error: res.error });
+    });
+    return () => {
+      live = false;
+    };
+  }, [hasOptions, printify, slug, productKey]);
+  const colors = [...new Set(garment.options.map((o) => o.color))];
+  const chosenColor = layout.variant?.color ?? null;
+  const sizesFor = (color: string) => garment.options.filter((o) => o.color === color);
+  const surface = hasOptions && chosenColor ? swatchFor(chosenColor) : undefined;
+  const pickVariant = (color: string, size?: string) => {
+    const choices = sizesFor(color);
+    const match = choices.find((o) => o.size === (size ?? layout.variant?.size)) ?? choices[0];
+    if (match) setLayout({ ...layout, variant: { id: match.id, color: match.color, size: match.size } });
+  };
 
   const selected = layout.elements.find((e) => e.id === selectedId) ?? null;
   const warnings = useMemo(() => layoutWarnings(layout, product, sourceMap), [layout, product, sourceMap]);
@@ -224,6 +250,10 @@ export function GiftDesigner({
 
   // ---- finalize -----------------------------------------------------------
   async function finalize() {
+    if (hasOptions && !layout.variant) {
+      setError("Choose the bodysuit color and size first.");
+      return;
+    }
     if (warnings.length && !window.confirm(`There ${warnings.length === 1 ? "is 1 warning" : `are ${warnings.length} warnings`}. Make the print file anyway?`)) return;
     setFinalizing(true);
     setError(null);
@@ -346,6 +376,7 @@ export function GiftDesigner({
             onSelect={setSelectedId}
             onChange={onChange}
             onCommit={onCommit}
+            surface={surface}
           />
           <p className="pp-soft" style={{ fontSize: "0.82rem", textAlign: "center", marginTop: "0.5rem" }}>
             {product.name} · {inW.toFixed(0)} × {inH.toFixed(0)} in
@@ -356,6 +387,69 @@ export function GiftDesigner({
 
         {/* Side panel */}
         <aside className="gd-panel">
+          {hasOptions && (
+            <section>
+              <h3>Color and size</h3>
+              {!printify ? (
+                <p className="pp-soft" style={{ fontSize: "0.9rem" }}>Connect Printify to choose from the real colors and sizes.</p>
+              ) : garment.state === "loading" || garment.state === "idle" ? (
+                <p className="pp-soft" style={{ fontSize: "0.9rem" }}>Loading colors and sizes…</p>
+              ) : garment.state === "error" ? (
+                <p style={{ color: "var(--pp-leather)", fontSize: "0.9rem" }}>{garment.error}</p>
+              ) : (
+                <>
+                  <p className="gd-label">
+                    Color{chosenColor ? `: ${chosenColor}` : ""}
+                  </p>
+                  <div className="gd-colors" role="radiogroup" aria-label="Bodysuit color">
+                    {colors.map((c) => {
+                      const hex = swatchFor(c);
+                      return (
+                        <button
+                          key={c}
+                          type="button"
+                          role="radio"
+                          aria-checked={chosenColor === c}
+                          aria-label={c}
+                          title={c}
+                          className="gd-color"
+                          data-dark={isDark(hex)}
+                          style={{ background: hex }}
+                          onClick={() => pickVariant(c)}
+                        />
+                      );
+                    })}
+                  </div>
+                  {chosenColor && (
+                    <>
+                      <p className="gd-label">Size</p>
+                      <div className="gd-sizes" role="radiogroup" aria-label="Bodysuit size">
+                        {sizesFor(chosenColor).map((o) => (
+                          <button
+                            key={o.id}
+                            type="button"
+                            role="radio"
+                            aria-checked={layout.variant?.id === o.id}
+                            className="gd-size"
+                            onClick={() => pickVariant(chosenColor, o.size)}
+                          >
+                            {o.size || "One size"}
+                          </button>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                  {!layout.variant && <p className="pp-soft" style={{ fontSize: "0.85rem" }}>Pick a color, then a size.</p>}
+                  {garment.provider && (
+                    <p className="pp-soft" style={{ fontSize: "0.8rem" }}>
+                      Printed by {garment.provider}. Colors here are approximate; the photos below show the real thing.
+                    </p>
+                  )}
+                </>
+              )}
+            </section>
+          )}
+
           <section>
             <h3>Arrange</h3>
             <div className="gd-row">
@@ -426,21 +520,6 @@ export function GiftDesigner({
               <button type="button" className="pp-btn pp-btn-ghost" style={btn} onClick={() => addText("Made with love", "serif", 0.94, 0.035)}>
                 + Title
               </button>
-            </div>
-            <p className="gd-label">Background</p>
-            <div className="gd-row" style={{ gap: 6 }}>
-              {SWATCHES.map((c) => (
-                <button
-                  key={c}
-                  type="button"
-                  className="gd-swatch"
-                  aria-label={`Background ${c}`}
-                  aria-pressed={layout.background.toLowerCase() === c}
-                  style={{ background: c }}
-                  onClick={() => setLayout({ ...layout, background: c })}
-                />
-              ))}
-              <input type="color" value={layout.background} onChange={(e) => setLayout({ ...layout, background: e.target.value })} aria-label="Custom background colour" />
             </div>
           </section>
 

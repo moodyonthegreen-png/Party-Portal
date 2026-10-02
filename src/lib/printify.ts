@@ -67,19 +67,59 @@ export async function listProviders(blueprintId: number) {
   return pf<Provider[]>(`/catalog/blueprints/${blueprintId}/print_providers.json`);
 }
 
-/** Pick the provider (pinned one if set) and the variant whose print area best matches ours. */
-export async function chooseVariant(product: Product) {
+/** Preferred fulfillment partner per product, matched by name (a pinned id in PRINTIFY_PROVIDERS still wins). */
+const PREFERRED_PROVIDER: Partial<Record<string, RegExp>> = {
+  bodysuit: /swift\s*pod/i,
+};
+
+export async function chooseProvider(product: Product): Promise<Provider> {
   const providers = await listProviders(product.printifyBlueprintId);
   if (!providers.length) throw new PrintifyError(`Printify has no print providers for ${product.name}.`);
   const pinned = pinnedProvider(product.key);
-  const provider = providers.find((p) => p.id === pinned) ?? providers[0];
+  const byName = PREFERRED_PROVIDER[product.key];
+  const preferred = byName ? providers.find((p) => byName.test(p.title)) : undefined;
+  if (byName && !preferred && !pinned) {
+    console.warn(`[printify] preferred provider not offered for ${product.name}; using ${providers[0].title}`);
+  }
+  return providers.find((p) => p.id === pinned) ?? preferred ?? providers[0];
+}
 
+// Catalog answers barely change, so keep them for half an hour
+const variantCache = new Map<string, { at: number; provider: Provider; variants: Variant[] }>();
+
+async function providerVariants(product: Product) {
+  const hit = variantCache.get(product.key);
+  if (hit && Date.now() - hit.at < 30 * 60_000) return hit;
+  const provider = await chooseProvider(product);
   const { variants } = await pf<{ variants: Variant[] }>(
     `/catalog/blueprints/${product.printifyBlueprintId}/print_providers/${provider.id}/variants.json`,
   );
   if (!variants?.length) throw new PrintifyError(`No sizes found for ${product.name} at ${provider.title}.`);
+  const entry = { at: Date.now(), provider, variants };
+  variantCache.set(product.key, entry);
+  return entry;
+}
 
-  // Closest print area to the file we made (prefer white garments)
+export type GarmentOption = { id: number; color: string; size: string };
+
+/** Every color and size the provider prints this product in. */
+export async function listGarmentOptions(product: Product): Promise<{ provider: string; options: GarmentOption[] }> {
+  const { provider, variants } = await providerVariants(product);
+  return {
+    provider: provider.title,
+    options: variants.map((v) => {
+      const parts = v.title.split("/").map((x) => x.trim());
+      return { id: v.id, color: v.options?.color ?? parts[0] ?? v.title, size: v.options?.size ?? parts[1] ?? "" };
+    }),
+  };
+}
+
+/**
+ * The provider and variant to print on: the host's chosen color and size when
+ * given, otherwise the variant whose print area best matches ours (white first).
+ */
+export async function chooseVariant(product: Product, variantId?: number | null) {
+  const { provider, variants } = await providerVariants(product);
   const score = (v: Variant) => {
     const ph = v.placeholders.find((p) => p.position === "front") ?? v.placeholders[0];
     if (!ph) return Number.POSITIVE_INFINITY;
@@ -87,7 +127,7 @@ export async function chooseVariant(product: Product) {
     const notWhite = v.options?.color && !/white/i.test(v.options.color) ? 1e6 : 0;
     return sizeDiff + notWhite;
   };
-  const variant = [...variants].sort((a, b) => score(a) - score(b))[0];
+  const variant = (variantId ? variants.find((v) => v.id === variantId) : undefined) ?? [...variants].sort((a, b) => score(a) - score(b))[0];
   const placeholder = variant.placeholders.find((p) => p.position === "front") ?? variant.placeholders[0];
   return { provider, variant, position: placeholder?.position ?? "front" };
 }
@@ -110,9 +150,11 @@ export async function createDraftProduct(opts: {
   title: string;
   printFileUrl: string;
   fileName: string;
+  /** Host's chosen color and size, when the product has options */
+  variantId?: number | null;
 }) {
   const shop = await shopId();
-  const { provider, variant, position } = await chooseVariant(opts.product);
+  const { provider, variant, position } = await chooseVariant(opts.product, opts.variantId);
   const image = await uploadImageFromUrl(opts.printFileUrl, opts.fileName);
 
   const created = await pf<{ id: string; images?: { src: string; position: string; is_default: boolean }[] }>(

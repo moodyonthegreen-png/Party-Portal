@@ -1914,3 +1914,62 @@
   color: var(--pp-ink);
   border-bottom-color: var(--pp-accent);
 }
+
+/* Gift designer: garment color and size */
+.gd-colors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 0.4rem;
+}
+.gd-color {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--pp-ink) 18%, transparent);
+  cursor: pointer;
+  position: relative;
+}
+.gd-color[aria-checked="true"] {
+  box-shadow: 0 0 0 2px var(--pp-paper), 0 0 0 4px var(--pp-accent);
+}
+.gd-color[aria-checked="true"]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 10px;
+  height: 6px;
+  border-left: 2px solid var(--pp-ink);
+  border-bottom: 2px solid var(--pp-ink);
+  transform: translateY(-1px) rotate(-45deg);
+}
+.gd-color[data-dark="true"][aria-checked="true"]::after {
+  border-color: #fff;
+}
+.gd-sizes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 0.4rem;
+}
+.gd-size {
+  min-width: 3.2rem;
+  padding: 0.45rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--pp-ink) 18%, var(--pp-paper-edge));
+  background: #fff;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+.gd-size[aria-checked="true"] {
+  background: var(--pp-accent);
+  border-color: var(--pp-accent);
+  color: #fff;
+}
+.gd-color:focus-visible,
+.gd-size:focus-visible {
+  outline: 2px solid var(--pp-accent);
+  outline-offset: 3px;
+}

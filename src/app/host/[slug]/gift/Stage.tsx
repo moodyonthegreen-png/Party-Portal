@@ -22,7 +22,6 @@ type Drag =
   | { kind: "resize"; id: string; cx: number; cy: number; startDist: number; startW: number; startSize: number }
   | { kind: "rotate"; id: string; cx: number; cy: number };
 
-const SWATCHES = ["#ffffff", "#fffdf6", "#f5f2e6", "#e4ecdc", "#f7e5a6", "#dfe8f1", "#f6e1e1", "#5d7a53", "#3b4836"];
 
 /** Warnings shown beside the editor, and the ids they apply to. */
 export function layoutWarnings(layout: Layout, product: Product, sources: Map<string, Source>) {
@@ -53,9 +52,12 @@ export function Stage({
   onSelect,
   onChange,
   onCommit,
+  surface,
 }: {
   product: Product;
   layout: Layout;
+  /** Garment color to show behind the design (preview only, not printed) */
+  surface?: string;
   sources: Map<string, Source>;
   mode: "edit" | "flat" | "mockup";
   selectedId: string | null;
@@ -178,7 +180,7 @@ export function Stage({
     <div
       ref={stageRef}
       className="gd-stage"
-      style={{ width: W, height: H, background: layout.background }}
+      style={{ width: W, height: H, background: surface ?? layout.background }}
       onPointerDown={() => editing && onSelect(null)}
       onPointerMove={onPointerMove}
       onPointerUp={endDrag}
@@ -260,13 +262,13 @@ export function Stage({
 
   return (
     <div ref={wrapRef} style={{ width: "100%", display: "grid", placeItems: "center" }}>
-      {mode === "mockup" ? <Mockup product={product} width={W}>{stage}</Mockup> : stage}
+      {mode === "mockup" ? <Mockup product={product} width={W} fill={surface}>{stage}</Mockup> : stage}
     </div>
   );
 }
 
 /** Simple product mockups around the flat design. */
-function Mockup({ product, width, children }: { product: Product; width: number; children: React.ReactNode }) {
+function Mockup({ product, width, fill, children }: { product: Product; width: number; fill?: string; children: React.ReactNode }) {
   if (product.mockup === "bodysuit") {
     const bodyW = width / 0.42;
     return (
@@ -274,13 +276,13 @@ function Mockup({ product, width, children }: { product: Product; width: number;
         <svg viewBox="0 0 200 236" width={bodyW} height={bodyW * 1.18} style={{ position: "absolute", inset: 0, filter: "drop-shadow(0 10px 18px rgb(0 0 0 / .18))" }} aria-hidden="true">
           <path
             d="M62 8 C 72 20 128 20 138 8 L 176 26 L 198 62 L 168 80 L 156 66 L 156 150 C 156 172 140 186 124 196 L 120 232 L 80 232 L 76 196 C 60 186 44 172 44 150 L 44 66 L 32 80 L 2 62 L 24 26 Z"
-            fill="#ffffff"
+            fill={fill ?? "#ffffff"}
             stroke="#e6e1d4"
             strokeWidth="1.5"
           />
           <path d="M62 8 C 72 26 128 26 138 8" fill="none" stroke="#e6e1d4" strokeWidth="2" />
         </svg>
-        <div style={{ position: "absolute", left: "50%", top: "21%", transform: "translateX(-50%)", mixBlendMode: "multiply" }}>{children}</div>
+        <div style={{ position: "absolute", left: "50%", top: "21%", transform: "translateX(-50%)" }}>{children}</div>
       </div>
     );
   }
@@ -312,4 +314,3 @@ export function useSourceMap(sources: Source[]) {
   return useMemo(() => new Map(sources.map((s) => [s.designId, s])), [sources]);
 }
 
-export { SWATCHES };

@@ -35,9 +35,15 @@ export type TextEl = {
 
 export type El = DesignEl | TextEl;
 
+/** The garment option chosen in Printify (bodysuit color and size). */
+export type VariantChoice = { id: number; color: string; size: string };
+
 export type Layout = {
   version: 1;
+  /** Always white: hosts don't choose a background (it looked like choosing the product color) */
   background: string;
+  /** Chosen color and size, for products that have options */
+  variant?: VariantChoice | null;
   snap: boolean;
   /** Painted bottom to top */
   elements: El[];
@@ -218,9 +224,16 @@ export function sanitizeLayout(raw: unknown): Layout {
       });
     }
   }
+  const v = r.variant as Partial<VariantChoice> | null | undefined;
+  const variant =
+    v && Number.isInteger(Number(v.id)) && Number(v.id) > 0
+      ? { id: Number(v.id), color: String(v.color ?? "").slice(0, 60), size: String(v.size ?? "").slice(0, 40) }
+      : null;
   return {
     version: 1,
-    background: /^#[0-9a-f]{6}$/i.test(String(r.background)) ? (r.background as string) : "#ffffff",
+    // Older layouts may have a colored background; print files are always on white now
+    background: "#ffffff",
+    variant,
     snap: r.snap !== false,
     elements,
   };

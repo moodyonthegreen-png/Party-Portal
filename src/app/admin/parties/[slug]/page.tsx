@@ -97,6 +97,16 @@ export default async function AdminParty({ params }: Props) {
                     · {PRODUCTS[prod.key].widthPx} × {PRODUCTS[prod.key].heightPx} px · Printify #{PRODUCTS[prod.key].printifyBlueprintId}
                   </span>
                 </p>
+                {g?.layout.variant && (
+                  <p style={{ marginBottom: "0.4rem" }}>
+                    <strong>
+                      {g.layout.variant.color}, size {g.layout.variant.size}
+                    </strong>{" "}
+                    <span className="pp-soft" style={{ fontSize: "0.9rem" }}>
+                      (Printify variant #{g.layout.variant.id})
+                    </span>
+                  </p>
+                )}
                 {!g ? (
                   <p className="pp-soft">The host hasn&apos;t started designing yet.</p>
                 ) : g.status !== "final" ? (

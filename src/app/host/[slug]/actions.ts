@@ -12,7 +12,7 @@ import { coHostInviteEmail, EmailError, raffleWinnerEmail, emailConfigured, isEm
 import { parseGuestLines } from "@/lib/guests";
 import { issueCoHostLink, requireHost, viewerName, type HostParty } from "@/lib/host";
 import { newCardToken } from "@/lib/thank-cards";
-import { createDraftProduct, deleteProduct, PrintifyError, printifyConfigured, type Mockup } from "@/lib/printify";
+import { createDraftProduct, deleteProduct, listGarmentOptions, PrintifyError, printifyConfigured, type GarmentOption, type Mockup } from "@/lib/printify";
 import { DESIGNS_BUCKET, supabaseAdmin } from "@/lib/supabase/admin";
 import { siteOrigin } from "@/lib/site";
 import { THEMES } from "@/themes";
@@ -570,11 +570,12 @@ export async function makeGiftMockups(
   const db = supabaseAdmin();
   const { data: gift } = await db
     .from("gift_designs")
-    .select("print_path, printify_product_id, status")
+    .select("print_path, printify_product_id, status, layout")
     .eq("party_id", party.id)
     .eq("product_key", productKey)
     .maybeSingle();
   if (!gift?.print_path || gift.status !== "final") return { ok: false, error: "Finalize the design first." };
+  const variantId = sanitizeLayout(gift.layout).variant?.id ?? null;
 
   const { data: signed } = await db.storage.from("prints").createSignedUrl(gift.print_path, 60 * 30);
   if (!signed?.signedUrl) return { ok: false, error: "We couldn't read the print file. Please try again." };
@@ -586,6 +587,7 @@ export async function makeGiftMockups(
       title: `${party.guestOfHonorName}'s ${product.name} (${party.slug})`,
       printFileUrl: signed.signedUrl,
       fileName: gift.print_path.split("/").pop()!,
+      variantId,
     });
     if (gift.printify_product_id && gift.printify_product_id !== made.productId) {
       await deleteProduct(gift.printify_product_id);
@@ -1106,5 +1108,28 @@ export async function getDownloadManifest(slug: string, section: DownloadSection
   } catch (e) {
     console.error("[download] manifest failed", e);
     return { error: "We couldn't gather the files. Please try again." };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Garment options (bodysuit color and size)
+// ---------------------------------------------------------------------------
+
+/** Products whose color and size the host chooses */
+const HAS_OPTIONS = new Set<string>(["bodysuit"]);
+
+export async function getGiftOptions(
+  slug: string,
+  productKey: string,
+): Promise<{ ok: true; provider: string; options: GarmentOption[] } | { ok: false; error: string }> {
+  const party = await host(slug);
+  if (isState(party)) return { ok: false, error: party.error ?? "Please open your host link again." };
+  if (!isProduct(productKey) || !HAS_OPTIONS.has(productKey)) return { ok: false, error: "This product has no options." };
+  if (!printifyConfigured()) return { ok: false, error: "Printify isn't connected yet." };
+  try {
+    const res = await listGarmentOptions(PRODUCTS[productKey]);
+    return { ok: true, ...res };
+  } catch (e) {
+    return { ok: false, error: e instanceof PrintifyError ? e.message : "We couldn't load the colors and sizes." };
   }
 }
