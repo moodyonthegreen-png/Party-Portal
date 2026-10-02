@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
-import { getHostParty } from "@/lib/host";
+import { getHostParty, listCoHosts } from "@/lib/host";
 import { THEMES } from "@/themes";
+import { CoHosts } from "./CoHosts";
 import { PasswordForm, SettingsForm } from "./SettingsForm";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -10,6 +11,7 @@ export default async function HostSettings({ params }: Props) {
   const party = await getHostParty(slug);
   if (!party) notFound();
 
+  const coHosts = await listCoHosts(party.id);
   const themes = Object.values(THEMES).map((t) => ({ id: t.id, name: t.name }));
 
   return (
@@ -30,6 +32,13 @@ export default async function HostSettings({ params }: Props) {
           requireGuestList: party.requireGuestList,
           hostName: party.hostName ?? "",
         }}
+      />
+      <CoHosts
+        slug={party.slug}
+        guestOfHonorName={party.guestOfHonorName}
+        coHosts={coHosts ?? []}
+        isHost={party.viewer.kind === "host"}
+        ready={coHosts !== null}
       />
       <PasswordForm slug={party.slug} hasPassword={party.hasPassword} />
     </main>

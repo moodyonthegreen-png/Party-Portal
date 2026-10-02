@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { emailConfigured } from "@/lib/email";
-import { getHostParty } from "@/lib/host";
+import { getHostParty, viewerName } from "@/lib/host";
 import { listThankYous } from "@/lib/thanks";
 import { ThankYouHelper } from "./ThankYouHelper";
 
@@ -29,7 +29,7 @@ export default async function ThanksPage({ params }: Props) {
       <ThankYouHelper
         slug={party.slug}
         guestOfHonorName={party.guestOfHonorName}
-        signOff={party.hostName}
+        signOff={viewerName(party)}
         people={people}
         canEmail={emailConfigured()}
       />

@@ -3,9 +3,9 @@
 import { revalidatePath } from "next/cache";
 import { sanitizeLayout } from "@/lib/gift/layout";
 import { ownedProducts, PRODUCTS, type ProductKey } from "@/lib/gift/products";
-import { EmailError, emailConfigured, isEmail, reminderEmail, sendEmails, thankYouCardEmail } from "@/lib/email";
+import { coHostInviteEmail, EmailError, emailConfigured, isEmail, reminderEmail, sendEmails, thankYouCardEmail } from "@/lib/email";
 import { parseGuestLines } from "@/lib/guests";
-import { requireHost, type HostParty } from "@/lib/host";
+import { issueCoHostLink, requireHost, viewerName, type HostParty } from "@/lib/host";
 import { newCardToken } from "@/lib/thank-cards";
 import { createDraftProduct, deleteProduct, PrintifyError, printifyConfigured, type Mockup } from "@/lib/printify";
 import { DESIGNS_BUCKET, supabaseAdmin } from "@/lib/supabase/admin";
@@ -733,18 +733,22 @@ async function upsertCard(party: HostParty, key: string, name: string, message: 
     .maybeSingle();
   const token = existing?.token ?? newCardToken();
   const now = new Date().toISOString();
-  const { error } = await db.from("thank_cards").upsert(
-    {
-      token,
-      party_id: party.id,
-      person_key: key,
-      recipient_name: name.trim().slice(0, 80) || key,
-      message: message.trim().slice(0, 5000),
-      design_path: design?.image_path ?? null,
-      updated_at: now,
-    },
-    { onConflict: "token" },
-  );
+  const row = {
+    token,
+    party_id: party.id,
+    person_key: key,
+    recipient_name: name.trim().slice(0, 80) || key,
+    message: message.trim().slice(0, 5000),
+    design_path: design?.image_path ?? null,
+    from_name: viewerName(party),
+    updated_at: now,
+  };
+  let { error } = await db.from("thank_cards").upsert(row, { onConflict: "token" });
+  if (error && (error.code === "PGRST204" || error.code === "42703")) {
+    // Database without the from_name column yet: save without the signature
+    const { from_name: _skip, ...rest } = row;
+    ({ error } = await db.from("thank_cards").upsert(rest, { onConflict: "token" }));
+  }
   if (error) throw new Error("We couldn't save the card. Please try again.");
   return { url: `${await siteOrigin()}/c/${token}`, guest };
 }
@@ -790,10 +794,10 @@ export async function emailThankYou(slug: string, key: string, name: string, to:
       thankYouCardEmail({
         to: to.trim(),
         recipientName: name.trim(),
-        fromName: party.hostName ?? `${party.guestOfHonorName}'s ${party.occasion.toLowerCase()}`,
+        fromName: viewerName(party) ?? `${party.guestOfHonorName}'s ${party.occasion.toLowerCase()}`,
         guestOfHonorName: party.guestOfHonorName,
         url,
-        replyTo: isEmail(party.hostEmail) ? party.hostEmail : undefined,
+        replyTo: isEmail(party.viewer.email) ? party.viewer.email : undefined,
       }),
     ]);
   } catch (e) {
@@ -802,4 +806,125 @@ export async function emailThankYou(slug: string, key: string, name: string, to:
   const now = new Date().toISOString();
   await saveThank(party.id, k, { emailed_at: now, thanked_at: now });
   return { ok: true, message: "Card sent! Marked as thanked." };
+}
+
+// ---------------------------------------------------------------------------
+// Co-hosts (the guest of honor, or a helper) with their own dashboard link
+// ---------------------------------------------------------------------------
+
+const MAX_CO_HOSTS = 6;
+
+export type CoHostState = ActionState & { url?: string };
+
+export async function inviteCoHost(slug: string, _prev: CoHostState, formData: FormData): Promise<CoHostState> {
+  const party = await host(slug);
+  if (isState(party)) return party;
+
+  const name = String(formData.get("name") ?? "").trim().replace(/\s+/g, " ");
+  const email = String(formData.get("email") ?? "").trim().toLowerCase();
+  const role = formData.get("role") === "helper" ? "helper" : "guest_of_honor";
+  if (!name) return { error: "Add their name." };
+  if (name.length > 80) return { error: "That name is a bit long." };
+  if (!isEmail(email) || email.length > 200) return { error: "That email address doesn't look right." };
+  if (email === party.hostEmail.toLowerCase()) return { error: "That's the host's email, which already has access." };
+
+  const db = supabaseAdmin();
+  const { data: existing, error: listErr } = await db.from("co_hosts").select("id, email").eq("party_id", party.id);
+  if (listErr) {
+    return {
+      error:
+        listErr.code === "42P01" || listErr.code === "PGRST205"
+          ? "Co-hosts aren't switched on yet (the database update hasn't been run)."
+          : "Something went wrong. Please try again.",
+    };
+  }
+  if ((existing ?? []).some((c) => String(c.email).toLowerCase() === email)) {
+    return { error: "They're already a co-host. Use \"Email their link again\" below." };
+  }
+  if ((existing ?? []).length >= MAX_CO_HOSTS) return { error: `A party can have up to ${MAX_CO_HOSTS} co-hosts.` };
+
+  const { data: created, error } = await db
+    .from("co_hosts")
+    .insert({ party_id: party.id, name, email, role })
+    .select("id")
+    .single();
+  if (error || !created) return { error: "We couldn't add them. Please try again." };
+
+  return sendCoHostLink(party, created.id, name, email, role === "guest_of_honor", true);
+}
+
+export async function resendCoHostLink(slug: string, id: string): Promise<CoHostState> {
+  const party = await host(slug);
+  if (isState(party)) return party;
+  if (!UUID.test(id)) return { error: "That co-host wasn't found." };
+
+  const { data: co } = await supabaseAdmin()
+    .from("co_hosts")
+    .select("id, name, email, role, link_sent_at")
+    .eq("party_id", party.id)
+    .eq("id", id)
+    .maybeSingle();
+  if (!co) return { error: "That co-host wasn't found." };
+  if (co.link_sent_at && Date.now() - new Date(co.link_sent_at).getTime() < 60_000) {
+    return { error: "A link just went out. Give it a minute to arrive." };
+  }
+  return sendCoHostLink(party, co.id, co.name, co.email, co.role === "guest_of_honor", false);
+}
+
+/** Make a fresh link for a co-host and email it (or hand it back to copy). */
+async function sendCoHostLink(
+  party: HostParty,
+  id: string,
+  name: string,
+  email: string,
+  isGuestOfHonor: boolean,
+  isNew: boolean,
+): Promise<CoHostState> {
+  let url: string;
+  try {
+    url = `${await siteOrigin()}${await issueCoHostLink(id)}`;
+  } catch {
+    return { error: "We couldn't make their link. Please try again." };
+  }
+  refresh(party.slug);
+
+  const first = name.split(" ")[0];
+  if (!emailConfigured()) {
+    return { ok: true, url, message: `${isNew ? "Added! " : ""}Email isn't set up, so copy ${first}'s link below and send it to them.` };
+  }
+  try {
+    await sendEmails([
+      coHostInviteEmail({
+        to: email,
+        name,
+        invitedBy: viewerName(party) ?? "Your host",
+        guestOfHonorName: party.guestOfHonorName,
+        occasion: party.occasion,
+        isGuestOfHonor,
+        url,
+        replyTo: isEmail(party.viewer.email) ? party.viewer.email : undefined,
+      }),
+    ]);
+  } catch {
+    return { ok: true, url, message: `${isNew ? "Added, but t" : "T"}he email didn't send. You can copy ${first}'s link below instead.` };
+  }
+  return {
+    ok: true,
+    url,
+    message: isNew
+      ? `Invite sent to ${email}! ${first}'s link opens the same dashboard you're using.`
+      : `A fresh link is on its way to ${email}. Their old link no longer works.`,
+  };
+}
+
+export async function removeCoHost(slug: string, id: string): Promise<ActionState> {
+  const party = await host(slug);
+  if (isState(party)) return party;
+  if (party.viewer.kind !== "host") return { error: "Only the host can remove co-hosts." };
+  if (!UUID.test(id)) return { error: "That co-host wasn't found." };
+
+  const { error } = await supabaseAdmin().from("co_hosts").delete().eq("party_id", party.id).eq("id", id);
+  if (error) return { error: "We couldn't remove them. Please try again." };
+  refresh(party.slug);
+  return { ok: true, message: "Removed. Their link no longer works." };
 }

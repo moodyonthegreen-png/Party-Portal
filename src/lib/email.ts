@@ -95,9 +95,40 @@ export function hostLinkEmail(opts: { to: string; parties: { guestOfHonorName: s
         : `<p>Here are your private links. Opening one signs you in on that device.</p><ul>${list}</ul>`,
       button: one ? { label: "Open my dashboard", url: first.url } : undefined,
       footer:
-        "Keep this email private: anyone with the link can manage your party. Asking for a new link switches off the old one. If you didn't ask for this, you can ignore it.",
+        "Keep this email private: anyone with the link can manage the party. Asking for a new link switches off your old one. If you didn't ask for this, you can ignore it.",
     }),
     text: `Your host link${one ? "" : "s"}:\n${opts.parties.map((p) => `${p.guestOfHonorName}'s ${p.occasion.toLowerCase()}: ${p.url}`).join("\n")}\n\nKeep this private: anyone with the link can manage your party.`,
+  };
+}
+
+export function coHostInviteEmail(opts: {
+  to: string;
+  name: string;
+  invitedBy: string;
+  guestOfHonorName: string;
+  occasion: string;
+  isGuestOfHonor: boolean;
+  url: string;
+  replyTo?: string;
+}): Email {
+  const party = `${opts.guestOfHonorName}'s ${opts.occasion.toLowerCase()}`;
+  const intro = opts.isGuestOfHonor
+    ? `<p>${esc(opts.invitedBy)} has set up a party page for your ${esc(opts.occasion.toLowerCase())}, and now you can see everything too: every note, voice memo and video in the guest book, the photo album, the games, and the designs for your gift.</p>
+       <p>You can also send thank-you cards to everyone who celebrated you, right from your dashboard.</p>`
+    : `<p>${esc(opts.invitedBy)} added you as a co-host for <strong>${esc(party)}</strong>. Your dashboard has the guest list, guest book, photos, games, gift designer and thank-yous.</p>`;
+  return {
+    to: opts.to,
+    replyTo: opts.replyTo,
+    subject: opts.isGuestOfHonor ? `Your ${opts.occasion.toLowerCase()} party page is ready for you 💛` : `You're a co-host for ${party}`,
+    html: layout({
+      preheader: opts.isGuestOfHonor ? "See everything your guests have shared" : "Open your co-host dashboard",
+      heading: opts.isGuestOfHonor ? `For you, ${opts.name.split(" ")[0]}` : "You're a co-host!",
+      body: `<p>Hi ${esc(opts.name)},</p>${intro}`,
+      button: { label: "Open my dashboard", url: opts.url },
+      footer:
+        "This link is just for you: opening it signs you in on that device, and anyone with it can manage the party, so please don't forward it. If you lose it, use \"Email me my link\" on the sign-in page.",
+    }),
+    text: `Hi ${opts.name},\n\n${opts.invitedBy} gave you access to the dashboard for ${party}. Open it here: ${opts.url}\n\nThis link is just for you, so please don't forward it.`,
   };
 }
 

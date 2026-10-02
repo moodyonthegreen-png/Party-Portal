@@ -24,7 +24,7 @@ export async function getThankCard(token: string): Promise<ThankCard | null> {
   const db = supabaseAdmin();
   const { data, error } = await db
     .from("thank_cards")
-    .select("token, party_id, recipient_name, message, design_path, opened_at")
+    .select("*")
     .eq("token", token)
     .maybeSingle();
   if (error) throw dbError("loading a thank-you card", error);
@@ -55,7 +55,7 @@ export async function getThankCard(token: string): Promise<ThankCard | null> {
     designUrl,
     openedAt: data.opened_at,
     party,
-    hostName: p?.host_name ?? null,
+    hostName: (data.from_name as string | null) ?? (p?.host_name as string | null) ?? null,
   };
 }
 

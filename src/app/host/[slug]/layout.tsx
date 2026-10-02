@@ -22,7 +22,9 @@ export default async function HostLayout({ children, params }: Props) {
           <header style={{ borderBottom: "1px solid var(--pp-paper-edge)", background: "rgb(255 253 246 / 0.85)" }}>
             <div className="pp-wrap pp-host-body" style={{ paddingTop: "1rem", paddingBottom: "0.75rem" }}>
               <p className="pp-caps pp-soft" style={{ fontSize: "0.7rem" }}>
-                Host dashboard
+                {party.viewer.kind === "cohost"
+                  ? `Party dashboard · signed in as ${party.viewer.name}`
+                  : "Host dashboard"}
               </p>
               <p className="pp-script" style={{ fontSize: "2.2rem", color: "var(--pp-accent)", marginTop: "0.2rem" }}>
                 {party.guestOfHonorName}&apos;s {party.occasion.toLowerCase()}

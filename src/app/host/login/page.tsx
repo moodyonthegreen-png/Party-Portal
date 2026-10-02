@@ -17,7 +17,7 @@ export default function HostLogin() {
             Host sign-in
           </h1>
           <p style={{ lineHeight: 1.55, textAlign: "center" }}>
-            Enter the email you used when you ordered and we&apos;ll send you a link to your host dashboard. No password needed.
+            Enter the email you ordered with (or the one your host invited) and we&apos;ll send you a link to your dashboard. No password needed.
           </p>
           <LoginForm />
         </div>
