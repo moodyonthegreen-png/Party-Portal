@@ -145,3 +145,23 @@ export async function updatePartyAdmin(slug: string, _prev: AdminState, formData
   revalidatePath(`/host/${slug}`, "layout");
   return { ok: true, message: "Saved." };
 }
+
+/** Send a test email so you can check Resend is set up. */
+export async function sendTestEmail(_prev: AdminState, formData: FormData): Promise<AdminState> {
+  const denied = await guard();
+  if (denied) return denied;
+  const to = String(formData.get("to") ?? "").trim();
+  if (!isEmail(to)) return { error: "Enter an email address to send the test to." };
+  if (!emailConfigured()) return { error: "RESEND_API_KEY and EMAIL_FROM aren't both set in Vercel yet (redeploy after adding them)." };
+  try {
+    await sendEmails([
+      hostLinkEmail({
+        to,
+        parties: [{ guestOfHonorName: "Test", occasion: "Email check", url: `${await siteOrigin()}/admin` }],
+      }),
+    ]);
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : "The email didn't send." };
+  }
+  return { ok: true, message: `Test email sent to ${to}. It should arrive within a minute (check spam too).` };
+}

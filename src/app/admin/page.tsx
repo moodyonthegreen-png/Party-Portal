@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { isAdmin } from "@/lib/admin";
 import { listPartySummaries, STAGE_LABEL, type FulfilmentStatus } from "@/lib/admin-data";
+import { TestEmail } from "./TestEmail";
 
 type Props = { searchParams: Promise<{ stage?: string; q?: string }> };
 
@@ -143,6 +144,10 @@ export default async function AdminHome({ searchParams }: Props) {
           </table>
         </div>
       )}
+
+      <div style={{ marginTop: "2rem", borderTop: "1px solid var(--pp-paper-edge)", paddingTop: "1rem" }}>
+        <TestEmail from={process.env.EMAIL_FROM ?? null} />
+      </div>
     </main>
   );
 }
