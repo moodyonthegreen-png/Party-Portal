@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { drawEntrant, raffleEntrants, secureRandom } from "@/lib/games/raffle";
+import { GAME_NAMES, gameWinners, type PrizeGame } from "@/lib/games/winners";
 import { MAX_PRIZES, type RaffleRules } from "@/lib/games/settings";
 import { sanitizeLayout } from "@/lib/gift/layout";
 import { listThankYous } from "@/lib/thanks";
@@ -801,9 +802,15 @@ export async function emailThankYou(slug: string, key: string, name: string, to:
     return { error: e instanceof Error ? e.message : "Something went wrong." };
   }
 
+  // Prizes they won (raffle or games), mentioned in the email
+  const wins = [
+    ...(party.games.raffle.on ? party.games.raffle.winners.filter((w) => w && w.key === k).map((w) => w!.prize) : []),
+    ...(await gameWinners(party).catch(() => [])).filter((r) => r.winners.some((w) => w.key === k)).map((r) => r.prize),
+  ];
   try {
     await sendEmails([
       thankYouCardEmail({
+        wins,
         to: to.trim(),
         recipientName: name.trim(),
         fromName: viewerName(party) ?? `${party.guestOfHonorName}'s ${party.occasion.toLowerCase()}`,
@@ -1263,4 +1270,60 @@ export async function deleteWelcomePhoto(slug: string, id: string): Promise<Acti
   await db.storage.from(PHOTOS_BUCKET).remove([data.image_path as string]);
   refresh(party.slug);
   return { ok: true };
+}
+
+// ---------------------------------------------------------------------------
+// Game prizes (a prize for the winner of a game, like the raffle)
+// ---------------------------------------------------------------------------
+
+export async function setGamePrize(slug: string, game: PrizeGame, input: { on: boolean; prize: string }): Promise<ActionState> {
+  const party = await host(slug);
+  if (isState(party)) return party;
+  if (game !== "babyPhotos" && game !== "pool") return { error: "That game wasn't found." };
+  const prize = String(input.prize ?? "").trim().replace(/\s+/g, " ");
+  if (input.on && !prize) return { error: "Say what the winner gets." };
+  if (prize.length > 80) return { error: "Keep the prize under 80 characters." };
+  const cur = party.games[game];
+  const res = await saveGames(party, { ...party.games, [game]: { ...cur, prize: { ...cur.prize, on: Boolean(input.on), prize } } });
+  return res.error ? res : { ok: true, message: input.on ? "Prize saved." : "Prize turned off." };
+}
+
+/** Email one game winner. Prize details (a gift card link or code) go straight into the email and are never stored. */
+export async function emailGameWinner(slug: string, game: PrizeGame, key: string, to: string, details: string): Promise<ActionState> {
+  const party = await host(slug);
+  if (isState(party)) return party;
+  if (game !== "babyPhotos" && game !== "pool") return { error: "That game wasn't found." };
+  if (!isEmail(to)) return { error: "That email address doesn't look right." };
+  if (details.length > 2000) return { error: "Those details are a bit long." };
+  if (!emailConfigured()) return { error: "Email isn't set up yet." };
+
+  const result = (await gameWinners(party)).find((r) => r.game === game);
+  const w = result?.winners.find((x) => x.key === key);
+  if (!result || !w) return { error: "That winner wasn't found. Have the results been posted?" };
+
+  try {
+    await sendEmails([
+      raffleWinnerEmail({
+        to: to.trim(),
+        name: w.name,
+        prize: result.prize,
+        contest: GAME_NAMES[game],
+        guestOfHonorName: party.guestOfHonorName,
+        occasion: party.occasion,
+        details,
+        fromName: viewerName(party) ?? `${party.guestOfHonorName}'s ${party.occasion.toLowerCase()}`,
+        replyTo: isEmail(party.viewer.email) ? party.viewer.email : undefined,
+      }),
+    ]);
+  } catch (e) {
+    return { error: e instanceof EmailError ? e.message : "The email didn't send. Please try again." };
+  }
+  // Remember their address on the guest list for next time
+  const db = supabaseAdmin();
+  const { data: g } = await db.from("guests").select("id, email").eq("party_id", party.id).ilike("name", w.name.replace(/[\\%_]/g, (c) => `\\${c}`)).maybeSingle();
+  if (g && !g.email) await db.from("guests").update({ email: to.trim().toLowerCase() }).eq("id", g.id);
+
+  const cur = party.games[game];
+  await saveGames(party, { ...party.games, [game]: { ...cur, prize: { ...cur.prize, emailed: { ...cur.prize.emailed, [key]: new Date().toISOString() } } } });
+  return { ok: true, message: `Sent to ${to.trim()}.` };
 }

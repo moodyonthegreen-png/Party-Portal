@@ -4,6 +4,7 @@ import { currentDeviceHash } from "@/lib/device";
 import { listPoolEntries } from "@/lib/games";
 import { formatWeight, scorePool } from "@/lib/games/scoring";
 import { getParty } from "@/lib/parties";
+import { PrizeNote } from "../PrizeNote";
 import { PoolForm } from "./PoolForm";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -37,6 +38,10 @@ export default async function DueDatePoolPage({ params }: Props) {
         <h1 className="pp-page-title">Due date &amp; weight pool</h1>
         <p className="pp-page-kicker">{pool.actual ? "Baby is here!" : "Closest guess wins"}</p>
       </header>
+      <PrizeNote
+        prize={pool.prize}
+        winners={results ? [...new Set(results.overall.filter((r) => r.place === 1).map((r) => r.name))] : null}
+      />
 
       {pool.actual && results ? (
         <>

@@ -6,6 +6,7 @@ import { PHOTOS_BUCKET } from "@/lib/photos";
 import { dbError, supabaseAdmin } from "@/lib/supabase/admin";
 import { personKey } from "@/lib/thanks-draft";
 import { listThankYous } from "@/lib/thanks";
+import { GAME_TITLES, gameWinners } from "@/lib/games/winners";
 
 /** One guest's part in the celebration, for the inside of their thank-you card. */
 export type WrapUp = {
@@ -16,6 +17,8 @@ export type WrapUp = {
   /** Played a game whose results aren't out yet */
   playedGames: boolean;
   rafflePrizes: string[];
+  /** Games they won a prize in */
+  gamePrizes: { game: string; prize: string }[];
   totals: { people: number; designs: number; notes: number; photos: number };
 };
 
@@ -80,6 +83,10 @@ export async function getWrapUp(party: PublicParty, key: string): Promise<WrapUp
     ? party.games.raffle.winners.filter((w): w is NonNullable<typeof w> => Boolean(w) && w!.key === key).map((w) => w.prize)
     : [];
 
+  const gamePrizes = (await gameWinners(party))
+    .filter((r) => r.winners.some((w) => w.key === key))
+    .map((r) => ({ game: GAME_TITLES[r.game], prize: r.prize }));
+
   const joined = people.filter((p) => p.contributions.design || p.contributions.note || p.contributions.photos > 0 || p.contributions.games);
   return {
     notes,
@@ -88,6 +95,7 @@ export async function getWrapUp(party: PublicParty, key: string): Promise<WrapUp
     pool,
     playedGames,
     rafflePrizes,
+    gamePrizes,
     totals: {
       people: joined.length,
       designs: people.filter((p) => p.contributions.design).length,

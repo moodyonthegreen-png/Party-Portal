@@ -82,6 +82,8 @@ export type RevealData = {
   designs: { name: string; url: string }[];
   games: {
     babyPhoto: { name: string; correct: number; total: number }[] | null;
+    /** Prize text per game, when the host offered one */
+    prizes: { babyPhotos: string | null; pool: string | null };
     pool: { closest: string[]; date: string[]; weight: string[] } | null;
     raffle: { prize: string; name: string }[];
   };
@@ -144,7 +146,15 @@ export async function getRevealData(party: PublicParty): Promise<RevealData> {
       .filter((p) => p.url)
       .map((p) => ({ id: p.id, author: p.authorName, caption: p.caption, url: p.url!, prompt: p.prompt, story: p.story })),
     designs: designs.filter((d) => d.url).map((d) => ({ name: d.guestName, url: d.url! })),
-    games: { babyPhoto, pool, raffle },
+    games: {
+      babyPhoto,
+      pool,
+      raffle,
+      prizes: {
+        babyPhotos: party.games.babyPhotos.prize.on && party.games.babyPhotos.prize.prize ? party.games.babyPhotos.prize.prize : null,
+        pool: party.games.pool.prize.on && party.games.pool.prize.prize ? party.games.pool.prize.prize : null,
+      },
+    },
     gift,
     names,
   };

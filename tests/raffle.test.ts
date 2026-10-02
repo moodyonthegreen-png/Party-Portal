@@ -39,3 +39,13 @@ test("older parties without raffle settings get safe defaults", () => {
   assert.deepEqual(g2.raffle.prizes, ["$25 card"]);
   assert.equal(g2.raffle.winners[0]?.name, "Sam");
 });
+
+test("game prizes default to off and keep who was emailed", () => {
+  const g = parseGames({});
+  assert.deepEqual(g.babyPhotos.prize, { on: false, prize: "", emailed: {} });
+  const g2 = parseGames({ pool: { on: true, prize: { on: true, prize: "$20 card", emailed: { "aunt mimi": "2026-10-01T00:00:00Z", bad: 3 } } } });
+  assert.equal(g2.pool.prize.on, true);
+  assert.equal(g2.pool.prize.prize, "$20 card");
+  assert.deepEqual(Object.keys(g2.pool.prize.emailed), ["aunt mimi"]);
+  assert.equal(g2.pool.on, true);
+});

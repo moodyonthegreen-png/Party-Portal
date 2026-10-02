@@ -173,6 +173,8 @@ export function raffleWinnerEmail(opts: {
   to: string;
   name: string;
   prize: string;
+  /** What they won: "the raffle" (default) or a game, e.g. "Guess the baby photo" */
+  contest?: string;
   guestOfHonorName: string;
   occasion: string;
   details: string;
@@ -180,20 +182,22 @@ export function raffleWinnerEmail(opts: {
   replyTo?: string;
 }): Email {
   const party = `${opts.guestOfHonorName}'s ${opts.occasion.toLowerCase()}`;
+  const contest = opts.contest ?? "the raffle";
+  const how = opts.contest ? `You won ${esc(contest)} at <strong>${esc(party)}</strong>! Your prize:` : `Your name was drawn in the raffle at <strong>${esc(party)}</strong>. You won:`;
   return {
     to: opts.to,
     replyTo: opts.replyTo,
-    subject: `You won the raffle at ${party}!`,
+    subject: `You won ${contest} at ${party}!`,
     html: layout({
       preheader: `You won: ${opts.prize}`,
       heading: "You won!",
       body: `<p style="text-align:center">Hi ${esc(opts.name)},</p>
-        <p style="text-align:center">Your name was drawn in the raffle at <strong>${esc(party)}</strong>. You won:</p>
+        <p style="text-align:center">${how}</p>
         <p style="text-align:center;font-size:22px;color:#56704f;margin:18px 0">${esc(opts.prize)}</p>
         ${opts.details.trim() ? `<div style="background:#f6f2df;border-radius:10px;padding:14px 16px;margin:8px 0 14px">${richText(opts.details)}</div>` : ""}
         <p style="text-align:center">Thank you for celebrating with us!<br>${esc(opts.fromName)}</p>`,
     }),
-    text: `Hi ${opts.name},\n\nYou won the raffle at ${party}: ${opts.prize}\n\n${opts.details.trim()}\n\nThank you for celebrating with us!\n${opts.fromName}`,
+    text: `Hi ${opts.name},\n\nYou won ${contest} at ${party}: ${opts.prize}\n\n${opts.details.trim()}\n\nThank you for celebrating with us!\n${opts.fromName}`,
   };
 }
 
@@ -240,7 +244,9 @@ export function thankYouEmail(opts: { to: string; message: string; fromName: str
   };
 }
 
-export function thankYouCardEmail(opts: { to: string; recipientName: string; fromName: string; guestOfHonorName: string; url: string; replyTo?: string }): Email {
+export function thankYouCardEmail(opts: { to: string; recipientName: string; fromName: string; guestOfHonorName: string; url: string; replyTo?: string; wins?: string[] }): Email {
+  const wins = (opts.wins ?? []).filter(Boolean);
+  const winLine = wins.length ? `<p style="text-align:center">And a little good news: you won ${wins.map(esc).join(" and ")}! The details are in your card.</p>` : "";
   return {
     to: opts.to,
     replyTo: opts.replyTo,
@@ -249,9 +255,9 @@ export function thankYouCardEmail(opts: { to: string; recipientName: string; fro
       preheader: "Tap to open your card",
       heading: "You've got a card!",
       body: `<p style="text-align:center">Hi ${esc(opts.recipientName)},</p>
-        <p style="text-align:center">${esc(opts.fromName)} sent you a little thank-you card for celebrating <strong>${esc(opts.guestOfHonorName)}</strong>.</p>`,
+        <p style="text-align:center">${esc(opts.fromName)} sent you a little thank-you card for celebrating <strong>${esc(opts.guestOfHonorName)}</strong>.</p>${winLine}`,
       button: { label: "Open your card", url: opts.url },
     }),
-    text: `Hi ${opts.recipientName},\n\n${opts.fromName} sent you a thank-you card for celebrating ${opts.guestOfHonorName}. Open it here: ${opts.url}`,
+    text: `Hi ${opts.recipientName},\n\n${opts.fromName} sent you a thank-you card for celebrating ${opts.guestOfHonorName}.${wins.length ? ` And good news: you won ${wins.join(" and ")}!` : ""} Open it here: ${opts.url}`,
   };
 }

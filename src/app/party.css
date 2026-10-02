@@ -1197,9 +1197,9 @@
 }
 .pp-board-table th {
   text-align: left;
-  font-family: var(--pp-display);
-  letter-spacing: 0.01em;
-  font-size: 0.68rem;
+  font-family: var(--pp-sans);
+  letter-spacing: 0;
+  font-size: 0.8rem;
   font-weight: 600;
   color: var(--pp-ink-soft);
   padding: 0 0.4rem 0.4rem;
@@ -2490,4 +2490,25 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .vr-rec span { animation: none; }
+}
+
+/* Game prize controls (host) */
+.gp {
+  display: grid;
+  gap: 0.8rem;
+  border-top: 1px solid var(--pp-paper-edge);
+  padding-top: 1rem;
+}
+
+/* Prize note on a game */
+.pp-prize {
+  display: flex;
+  gap: 0.7rem;
+  align-items: center;
+  margin: -0.5rem 0 1.5rem;
+  color: var(--pp-ink);
+}
+.pp-prize svg {
+  flex: none;
+  color: var(--pp-gold-dark);
 }

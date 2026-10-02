@@ -140,6 +140,14 @@ function WrapUpView({ wrapUp: w, hasDesign, guestOfHonorName }: { wrapUp: WrapUp
       </div>,
     );
   }
+  for (const g of w.gamePrizes ?? []) {
+    tiles.push(
+      <div className="tc-tile tc-win" key={`game-${g.game}`}>
+        <p className="pp-caps" style={{ fontSize: "0.62rem" }}>You won {g.game}</p>
+        <p className="tc-tile-big">{g.prize}</p>
+      </div>,
+    );
+  }
   if (hasDesign) {
     tiles.push(
       <div className="tc-tile" key="design">

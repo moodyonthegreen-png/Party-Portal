@@ -4,6 +4,7 @@ import { currentDeviceHash } from "@/lib/device";
 import { listBabyGuesses, listBabyPhotos } from "@/lib/games";
 import { scoreBabyPhotos } from "@/lib/games/scoring";
 import { getParty } from "@/lib/parties";
+import { PrizeNote } from "../PrizeNote";
 import { BabyPhotoGame } from "./BabyPhotoGame";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -46,6 +47,10 @@ export default async function BabyPhotosPage({ params }: Props) {
           </p>
         )}
       </header>
+      <PrizeNote
+        prize={party.games.babyPhotos.prize}
+        winners={revealed ? [...new Set(board.filter((r) => r.place === 1 && r.correct > 0).map((r) => r.name))] : null}
+      />
 
       <BabyPhotoGame
         slug={party.slug}

@@ -182,6 +182,7 @@ export function RevealView({
             {g.babyPhoto && g.babyPhoto.length > 0 && (
               <div className="rv-card">
                 <p className="pp-caps" style={{ fontSize: "0.68rem" }}>Guess the baby photo</p>
+                {g.prizes?.babyPhotos && <p className="pp-soft">Winner&apos;s prize: {g.prizes.babyPhotos}</p>}
                 {g.babyPhoto.map((r) => (
                   <p key={r.name} className="rv-line">
                     {r.name} <span className="pp-soft">· {r.correct} of {r.total}</span>
@@ -192,6 +193,7 @@ export function RevealView({
             {g.pool && (
               <div className="rv-card">
                 <p className="pp-caps" style={{ fontSize: "0.68rem" }}>Due date &amp; weight pool</p>
+                {g.prizes?.pool && <p className="pp-soft">Winner&apos;s prize: {g.prizes.pool}</p>}
                 {g.pool.closest.length > 0 && <p className="rv-line">{g.pool.closest.join(", ")}</p>}
                 {g.pool.date.length > 0 && <p className="pp-soft">Closest birthday: {g.pool.date.join(", ")}</p>}
                 {g.pool.weight.length > 0 && <p className="pp-soft">Closest weight: {g.pool.weight.join(", ")}</p>}

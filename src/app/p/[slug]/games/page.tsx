@@ -46,6 +46,7 @@ export default async function GamesHub({ params }: Props) {
                 {babyPhotos.revealed
                   ? "The answers are in. See how you did."
                   : `Can you tell who's who? ${photoCount} ${photoCount === 1 ? "photo" : "photos"}, ${babyPlayers ?? 0} ${babyPlayers === 1 ? "player" : "players"} so far.`}
+                {babyPhotos.prize.on && babyPhotos.prize.prize && !babyPhotos.revealed ? ` The winner gets ${babyPhotos.prize.prize}.` : ""}
               </p>
             </div>
             <div className="pp-entry-art">
@@ -66,6 +67,7 @@ export default async function GamesHub({ params }: Props) {
                   : pool.closed
                     ? "Guessing is closed. Results once baby arrives."
                     : `Guess the birthday and weight. Closest wins. ${poolPlayers ?? 0} ${poolPlayers === 1 ? "guess" : "guesses"} so far.`}
+                {pool.prize.on && pool.prize.prize && !pool.actual ? ` The winner gets ${pool.prize.prize}.` : ""}
               </p>
             </div>
             <div className="pp-entry-art">

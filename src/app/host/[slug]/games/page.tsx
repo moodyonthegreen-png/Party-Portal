@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { emailConfigured } from "@/lib/email";
 import { listBabyGuesses, listBabyPhotos, listPoolEntries } from "@/lib/games";
 import { raffleEntrants } from "@/lib/games/raffle";
+import { gameWinners } from "@/lib/games/winners";
 import { scoreBabyPhotos } from "@/lib/games/scoring";
 import { getHostParty } from "@/lib/host";
 import { listThankYous } from "@/lib/thanks";
@@ -22,6 +23,9 @@ export default async function HostGamesPage({ params }: Props) {
     listThankYous(party.id),
   ]);
   const emails = new Map(people.map((p) => [p.key, p.email]));
+  const results = await gameWinners(party);
+  const winnersFor = (g: "babyPhotos" | "pool") =>
+    (results.find((r) => r.game === g)?.winners ?? []).map((w) => ({ ...w, email: emails.get(w.key) ?? null }));
   const entrants = raffleEntrants(people, party.games.raffle.rules).map((e) => ({ ...e, email: emails.get(e.key) ?? null }));
   const babyBoard = scoreBabyPhotos(
     photos.map((p) => ({ id: p.id, answer: p.answer })),
@@ -39,6 +43,8 @@ export default async function HostGamesPage({ params }: Props) {
         photos={photos}
         babyBoard={babyBoard.map((r) => ({ name: r.name, correct: r.correct, total: r.total, place: r.place }))}
         poolCount={poolEntries.length}
+        winners={{ babyPhotos: winnersFor("babyPhotos"), pool: winnersFor("pool") }}
+        canEmail={emailConfigured()}
       />
       <RaffleHost slug={party.slug} raffle={party.games.raffle} entrants={entrants} canEmail={emailConfigured()} />
     </main>

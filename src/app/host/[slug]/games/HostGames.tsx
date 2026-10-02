@@ -4,6 +4,7 @@ import { useRef, useState, useTransition } from "react";
 import type { BabyPhoto } from "@/lib/games";
 import type { GameSettings } from "@/lib/games/settings";
 import { resizeToJpeg } from "@/lib/image/resize";
+import { GamePrize } from "./GamePrize";
 import { supabaseBrowser } from "@/lib/supabase/browser";
 import {
   deleteBabyPhoto,
@@ -34,12 +35,16 @@ export function HostGames({
   photos,
   babyBoard,
   poolCount,
+  winners,
+  canEmail,
 }: {
   slug: string;
   games: GameSettings;
   photos: BabyPhoto[];
   babyBoard: { name: string; correct: number; total: number; place: number }[];
   poolCount: number;
+  winners: Record<"babyPhotos" | "pool", { key: string; name: string; emailedAt: string | null; email: string | null }[]>;
+  canEmail: boolean;
 }) {
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -205,6 +210,7 @@ export function HostGames({
             )}
           </div>
         </div>
+        <GamePrize slug={slug} game="babyPhotos" prize={games.babyPhotos.prize} resultsOut={games.babyPhotos.revealed} winners={winners.babyPhotos} canEmail={canEmail} />
       </section>
 
       {/* Due date pool */}
@@ -278,6 +284,7 @@ export function HostGames({
             overall leaderboard.
           </p>
         </div>
+        <GamePrize slug={slug} game="pool" prize={games.pool.prize} resultsOut={Boolean(games.pool.actual)} winners={winners.pool} canEmail={canEmail} />
       </section>
     </div>
   );
