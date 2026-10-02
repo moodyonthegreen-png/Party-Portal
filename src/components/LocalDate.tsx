@@ -80,3 +80,15 @@ export function EventDate({ iso }: { iso: string }) {
     </time>
   );
 }
+
+/** "Saturday, October 11 at 2:00 PM" in the viewer's own time zone. */
+export function EventLine({ iso }: { iso: string }) {
+  const [text, setText] = useState<string | null>(null);
+  useEffect(() => {
+    const d = new Date(iso);
+    const day = d.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" });
+    const time = d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+    setText(`${day} at ${time}`);
+  }, [iso]);
+  return <time dateTime={iso}>{text ?? "\u00a0"}</time>;
+}

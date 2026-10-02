@@ -1,16 +1,24 @@
-import { Allura, Caveat, Cormorant_Garamond, EB_Garamond } from "next/font/google";
+import { Instrument_Sans, Instrument_Serif } from "next/font/google";
 
-// Theme fonts. Every theme's CSS picks from these variables.
-const allura = Allura({ subsets: ["latin"], weight: "400", variable: "--font-allura", display: "swap" });
-const cormorant = Cormorant_Garamond({
+/**
+ * The house type: Instrument Serif for names and titles, Instrument Sans for
+ * everything people read and tap. Loaded once in the root layout; party pages
+ * still add `themeFontVars` so a theme could bring its own pairing later.
+ */
+export const instrumentSerif = Instrument_Serif({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-cormorant",
+  weight: "400",
+  style: ["normal", "italic"],
+  variable: "--font-instrument-serif",
   display: "swap",
 });
-const ebGaramond = EB_Garamond({ subsets: ["latin"], variable: "--font-ebgaramond", display: "swap" });
-// Handwriting, for the guest book
-const caveat = Caveat({ subsets: ["latin"], variable: "--font-caveat", display: "swap" });
+export const instrumentSans = Instrument_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  style: ["normal", "italic"],
+  variable: "--font-instrument-sans",
+  display: "swap",
+});
 
-/** Class names that make the theme font variables available. */
-export const themeFontVars = `${allura.variable} ${cormorant.variable} ${ebGaramond.variable} ${caveat.variable}`;
+/** Class names that make the font variables available. */
+export const themeFontVars = `${instrumentSerif.variable} ${instrumentSans.variable}`;

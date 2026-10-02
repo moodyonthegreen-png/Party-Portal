@@ -18,17 +18,13 @@ export default async function MessagesPage({ params }: Props) {
 
   return (
     <main className="pp-wrap" style={{ maxWidth: "54rem" }}>
-      <Link href={`/p/${party.slug}`} className="pp-caps pp-link" style={{ fontSize: "0.8rem" }}>
+      <Link href={`/p/${party.slug}`} className="pp-back">
         ← Back to the party
       </Link>
 
-      <header style={{ textAlign: "center", marginTop: "1.75rem" }}>
-        <p className="pp-caps pp-soft" style={{ fontSize: "0.75rem" }}>
-          Notes, wishes, voice memos &amp; videos
-        </p>
-        <h1 className="pp-script" style={{ fontSize: "3.4rem", color: "var(--pp-accent)", marginTop: "0.4rem" }}>
-          Guest book
-        </h1>
+      <header className="pp-head">
+        <h1 className="pp-page-title">Guest book</h1>
+        <p className="pp-page-kicker">Notes, wishes, voice memos &amp; videos</p>
       </header>
 
       <GuestBook slug={party.slug} guestOfHonorName={party.guestOfHonorName} messages={messages} />

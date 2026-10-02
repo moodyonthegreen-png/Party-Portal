@@ -67,7 +67,7 @@ export function ThankYouHelper({
 
   if (!people.length) {
     return (
-      <p className="pp-paper" style={{ padding: "1.5rem 1.25rem", borderRadius: 4 }}>
+      <p className="pp-paper" style={{ padding: "1.5rem 1.25rem" }}>
         Nobody to thank yet. Guests appear here as they&apos;re added to the guest list or take part in the party.
       </p>
     );
@@ -75,7 +75,7 @@ export function ThankYouHelper({
 
   return (
     <div style={{ display: "grid", gap: "1.25rem" }}>
-      <section className="pp-paper" style={{ padding: "1.25rem", borderRadius: 4, display: "grid", gap: "0.75rem" }}>
+      <section className="pp-paper" style={{ padding: "1.25rem", display: "grid", gap: "0.75rem" }}>
         <p>
           <span className="pp-display" style={{ fontSize: "2.2rem", fontWeight: 600 }}>
             {done}
@@ -180,12 +180,12 @@ function PersonCard({
 
   const did = contributionPhrases(p.contributions, guestOfHonorName);
   const badges = [
-    p.contributions.design && "🎨 Design",
-    p.contributions.note === "text" && "📖 Note",
-    p.contributions.note === "audio" && "🎙 Voice memo",
-    p.contributions.note === "video" && "🎥 Video",
-    p.contributions.photos > 0 && `📷 ${p.contributions.photos} ${p.contributions.photos === 1 ? "photo" : "photos"}`,
-    p.contributions.games && "🎲 Games",
+    p.contributions.design && "Design",
+    p.contributions.note === "text" && "Note",
+    p.contributions.note === "audio" && "Voice memo",
+    p.contributions.note === "video" && "Video",
+    p.contributions.photos > 0 && `${p.contributions.photos} ${p.contributions.photos === 1 ? "photo" : "photos"}`,
+    p.contributions.games && "Games",
   ].filter(Boolean) as string[];
 
   function saveGift(value: string) {
@@ -239,7 +239,7 @@ function PersonCard({
   }
 
   return (
-    <li className="pp-paper" style={{ padding: "1rem 1.1rem", borderRadius: 4, opacity: p.thankedAt && !open ? 0.75 : 1 }}>
+    <li className="pp-paper" style={{ padding: "1rem 1.1rem", opacity: p.thankedAt && !open ? 0.75 : 1 }}>
       <div style={{ display: "flex", gap: "0.85rem", alignItems: "center" }}>
         <input
           type="checkbox"
@@ -261,8 +261,8 @@ function PersonCard({
           <p style={{ fontWeight: 600, textDecoration: p.thankedAt ? "line-through" : "none" }}>{p.name}</p>
           <p className="pp-soft" style={{ fontSize: "0.85rem" }}>
             {badges.length ? badges.join(" · ") : p.onGuestList ? "On the guest list" : ""}
-            {p.giftNote ? ` · 🎁 ${p.giftNote}` : ""}
-            {p.cardOpenedAt ? " · 💌 card opened" : p.emailedAt ? " · ✉️ card sent" : ""}
+            {p.giftNote ? ` · Gift: ${p.giftNote}` : ""}
+            {p.cardOpenedAt ? " · Card opened" : p.emailedAt ? " · Card sent" : ""}
           </p>
         </div>
         <button type="button" className="pp-link" style={{ fontSize: "0.9rem", flexShrink: 0 }} onClick={onToggleOpen}>
@@ -316,7 +316,7 @@ function PersonCard({
           </div>
           <div style={{ display: "grid", gap: "0.6rem" }}>
             <p className="pp-caps" style={{ fontSize: "0.7rem" }}>
-              Send it as a card that opens 💌
+              Send it as a card that opens
             </p>
             <div style={{ display: "flex", gap: "0.6rem", flexWrap: "wrap", alignItems: "center" }}>
               {canEmail && (

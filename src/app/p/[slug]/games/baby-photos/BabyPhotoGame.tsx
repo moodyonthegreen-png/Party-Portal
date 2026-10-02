@@ -112,7 +112,7 @@ export function BabyPhotoGame({
             const mine = myGuesses[p.id];
             const right = mine && p.answer && mine.toLowerCase() === p.answer.toLowerCase();
             return (
-              <li key={p.id} className="pp-album-item" style={{ transform: `rotate(${[-1.5, 1.2, -0.8, 1.8][i % 4]}deg)` }}>
+              <li key={p.id} className="pp-album-item">
                 <figure className="pp-print">
                   <div className="pp-print-photo" style={{ cursor: "default" }}>
                     {p.url && <img src={p.url} alt={`Baby photo ${i + 1}`} />}
@@ -148,7 +148,7 @@ export function BabyPhotoGame({
 
       <ul className="pp-album" aria-label="Baby photos">
         {photos.map((p, i) => (
-          <li key={p.id} className="pp-album-item" style={{ transform: `rotate(${[-1.5, 1.2, -0.8, 1.8][i % 4]}deg)` }}>
+          <li key={p.id} className="pp-album-item">
             <figure className="pp-print">
               <div className="pp-print-photo" style={{ cursor: "default" }}>
                 {p.url && <img src={p.url} alt={`Baby photo ${i + 1}`} />}

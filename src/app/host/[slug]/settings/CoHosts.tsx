@@ -12,7 +12,7 @@ export type CoHostRow = {
   lastOpenedAt: string | null;
 };
 
-const card: React.CSSProperties = { padding: "1.5rem 1.25rem", borderRadius: 4, display: "grid", gap: "1.1rem" };
+const card: React.CSSProperties = { padding: "1.5rem 1.25rem", display: "grid", gap: "1.1rem" };
 const small: React.CSSProperties = { fontSize: "0.8rem", padding: "0.6rem 0.95rem" };
 
 function shortDate(iso: string) {

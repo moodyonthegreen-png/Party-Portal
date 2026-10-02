@@ -138,9 +138,8 @@ export function Album({ slug, guestOfHonorName, photos }: { slug: string; guestO
       {/* Add photos */}
       <section
         className="pp-paper"
-        style={{ maxWidth: "34rem", margin: "1.75rem auto 0", padding: "1.5rem 1.25rem", transform: "rotate(-0.5deg)" }}
+        style={{ maxWidth: "34rem", margin: "1.75rem auto 0", padding: "1.5rem 1.25rem" }}
       >
-        <div className="pp-tape" style={{ left: "50%", top: "-12px", transform: "translateX(-50%) rotate(2deg)" }} />
         <div style={{ display: "grid", gap: "0.9rem" }}>
           <div>
             <label htmlFor="ph-name" className="pp-caps" style={{ fontSize: "0.72rem", display: "block", marginBottom: "0.35rem" }}>
@@ -222,7 +221,7 @@ export function Album({ slug, guestOfHonorName, photos }: { slug: string; guestO
           {photos.map((p, i) => {
             const h = hearts[p.id] ?? { n: p.hearts, on: p.hearted };
             return (
-              <li key={p.id} className="pp-album-item" style={{ transform: `rotate(${TILTS[i % TILTS.length]}deg)` }}>
+              <li key={p.id} className="pp-album-item">
                 <figure className="pp-print">
                   <button type="button" className="pp-print-photo" onClick={() => setOpen(p)} aria-label={`Open photo from ${p.authorName}`}>
                     {p.url && <img src={p.url} alt={p.caption ?? `Photo from ${p.authorName}`} loading="lazy" />}

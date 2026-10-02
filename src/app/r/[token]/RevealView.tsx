@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { Ornament } from "@/components/Icon";
 import { Motif } from "@/components/Motif";
 import type { RevealData } from "@/lib/reveal";
 import type { Theme } from "@/themes";
@@ -94,18 +95,18 @@ export function RevealView({
 
       <div className="rv-slide" key={i} aria-live="polite">
         {slide.t === "cover" && (
-          <div className="rv-center">
-            <div style={{ color: "var(--pp-gold)" }}>
-              <Motif motif={motif} size={34} />
+          <div className="rv-center" style={{ width: "min(100%, 440px)" }}>
+            <div className="pp-cover" style={{ width: "100%" }}>
+              <Ornament />
+              <p className="pp-cover-sub" style={{ marginTop: "1.1rem", opacity: 0.92 }}>
+                Your {occasion.toLowerCase()} keepsake
+              </p>
+              <h1 className="pp-cover-name pp-foil">For {first}</h1>
+              <p className="pp-cover-meta" style={{ maxWidth: "24ch", lineHeight: 1.45 }}>
+                {data.names.length > 1 ? `${data.names.length} people` : "The people who love you"} celebrated you. Here&apos;s
+                everything they shared.
+              </p>
             </div>
-            <p className="pp-caps pp-soft" style={{ fontSize: "0.75rem", marginTop: "1rem" }}>
-              Your {occasion.toLowerCase()} keepsake
-            </p>
-            <h1 className="pp-script rv-huge">For {first}</h1>
-            <p className="rv-lead">
-              {data.names.length > 1 ? `${data.names.length} people` : "The people who love you"} celebrated you. Here&apos;s
-              everything they shared.
-            </p>
             <button type="button" className="pp-btn" style={{ marginTop: "1.75rem" }} onClick={next}>
               Begin
             </button>
@@ -114,11 +115,12 @@ export function RevealView({
 
         {slide.t === "title" && (
           <div className="rv-center">
-            <p className="pp-caps pp-soft" style={{ fontSize: "0.75rem" }}>
+            <Ornament />
+            <h2 className="pp-script rv-huge" style={{ marginTop: "1rem" }}>{slide.title}</h2>
+            <p className="pp-page-kicker">
               {slide.kicker}
+              {slide.sub ? `, ${slide.sub}` : ""}
             </p>
-            <h2 className="pp-script rv-huge">{slide.title}</h2>
-            {slide.sub && <p className="pp-caps" style={{ fontSize: "0.75rem", marginTop: "0.5rem" }}>{slide.sub}</p>}
           </div>
         )}
 
@@ -130,7 +132,7 @@ export function RevealView({
             {slide.note.mediaType === "audio" && slide.note.mediaUrl && (
               <div style={{ display: "grid", justifyItems: "center", gap: "0.6rem" }}>
                 <p className="pp-caps pp-soft" style={{ fontSize: "0.7rem" }}>
-                  🎙️ A voice memo
+                  A voice memo
                 </p>
                 <audio src={slide.note.mediaUrl} controls preload="metadata" style={{ width: "100%" }} />
               </div>
@@ -143,7 +145,7 @@ export function RevealView({
         {slide.t === "photos" && (
           <div className="rv-photos" data-count={slide.photos.length}>
             {slide.photos.map((p, k) => (
-              <figure key={p.id} className="rv-polaroid" style={{ transform: `rotate(${[-3, 2, -1.5, 3, -2.5, 1.5][k % 6]}deg)` }}>
+              <figure key={p.id} className="rv-polaroid">
                 <img src={p.url} alt={p.caption ?? `Photo from ${p.author}`} />
                 <figcaption>{p.caption || p.author}</figcaption>
               </figure>
@@ -170,7 +172,7 @@ export function RevealView({
             {g.pool && (
               <div className="rv-card">
                 <p className="pp-caps" style={{ fontSize: "0.68rem" }}>Due date &amp; weight pool</p>
-                {g.pool.closest.length > 0 && <p className="rv-line">🏆 {g.pool.closest.join(", ")}</p>}
+                {g.pool.closest.length > 0 && <p className="rv-line">{g.pool.closest.join(", ")}</p>}
                 {g.pool.date.length > 0 && <p className="pp-soft">Closest birthday: {g.pool.date.join(", ")}</p>}
                 {g.pool.weight.length > 0 && <p className="pp-soft">Closest weight: {g.pool.weight.join(", ")}</p>}
               </div>
@@ -180,7 +182,7 @@ export function RevealView({
                 <p className="pp-caps" style={{ fontSize: "0.68rem" }}>Raffle</p>
                 {g.raffle.map((r) => (
                   <p key={r.prize} className="rv-line">
-                    🎁 {r.name} <span className="pp-soft">· {r.prize}</span>
+                    {r.name} <span className="pp-soft">· {r.prize}</span>
                   </p>
                 ))}
               </div>

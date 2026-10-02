@@ -39,7 +39,7 @@ export default async function KeepsakePage({ params }: Props) {
     <main style={{ paddingTop: "1.5rem", paddingBottom: "3rem", display: "grid", gap: "1.75rem" }}>
       <header>
         <h2 className="pp-script" style={{ fontSize: "2.6rem", color: "var(--pp-accent)" }}>
-          {first}&apos;s keepsake
+          {first}’s keepsake
         </h2>
         <p className="pp-soft" style={{ fontSize: "1rem" }}>
           A step-through story of everything guests shared, for {first} to open on her own time and watch as often as she
@@ -47,7 +47,7 @@ export default async function KeepsakePage({ params }: Props) {
         </p>
       </header>
 
-      <section className="pp-paper" style={{ padding: "1.5rem 1.25rem", borderRadius: 4, display: "grid", gap: "0.8rem" }}>
+      <section className="pp-paper" style={{ padding: "1.5rem 1.25rem", display: "grid", gap: "0.8rem" }}>
         <h3 className="pp-caps" style={{ fontSize: "0.8rem" }}>
           What&apos;s in it so far
         </h3>

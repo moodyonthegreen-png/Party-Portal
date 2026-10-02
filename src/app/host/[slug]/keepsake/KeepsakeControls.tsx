@@ -41,15 +41,15 @@ export function KeepsakeControls({
   };
 
   return (
-    <section className="pp-paper" style={{ padding: "1.5rem 1.25rem", borderRadius: 4, display: "grid", gap: "1rem", opacity: pending ? 0.7 : 1 }}>
+    <section className="pp-paper" style={{ padding: "1.5rem 1.25rem", display: "grid", gap: "1rem", opacity: pending ? 0.7 : 1 }}>
       <h3 className="pp-caps" style={{ fontSize: "0.8rem" }}>
         Send it to {firstName}
       </h3>
 
       {(sentAt || openedAt) && (
         <p className="pp-note" style={{ fontSize: "0.95rem" }}>
-          {sentAt ? `✉️ Sent ${shortDate(sentAt)}` : ""}
-          {openedAt ? `${sentAt ? " · " : ""}💛 ${firstName} opened it ${shortDate(openedAt)}` : sentAt ? " · not opened yet" : ""}
+          {sentAt ? `Sent ${shortDate(sentAt)}` : ""}
+          {openedAt ? `${sentAt ? " · " : ""}${firstName} opened it ${shortDate(openedAt)}` : sentAt ? " · not opened yet" : ""}
         </p>
       )}
 

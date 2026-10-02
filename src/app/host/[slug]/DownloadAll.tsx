@@ -100,7 +100,7 @@ export function DownloadAll({ slug, counts }: { slug: string; counts: { notes: n
   ];
 
   return (
-    <section className="pp-paper" style={{ padding: "1.5rem 1.25rem", borderRadius: 4, display: "grid", gap: "0.9rem" }}>
+    <section className="pp-paper" style={{ padding: "1.5rem 1.25rem", display: "grid", gap: "0.9rem" }}>
       <h2 className="pp-caps" style={{ fontSize: "0.8rem" }}>
         Keep everything
       </h2>

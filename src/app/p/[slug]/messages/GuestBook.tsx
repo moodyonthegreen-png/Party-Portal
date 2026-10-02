@@ -214,16 +214,16 @@ export function GuestBook({
             {attachment.kind === "none" && (
               <div style={{ display: "flex", gap: "1rem", marginTop: 10, fontSize: "0.85rem", flexWrap: "wrap" }}>
                 <button type="button" className="pp-link" onClick={() => setAttachment({ kind: "voice", recording: null })}>
-                  🎙 Voice memo
+                  Voice memo
                 </button>
                 <button type="button" className="pp-link" onClick={() => videoInput.current?.click()}>
-                  🎥 Video
+                  Video
                 </button>
               </div>
             )}
             {attachment.kind !== "none" && (
               <p className="pp-soft" style={{ marginTop: 10, fontSize: "0.85rem" }}>
-                {attachment.kind === "video" ? "🎥 Video attached below" : "🎙 Voice memo below"}
+                {attachment.kind === "video" ? "Video attached below" : "Voice memo below"}
               </p>
             )}
             {num}

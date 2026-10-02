@@ -30,22 +30,17 @@ export default async function DueDatePoolPage({ params }: Props) {
 
   return (
     <main className="pp-wrap">
-      <Link href={`/p/${party.slug}/games`} className="pp-caps pp-link" style={{ fontSize: "0.8rem" }}>
+      <Link href={`/p/${party.slug}/games`} className="pp-back">
         ← Back to games
       </Link>
-      <header style={{ textAlign: "center", marginTop: "1.75rem" }}>
-        <p className="pp-caps pp-soft" style={{ fontSize: "0.75rem" }}>
-          {pool.actual ? "Baby is here!" : "Closest guess wins"}
-        </p>
-        <h1 className="pp-script" style={{ fontSize: "3.2rem", color: "var(--pp-accent)", marginTop: "0.4rem" }}>
-          Due date &amp; weight pool
-        </h1>
+      <header className="pp-head">
+        <h1 className="pp-page-title">Due date &amp; weight pool</h1>
+        <p className="pp-page-kicker">{pool.actual ? "Baby is here!" : "Closest guess wins"}</p>
       </header>
 
       {pool.actual && results ? (
         <>
-          <section className="pp-paper" style={{ marginTop: "1.75rem", padding: "1.5rem 1.2rem", textAlign: "center", transform: "rotate(-0.8deg)" }}>
-            <div className="pp-tape" style={{ left: "50%", top: "-12px", transform: "translateX(-50%) rotate(-2deg)" }} />
+          <section className="pp-paper" style={{ marginTop: "1.75rem", padding: "1.5rem 1.2rem", textAlign: "center" }}>
             <p className="pp-caps pp-soft" style={{ fontSize: "0.72rem" }}>
               Welcome to the world
             </p>
@@ -57,9 +52,9 @@ export default async function DueDatePoolPage({ params }: Props) {
               {pool.actual.lengthIn != null ? ` · ${pool.actual.lengthIn} in` : ""}
             </p>
             <div style={{ display: "grid", gap: "0.3rem", marginTop: "1rem", fontSize: "1rem" }}>
-              {results.closestDate.length > 0 && <p>📅 Closest birthday: <strong>{results.closestDate.join(", ")}</strong></p>}
-              {results.closestWeight.length > 0 && <p>⚖️ Closest weight: <strong>{results.closestWeight.join(", ")}</strong></p>}
-              {results.closestLength.length > 0 && <p>📏 Closest length: <strong>{results.closestLength.join(", ")}</strong></p>}
+              {results.closestDate.length > 0 && <p>Closest birthday: <strong>{results.closestDate.join(", ")}</strong></p>}
+              {results.closestWeight.length > 0 && <p>Closest weight: <strong>{results.closestWeight.join(", ")}</strong></p>}
+              {results.closestLength.length > 0 && <p>Closest length: <strong>{results.closestLength.join(", ")}</strong></p>}
             </div>
           </section>
 

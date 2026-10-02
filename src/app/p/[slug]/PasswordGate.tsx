@@ -11,12 +11,11 @@ export function PasswordGate({ slug, guestOfHonorName }: { slug: string; guestOf
 
   return (
     <main className="pp-wrap" style={{ minHeight: "100dvh", display: "grid", alignContent: "center" }}>
-      <div className="pp-paper" style={{ padding: "2.5rem 1.5rem", textAlign: "center", transform: "rotate(-1deg)" }}>
-        <div className="pp-tape" style={{ left: "50%", top: "-12px", transform: "translateX(-50%) rotate(-3deg)" }} />
+      <div className="pp-paper" style={{ padding: "2.5rem 1.5rem", textAlign: "center" }}>
         <p className="pp-caps pp-soft" style={{ fontSize: "0.78rem" }}>
           You&apos;re invited to celebrate
         </p>
-        <h1 className="pp-script" style={{ fontSize: "3.8rem", color: "var(--pp-accent)", margin: "0.6rem 0" }}>
+        <h1 className="pp-page-title">
           {guestOfHonorName}
         </h1>
         <p className="pp-soft">This party has a password. You&apos;ll find it on your invitation.</p>

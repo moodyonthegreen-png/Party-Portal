@@ -60,9 +60,8 @@ export function PoolForm({ slug, initial }: { slug: string; initial: Initial | n
     <form
       onSubmit={submit}
       className="pp-paper"
-      style={{ marginTop: "1.75rem", padding: "1.5rem 1.2rem", display: "grid", gap: "1rem", transform: "rotate(-0.5deg)" }}
+      style={{ marginTop: "1.75rem", padding: "1.5rem 1.2rem", display: "grid", gap: "1rem" }}
     >
-      <div className="pp-tape" style={{ left: "50%", top: "-12px", transform: "translateX(-50%) rotate(2deg)" }} />
       <div>
         <label htmlFor="pool-name" className="pp-caps" style={label}>
           Your name

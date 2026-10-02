@@ -14,7 +14,7 @@ export default async function HostPhotosPage({ params }: Props) {
 
   return (
     <main style={{ paddingTop: "1.5rem" }}>
-      <section className="pp-paper" style={{ padding: "1.5rem 1.25rem", borderRadius: 4 }}>
+      <section className="pp-paper" style={{ padding: "1.5rem 1.25rem" }}>
         <h2 className="pp-caps" style={{ fontSize: "0.8rem" }}>
           Photo album
         </h2>

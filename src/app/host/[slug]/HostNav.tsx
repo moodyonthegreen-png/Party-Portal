@@ -18,36 +18,17 @@ export function HostNav({ slug }: { slug: string }) {
   ];
 
   return (
-    <nav style={{ display: "flex", gap: "1.25rem", alignItems: "center", marginTop: "0.75rem", flexWrap: "wrap" }}>
-      {items.map((item) => {
-        const active = path === item.href;
-        return (
-          <Link
-            key={item.href}
-            href={item.href}
-            className="pp-caps"
-            aria-current={active ? "page" : undefined}
-            style={{
-              fontSize: "0.78rem",
-              textDecoration: "none",
-              color: active ? "var(--pp-accent)" : "var(--pp-ink-soft)",
-              borderBottom: active ? "2px solid var(--pp-gold)" : "2px solid transparent",
-              paddingBottom: "0.2rem",
-            }}
-          >
-            {item.label}
-          </Link>
-        );
-      })}
-      <a
-        href={`/p/${slug}`}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="pp-caps"
-        style={{ fontSize: "0.78rem", marginLeft: "auto", color: "var(--pp-ink-soft)" }}
-      >
-        View guest page ↗
-      </a>
+    <nav className="hd-nav" aria-label="Dashboard">
+      <div className="pp-wrap pp-host-body hd-tabs">
+        {items.map((item) => {
+          const active = item.href === base ? path === base : path.startsWith(item.href);
+          return (
+            <Link key={item.href} href={item.href} className="hd-tab" aria-current={active ? "page" : undefined}>
+              {item.label}
+            </Link>
+          );
+        })}
+      </div>
     </nav>
   );
 }

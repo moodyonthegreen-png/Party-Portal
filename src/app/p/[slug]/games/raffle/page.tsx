@@ -28,16 +28,12 @@ export default async function RafflePage({ params }: Props) {
 
   return (
     <main className="pp-wrap">
-      <Link href={`${base}/games`} className="pp-caps pp-link" style={{ fontSize: "0.8rem" }}>
+      <Link href={`${base}/games`} className="pp-back">
         ← Back to games
       </Link>
-      <header style={{ textAlign: "center", marginTop: "1.75rem" }}>
-        <p className="pp-caps pp-soft" style={{ fontSize: "0.75rem" }}>
-          {anyDrawn ? "And the winner is…" : "A little thank-you for joining in"}
-        </p>
-        <h1 className="pp-script" style={{ fontSize: "3.4rem", color: "var(--pp-accent)", marginTop: "0.4rem" }}>
-          Raffle
-        </h1>
+      <header className="pp-head">
+        <h1 className="pp-page-title">Raffle</h1>
+        <p className="pp-page-kicker">{anyDrawn ? "And the winner is…" : "A little thank-you for joining in"}</p>
       </header>
 
       <section style={{ display: "grid", gap: "1.25rem", marginTop: "1.75rem" }}>
@@ -47,14 +43,13 @@ export default async function RafflePage({ params }: Props) {
             <div
               key={i}
               className="pp-paper pp-object"
-              style={{ padding: "1.4rem 1.2rem", textAlign: "center", transform: `rotate(${i % 2 ? 0.7 : -0.7}deg)` }}
+              style={{ padding: "1.4rem 1.2rem", textAlign: "center" }}
             >
-              <div className="pp-tape" style={{ left: "50%", top: "-12px", transform: "translateX(-50%) rotate(-2deg)" }} />
               <p className="pp-caps pp-soft" style={{ fontSize: "0.7rem" }}>
                 {raffle.prizes.length > 1 ? `Prize ${i + 1}` : "The prize"}
               </p>
               <p className="pp-display" style={{ fontSize: "1.45rem", fontWeight: 600, marginTop: "0.4rem" }}>
-                🎁 {prize}
+                {prize}
               </p>
               {w ? (
                 <>
@@ -62,7 +57,7 @@ export default async function RafflePage({ params }: Props) {
                     Winner
                   </p>
                   <p className="pp-script" style={{ fontSize: "2.6rem", color: "var(--pp-accent)", lineHeight: 1.1 }}>
-                    {w.name} 🎉
+                    {w.name}
                   </p>
                 </>
               ) : (
@@ -87,7 +82,7 @@ export default async function RafflePage({ params }: Props) {
             {active.map((w) => (
               <li key={w.key}>
                 <Link href={w.href} className="pp-link" style={{ fontSize: "1.05rem" }}>
-                  ✦ {RULE_LABELS[w.key].how}
+                  {RULE_LABELS[w.key].how}
                 </Link>
               </li>
             ))}

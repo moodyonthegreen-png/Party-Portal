@@ -41,7 +41,7 @@ export default async function DesignPage({ params }: Props) {
   if (!party) notFound();
 
   const back = (
-    <Link href={`/p/${party.slug}`} className="pp-caps pp-link" style={{ fontSize: "0.8rem" }}>
+    <Link href={`/p/${party.slug}`} className="pp-back">
       ← Back to the party
     </Link>
   );
@@ -54,7 +54,7 @@ export default async function DesignPage({ params }: Props) {
       <main className="pp-wrap">
         {back}
         <div className="pp-paper" style={{ marginTop: "2rem", padding: "2.5rem 1.5rem", textAlign: "center" }}>
-          <h1 className="pp-script" style={{ fontSize: "3.2rem", color: "var(--pp-accent)" }}>
+          <h1 className="pp-page-title">
             Designs are closed
           </h1>
           <p style={{ marginTop: "1rem", lineHeight: 1.55 }}>
@@ -74,12 +74,11 @@ export default async function DesignPage({ params }: Props) {
     <main className="pp-wrap">
       {back}
       <div className="pp-paper" style={{ marginTop: "2rem", padding: "2.25rem 1.25rem 1.75rem" }}>
-        <div className="pp-tape" style={{ left: "50%", top: "-12px", transform: "translateX(-50%) rotate(-2deg)" }} />
         <div style={{ textAlign: "center" }}>
           <p className="pp-caps pp-soft" style={{ fontSize: "0.75rem" }}>
             A gift from all of us
           </p>
-          <h1 className="pp-script" style={{ fontSize: "3.3rem", color: "var(--pp-accent)", marginTop: "0.5rem" }}>
+          <h1 className="pp-page-title">
             Add your design
           </h1>
           <p className="pp-soft" style={{ marginTop: "0.6rem", lineHeight: 1.5 }}>
@@ -88,7 +87,7 @@ export default async function DesignPage({ params }: Props) {
           </p>
           {party.sections.games && party.games.raffle.on && party.games.raffle.rules.design && party.games.raffle.prizes.length > 0 && (
             <p className="pp-note" style={{ marginTop: "0.9rem", fontSize: "0.95rem" }}>
-              🎟️ Adding a design enters you in the raffle to win {party.games.raffle.prizes.join(" or ")}!
+              Adding a design enters you in the raffle to win {party.games.raffle.prizes.join(" or ")}!
             </p>
           )}
         </div>

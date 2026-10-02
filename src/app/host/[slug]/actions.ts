@@ -1089,7 +1089,7 @@ export async function sendRevealNow(slug: string, email: string): Promise<Action
     return { error: e instanceof EmailError || e instanceof Error ? e.message : "The email didn't send. Please try again." };
   }
   refresh(party.slug);
-  return { ok: true, message: `Sent to ${to}! 💛` };
+  return { ok: true, message: `Sent to ${to}.` };
 }
 
 // ---------------------------------------------------------------------------

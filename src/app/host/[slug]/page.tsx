@@ -71,7 +71,7 @@ export default async function HostOverview({ params }: Props) {
   return (
     <main style={{ paddingTop: "1.5rem", display: "grid", gap: "1.75rem" }}>
       {/* Share */}
-      <section className="pp-paper" style={{ padding: "1.5rem 1.25rem", borderRadius: 4 }}>
+      <section className="pp-paper" style={{ padding: "1.5rem 1.25rem" }}>
         <h2 className="pp-caps" style={{ fontSize: "0.8rem" }}>
           Share with your guests
         </h2>
@@ -99,7 +99,7 @@ export default async function HostOverview({ params }: Props) {
       </section>
 
       {/* Progress */}
-      <section className="pp-paper" style={{ padding: "1.5rem 1.25rem", borderRadius: 4 }}>
+      <section className="pp-paper" style={{ padding: "1.5rem 1.25rem" }}>
         <h2 className="pp-caps" style={{ fontSize: "0.8rem" }}>
           Designs for the group gift
         </h2>
@@ -149,7 +149,7 @@ export default async function HostOverview({ params }: Props) {
       </section>
 
       {/* Guests */}
-      <section className="pp-paper" style={{ padding: "1.5rem 1.25rem", borderRadius: 4 }}>
+      <section className="pp-paper" style={{ padding: "1.5rem 1.25rem" }}>
         <h2 className="pp-caps" style={{ fontSize: "0.8rem" }}>
           Guest list
         </h2>

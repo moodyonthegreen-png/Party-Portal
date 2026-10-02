@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Ornament } from "@/components/Icon";
 import { Motif } from "@/components/Motif";
 import type { Theme } from "@/themes";
 import type { WrapUp } from "@/lib/wrapup";
@@ -70,14 +71,12 @@ export function ThankCardView({
           >
             <div className="tc-face tc-front">
               <div className="tc-front-panel">
-                <div style={{ color: "var(--pp-gold)", marginBottom: "0.6rem" }}>
-                  <Motif motif={motif} size={26} />
-                </div>
-                <p className="pp-script" style={{ fontSize: "clamp(3rem, 14vw, 4.2rem)", color: "var(--pp-accent)", lineHeight: 0.95 }}>
+                <Ornament style={{ color: "#e2c67a", margin: "0 auto" }} />
+                <p className="pp-script pp-foil" style={{ fontSize: "clamp(3.4rem, 15vw, 4.6rem)", lineHeight: 0.92, margin: "0.9rem 0 1rem" }}>
                   Thank you
                 </p>
-                <p className="pp-caps pp-soft" style={{ fontSize: "0.66rem", marginTop: "1rem" }}>
-                  For {recipientName}
+                <p className="pp-serif-italic" style={{ fontSize: "1.25rem", opacity: 0.92 }}>
+                  for {recipientName}
                 </p>
               </div>
             </div>
@@ -136,7 +135,7 @@ function WrapUpView({ wrapUp: w, hasDesign, guestOfHonorName }: { wrapUp: WrapUp
   for (const prize of w.rafflePrizes) {
     tiles.push(
       <div className="tc-tile tc-win" key={`win-${prize}`}>
-        <p className="pp-caps" style={{ fontSize: "0.62rem" }}>You won the raffle! 🎉</p>
+        <p className="pp-caps" style={{ fontSize: "0.62rem" }}>You won the raffle</p>
         <p className="tc-tile-big">{prize}</p>
       </div>,
     );
@@ -156,7 +155,7 @@ function WrapUpView({ wrapUp: w, hasDesign, guestOfHonorName }: { wrapUp: WrapUp
         {n.kind === "text" && n.excerpt ? (
           <p className="tc-quote">&ldquo;{n.excerpt}&rdquo;</p>
         ) : (
-          <p className="tc-tile-big">{n.kind === "video" ? "🎥 Your video message" : n.kind === "audio" ? "🎙️ Your voice memo" : "Your note"}</p>
+          <p className="tc-tile-big">{n.kind === "video" ? "Your video message" : n.kind === "audio" ? "Your voice memo" : "Your note"}</p>
         )}
         {n.kind !== "text" && n.excerpt && <p className="tc-quote" style={{ fontSize: "1.1rem" }}>&ldquo;{n.excerpt}&rdquo;</p>}
       </div>,
@@ -193,7 +192,7 @@ function WrapUpView({ wrapUp: w, hasDesign, guestOfHonorName }: { wrapUp: WrapUp
           {w.babyPhoto.correct} of {w.babyPhoto.total} right
         </p>
         <p className="pp-soft" style={{ fontSize: "0.9rem" }}>
-          {w.babyPhoto.place === 1 ? "🏆 First place!" : `${ordinal(w.babyPhoto.place)} place`} of {w.babyPhoto.players}
+          {w.babyPhoto.place === 1 ? "First place" : `${ordinal(w.babyPhoto.place)} place`} of {w.babyPhoto.players}
         </p>
       </div>,
     );
@@ -202,7 +201,7 @@ function WrapUpView({ wrapUp: w, hasDesign, guestOfHonorName }: { wrapUp: WrapUp
     tiles.push(
       <div className="tc-tile" key="pool">
         <p className="pp-caps pp-soft" style={{ fontSize: "0.62rem" }}>Due date &amp; weight pool</p>
-        <p className="tc-tile-big">{w.pool.place === 1 ? "🏆 Closest guess!" : `${ordinal(w.pool.place)} closest`}</p>
+        <p className="tc-tile-big">{w.pool.place === 1 ? "Closest guess" : `${ordinal(w.pool.place)} closest`}</p>
         <p className="pp-soft" style={{ fontSize: "0.9rem" }}>out of {plural(w.pool.players, "guess", "guesses")}</p>
       </div>,
     );

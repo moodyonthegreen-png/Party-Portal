@@ -15,7 +15,7 @@ import {
   type ActionState,
 } from "../actions";
 
-const card: React.CSSProperties = { padding: "1.5rem 1.25rem", borderRadius: 4, display: "grid", gap: "1rem" };
+const card: React.CSSProperties = { padding: "1.5rem 1.25rem", display: "grid", gap: "1rem" };
 const small: React.CSSProperties = { fontSize: "0.8rem", padding: "0.65rem 1rem" };
 const label: React.CSSProperties = { fontSize: "0.72rem", display: "block", marginBottom: "0.35rem" };
 

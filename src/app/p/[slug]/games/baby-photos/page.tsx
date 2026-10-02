@@ -34,16 +34,12 @@ export default async function BabyPhotosPage({ params }: Props) {
 
   return (
     <main className="pp-wrap" style={{ maxWidth: "54rem" }}>
-      <Link href={`/p/${party.slug}/games`} className="pp-caps pp-link" style={{ fontSize: "0.8rem" }}>
+      <Link href={`/p/${party.slug}/games`} className="pp-back">
         ← Back to games
       </Link>
-      <header style={{ textAlign: "center", marginTop: "1.75rem" }}>
-        <p className="pp-caps pp-soft" style={{ fontSize: "0.75rem" }}>
-          {revealed ? "The answers are in" : "Who's who?"}
-        </p>
-        <h1 className="pp-script" style={{ fontSize: "3.2rem", color: "var(--pp-accent)", marginTop: "0.4rem" }}>
-          Guess the baby photo
-        </h1>
+      <header className="pp-head">
+        <h1 className="pp-page-title">Guess the baby photo</h1>
+        <p className="pp-page-kicker">{revealed ? "The answers are in" : "Who's who?"}</p>
         {!revealed && (
           <p className="pp-soft" style={{ marginTop: "0.5rem" }}>
             Match each baby photo to the grown-up it belongs to. You can change your guesses until the host reveals the answers.

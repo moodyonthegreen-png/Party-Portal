@@ -8,60 +8,68 @@
  */
 
 /* ------------------------------------------------------------------ */
-/* Theme: Classic baby shower (sage and buttercup)                      */
+/* Theme: Classic (sage linen and butter, gold foil)                    */
 /* ------------------------------------------------------------------ */
 [data-theme="classic"] {
-  --pp-bg: #f5f2e6;
-  --pp-ink: #3b4836;
-  --pp-ink-soft: #66735f;
-  --pp-paper: #fffdf6;
-  --pp-paper-edge: #ece6d2;
+  --pp-bg: #f1f3ec;
+  --pp-ink: #253026;
+  --pp-ink-soft: #5d695b;
+  --pp-paper: #fffefb;
+  --pp-paper-edge: #e2e6da;
   --pp-kraft: #e8dcc0;
   --pp-kraft-dark: #cdbf9d;
-  --pp-gold: #e6be4f;
-  --pp-gold-light: #f7e5a6;
-  --pp-gold-dark: #b38c25;
-  --pp-accent: #5d7a53;
-  --pp-accent-soft: #e2ebdb;
-  --pp-leather: #b0603a;
+  --pp-gold: #b8923a;
+  --pp-gold-light: #f3e5ae;
+  --pp-gold-dark: #8a6a22;
+  --pp-accent: #56704f;
+  --pp-accent-soft: #e4ebdd;
+  --pp-leather: #a4553a;
   --pp-map: #f3dc8e;
   --pp-tape-a: #e3b93f;
   --pp-tape-b: #fffaf0;
   --pp-swatch: #e4ecdc;
-  --pp-script: var(--font-allura), "Brush Script MT", cursive;
-  --pp-display: var(--font-cormorant), "Cormorant Garamond", Georgia, serif;
-  --pp-body: var(--font-ebgaramond), "EB Garamond", Georgia, serif;
-  /* Scattered little stars and dots */
-  --pp-bg-art: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='360' height='360' viewBox='0 0 360 360'%3E%3Cpath transform='translate(40 52) rotate(10) scale(1.6)' d='M0 -7 L2 -2.2 L7 -2.2 L3 1 L4.5 6 L0 3 L-4.5 6 L-3 1 L-7 -2.2 L-2 -2.2 Z' fill='%23e3b93f' fill-opacity='0.55'/%3E%3Cpath transform='translate(250 30) rotate(-12) scale(1.1)' d='M0 -7 L2 -2.2 L7 -2.2 L3 1 L4.5 6 L0 3 L-4.5 6 L-3 1 L-7 -2.2 L-2 -2.2 Z' fill='%23e3b93f' fill-opacity='0.45'/%3E%3Cpath transform='translate(170 170) rotate(20) scale(1.9)' d='M0 -7 L2 -2.2 L7 -2.2 L3 1 L4.5 6 L0 3 L-4.5 6 L-3 1 L-7 -2.2 L-2 -2.2 Z' fill='%23e3b93f' fill-opacity='0.5'/%3E%3Cpath transform='translate(320 210) rotate(5) scale(1.3)' d='M0 -7 L2 -2.2 L7 -2.2 L3 1 L4.5 6 L0 3 L-4.5 6 L-3 1 L-7 -2.2 L-2 -2.2 Z' fill='%23e3b93f' fill-opacity='0.5'/%3E%3Cpath transform='translate(70 290) rotate(-20) scale(1.2)' d='M0 -7 L2 -2.2 L7 -2.2 L3 1 L4.5 6 L0 3 L-4.5 6 L-3 1 L-7 -2.2 L-2 -2.2 Z' fill='%23e3b93f' fill-opacity='0.45'/%3E%3Cpath transform='translate(260 320) rotate(15) scale(1.7)' d='M0 -7 L2 -2.2 L7 -2.2 L3 1 L4.5 6 L0 3 L-4.5 6 L-3 1 L-7 -2.2 L-2 -2.2 Z' fill='%23e3b93f' fill-opacity='0.5'/%3E%3Ccircle cx='130' cy='60' r='3' fill='%237f9a74' fill-opacity='0.35'/%3E%3Ccircle cx='300' cy='110' r='2.5' fill='%237f9a74' fill-opacity='0.35'/%3E%3Ccircle cx='30' cy='170' r='2.5' fill='%237f9a74' fill-opacity='0.35'/%3E%3Ccircle cx='220' cy='250' r='3' fill='%237f9a74' fill-opacity='0.35'/%3E%3Ccircle cx='120' cy='330' r='2.5' fill='%237f9a74' fill-opacity='0.35'/%3E%3Ccircle cx='340' cy='340' r='2' fill='%237f9a74' fill-opacity='0.3'/%3E%3Ccircle cx='90' cy='120' r='1.8' fill='%23e3b93f' fill-opacity='0.5'/%3E%3Ccircle cx='200' cy='90' r='1.8' fill='%237f9a74' fill-opacity='0.3'/%3E%3C/svg%3E");
-  --pp-bg-size: 360px 360px;
+  /* The book cover: sage linen */
+  --pp-cover: #9aae91;
+  --pp-cover-deep: #7d9474;
+  --pp-cover-ink: #fbfaf3;
 }
 
 /* ------------------------------------------------------------------ */
-/* Theme: Explorer (travel)                                            */
+/* Theme: Explorer (navy linen, gold foil)                              */
 /* ------------------------------------------------------------------ */
 [data-theme="explorer"] {
-  --pp-bg: #e9e3d6;
-  --pp-ink: #2c3458;
-  --pp-ink-soft: #5b6283;
-  --pp-paper: #faf6ec;
-  --pp-paper-edge: #e9e1cf;
+  --pp-bg: #eef0f4;
+  --pp-ink: #222a45;
+  --pp-ink-soft: #586079;
+  --pp-paper: #fffefb;
+  --pp-paper-edge: #dfe2ea;
   --pp-kraft: #c6a47c;
   --pp-kraft-dark: #a9865d;
-  --pp-gold: #c9a14a;
-  --pp-gold-light: #ecd28c;
-  --pp-gold-dark: #8f6a22;
-  --pp-accent: #39467a;
-  --pp-accent-soft: #dfe4f0;
-  --pp-leather: #a9663a;
+  --pp-gold: #b8923a;
+  --pp-gold-light: #efe0a9;
+  --pp-gold-dark: #8a6a22;
+  --pp-accent: #3a4775;
+  --pp-accent-soft: #e2e6f1;
+  --pp-leather: #a9553a;
   --pp-map: #8ea2c2;
   --pp-tape-a: #2f3d74;
   --pp-tape-b: #f4f1ea;
   --pp-swatch: #dbe4ef;
-  --pp-script: var(--font-allura), "Brush Script MT", cursive;
-  --pp-display: var(--font-cormorant), "Cormorant Garamond", Georgia, serif;
-  --pp-body: var(--font-ebgaramond), "EB Garamond", Georgia, serif;
-  /* Faint map: latitude curves, dashed flight paths, a compass rose */
-  --pp-bg-art: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='640' height='640' viewBox='0 0 640 640'%3E%3Cg fill='none' stroke='%238ea2c2' stroke-opacity='.38' stroke-width='1.2'%3E%3Cpath d='M-20 120 C 160 80 300 170 660 110'/%3E%3Cpath d='M-20 300 C 200 250 380 360 660 290'/%3E%3Cpath d='M-20 480 C 180 440 420 540 660 470'/%3E%3Cpath d='M120 -20 C 90 200 170 420 110 660'/%3E%3Cpath d='M420 -20 C 470 220 380 430 450 660'/%3E%3C/g%3E%3Cg fill='none' stroke='%232c3458' stroke-opacity='.22' stroke-width='1.6' stroke-dasharray='6 7'%3E%3Cpath d='M40 560 C 180 380 300 420 380 250 S 560 120 610 70'/%3E%3C/g%3E%3Cg transform='translate(520 520)' stroke='%238ea2c2' stroke-opacity='.45' fill='none'%3E%3Ccircle r='46'/%3E%3Ccircle r='38' stroke-dasharray='2 4'/%3E%3Cpath d='M0 -62 L8 0 L0 62 L-8 0 Z M-62 0 L0 -8 L62 0 L0 8 Z' fill='%238ea2c2' fill-opacity='.18'/%3E%3C/g%3E%3Cg transform='translate(608 66) rotate(-35)' fill='%232c3458' fill-opacity='.22'%3E%3Cpath d='M0 -14 L3 -3 L16 3 L16 6 L3 4 L2 12 L6 15 L6 17 L0 15 L-6 17 L-6 15 L-2 12 L-3 4 L-16 6 L-16 3 L-3 -3 Z'/%3E%3C/g%3E%3C/svg%3E");
+  --pp-cover: #34406b;
+  --pp-cover-deep: #273157;
+  --pp-cover-ink: #f6f3ea;
+}
+
+/* Shared type: one serif for names and titles, one sans for reading and tapping */
+[data-theme] {
+  --pp-serif: var(--font-instrument-serif), "Instrument Serif", Georgia, serif;
+  --pp-sans: var(--font-instrument-sans), "Instrument Sans", system-ui, sans-serif;
+  --pp-script: var(--pp-serif);
+  --pp-display: var(--pp-serif);
+  --pp-body: var(--pp-sans);
+  --pp-radius: 14px;
+  --pp-shadow: 0 1px 2px rgb(37 48 38 / 0.06), 0 12px 32px -18px rgb(37 48 38 / 0.28);
+  --pp-foil: linear-gradient(100deg, #8a6a22 0%, #d9bb6c 28%, #f4e3a6 42%, #b8923a 58%, #e2c67a 78%, #9c7a2b 100%);
 }
 
 /* ------------------------------------------------------------------ */
@@ -70,67 +78,61 @@
 .pp-page {
   min-height: 100dvh;
   color: var(--pp-ink);
-  font-family: var(--pp-body);
-  font-size: 1.125rem;
+  font-family: var(--pp-sans);
+  font-size: 1.0625rem;
+  line-height: 1.55;
   background-color: var(--pp-bg);
-  background-image:
-    var(--pp-bg-art),
-    repeating-linear-gradient(0deg, rgb(255 255 255 / 0.18) 0 1px, transparent 1px 3px),
-    repeating-linear-gradient(90deg, rgb(120 100 70 / 0.06) 0 1px, transparent 1px 3px);
-  background-size: var(--pp-bg-size, 640px 640px), auto, auto;
   overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
 }
 
 .pp-wrap {
-  max-width: 34rem;
+  max-width: 36rem;
   margin: 0 auto;
-  padding: 1.25rem 1.25rem 4rem;
+  padding: 1.25rem 1.25rem 5rem;
 }
 
-.pp-script {
-  font-family: var(--pp-script);
-  font-weight: 400;
-  line-height: 1;
-}
-.pp-caps {
-  font-family: var(--pp-display);
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
-  font-weight: 500;
-}
+/* Titles and names */
+.pp-script,
 .pp-display {
-  font-family: var(--pp-display);
+  font-family: var(--pp-serif);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 1.02;
+}
+.pp-script {
+  color: inherit;
+}
+/* Small labels and section headings: sentence case, never shouted */
+.pp-caps {
+  font-family: var(--pp-sans);
+  font-weight: 600;
+  font-size: 0.875rem !important;
+  letter-spacing: 0.005em;
+  text-transform: none;
+  line-height: 1.35;
 }
 .pp-soft {
   color: var(--pp-ink-soft);
 }
+.pp-serif-italic {
+  font-family: var(--pp-serif);
+  font-style: italic;
+}
 
 /* ------------------------------------------------------------------ */
-/* Paper, tape, stamps                                                 */
+/* Paper                                                               */
 /* ------------------------------------------------------------------ */
 .pp-paper {
   position: relative;
-  background:
-    radial-gradient(120% 90% at 30% 20%, rgb(255 255 255 / 0.65), transparent 60%),
-    var(--pp-paper);
+  background: var(--pp-paper);
   border: 1px solid var(--pp-paper-edge);
-  box-shadow:
-    0 1px 1px rgb(60 45 20 / 0.08),
-    0 10px 24px -10px rgb(60 45 20 / 0.35);
+  border-radius: var(--pp-radius);
+  box-shadow: var(--pp-shadow);
 }
-
+/* Retired scrapbook decoration */
 .pp-tape {
-  position: absolute;
-  width: 6.5rem;
-  height: 1.6rem;
-  opacity: 0.92;
-  background-color: var(--pp-tape-b);
-  background-image:
-    linear-gradient(90deg, color-mix(in srgb, var(--pp-tape-a) 55%, transparent) 50%, transparent 50%),
-    linear-gradient(0deg, color-mix(in srgb, var(--pp-tape-a) 55%, transparent) 50%, transparent 50%);
-  background-size: 10px 10px;
-  box-shadow: 0 1px 2px rgb(0 0 0 / 0.15);
-  clip-path: polygon(3% 0, 97% 4%, 100% 50%, 97% 96%, 3% 100%, 0 50%);
+  display: none;
 }
 
 .pp-stamp {
@@ -138,7 +140,6 @@
   position: relative;
   display: grid;
   padding: var(--perf);
-  /* perforated edge: paper-coloured dots with holes, the inner panel covers the middle */
   background: radial-gradient(circle, transparent calc(var(--perf) * 0.5), var(--pp-paper) calc(var(--perf) * 0.55))
     calc(var(--perf) * -1) calc(var(--perf) * -1) / calc(var(--perf) * 2) calc(var(--perf) * 2);
   filter: drop-shadow(0 2px 3px rgb(0 0 0 / 0.2));
@@ -150,8 +151,268 @@
   place-items: center;
   background: var(--pp-accent);
   color: var(--pp-paper);
-  /* paper border inside the perforations */
   box-shadow: 0 0 0 calc(var(--perf) * 0.8) var(--pp-paper);
+}
+
+/* ------------------------------------------------------------------ */
+/* The book cover (guest home)                                         */
+/* ------------------------------------------------------------------ */
+.pp-cover {
+  position: relative;
+  border-radius: 6px 14px 14px 6px;
+  padding: 3.25rem 1.75rem 2.75rem;
+  text-align: center;
+  color: var(--pp-cover-ink);
+  background-color: var(--pp-cover);
+  /* woven cloth */
+  background-image:
+    repeating-linear-gradient(0deg, rgb(255 255 255 / 0.05) 0 1px, transparent 1px 3px),
+    repeating-linear-gradient(90deg, rgb(0 0 0 / 0.05) 0 1px, transparent 1px 3px),
+    radial-gradient(120% 90% at 30% 0%, rgb(255 255 255 / 0.18), transparent 60%);
+  box-shadow:
+    inset 10px 0 14px -10px rgb(0 0 0 / 0.35),
+    inset 0 0 0 1px rgb(255 255 255 / 0.12),
+    0 2px 2px rgb(37 48 38 / 0.12),
+    0 26px 46px -24px rgb(37 48 38 / 0.55);
+}
+/* debossed frame */
+.pp-cover::before {
+  content: "";
+  position: absolute;
+  inset: 14px 14px 14px 22px;
+  border-radius: 4px;
+  box-shadow: inset 0 1px 1px rgb(0 0 0 / 0.18), inset 0 -1px 0 rgb(255 255 255 / 0.16), 0 1px 0 rgb(255 255 255 / 0.12);
+  pointer-events: none;
+}
+/* the spine */
+.pp-cover::after {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 12px;
+  border-radius: 6px 0 0 6px;
+  background: linear-gradient(90deg, var(--pp-cover-deep), transparent);
+  opacity: 0.8;
+}
+.pp-foil {
+  background: var(--pp-foil);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 1px 0 rgb(0 0 0 / 0.18));
+}
+.pp-cover {
+  min-height: min(118vw, 520px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.pp-cover-name {
+  font-family: var(--pp-serif);
+  font-size: clamp(3.8rem, 19vw, 6.2rem);
+  line-height: 0.9;
+  letter-spacing: -0.02em;
+  margin: 0.6rem auto 0.9rem;
+  max-width: 8ch;
+  text-wrap: balance;
+}
+.pp-cover-sub {
+  font-family: var(--pp-serif);
+  font-style: italic;
+  font-size: 1.35rem;
+  line-height: 1.2;
+}
+.pp-cover-meta {
+  margin-top: 1.4rem;
+  font-size: 0.95rem;
+  color: rgb(255 255 255 / 0.85);
+}
+.pp-ornament {
+  display: inline-block;
+  width: 64px;
+  height: 14px;
+  color: var(--pp-gold);
+}
+.pp-cover .pp-ornament {
+  color: #e2c67a;
+}
+
+/* Two-page spread on wide screens: cover on the left, contents on the right */
+@media (min-width: 960px) {
+  .pp-home {
+    max-width: 1060px;
+    display: grid;
+    grid-template-columns: minmax(0, 420px) minmax(0, 1fr);
+    gap: 3.5rem;
+    align-items: start;
+    padding-top: 3rem;
+  }
+  .pp-home-cover {
+    position: sticky;
+    top: 3rem;
+  }
+  .pp-home .pp-cover {
+    min-height: 560px;
+  }
+  .pp-home .pp-letter {
+    margin-top: 0;
+  }
+}
+
+/* Welcome letter under the cover */
+.pp-letter {
+  margin-top: 1.25rem;
+  padding: 1.75rem 1.5rem 1.5rem;
+}
+.pp-letter p {
+  font-family: var(--pp-serif);
+  font-size: 1.4rem;
+  line-height: 1.38;
+  white-space: pre-line;
+}
+
+/* Contents: what to do at the party */
+.pp-contents {
+  display: grid;
+  gap: 0.9rem;
+  margin-top: 2.5rem;
+}
+.pp-contents-title {
+  font-family: var(--pp-serif);
+  font-size: 2rem;
+  line-height: 1.1;
+  margin: 2.75rem 0 0.25rem;
+}
+.pp-entry {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.15rem 1.2rem;
+  color: var(--pp-ink);
+  text-decoration: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.pp-entry:hover {
+  border-color: color-mix(in srgb, var(--pp-accent) 40%, var(--pp-paper-edge));
+}
+.pp-entry:focus-visible {
+  outline: 2px solid var(--pp-accent);
+  outline-offset: 3px;
+}
+.pp-entry h3 {
+  font-family: var(--pp-serif);
+  font-size: 1.75rem;
+  line-height: 1.05;
+}
+.pp-entry p {
+  color: var(--pp-ink-soft);
+  font-size: 0.95rem;
+  margin-top: 0.2rem;
+}
+.pp-entry-art {
+  width: 92px;
+  height: 92px;
+  display: grid;
+  place-items: center;
+}
+.pp-entry-go {
+  display: inline-block;
+  margin-top: 0.55rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--pp-accent);
+}
+/* little previews inside entries */
+.pp-thumbs {
+  position: relative;
+  width: 92px;
+  height: 92px;
+}
+.pp-thumbs > * {
+  position: absolute;
+  width: 64px;
+  height: 64px;
+  object-fit: cover;
+  border-radius: 3px;
+  background: #fff;
+  border: 4px solid #fff;
+  box-shadow: 0 6px 14px -8px rgb(37 48 38 / 0.55);
+}
+.pp-thumbs > :nth-child(1) { left: 0; top: 0; }
+.pp-thumbs > :nth-child(2) { left: 14px; top: 14px; }
+.pp-thumbs > :nth-child(3) { left: 28px; top: 28px; }
+.pp-thumbs.designs > * { object-fit: contain; background: #fff; }
+/* Designs on a soft swatch, two by two */
+.pp-swatches {
+  width: 92px;
+  height: 92px;
+  border-radius: 12px;
+  padding: 8px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  background: color-mix(in srgb, var(--pp-gold-light) 55%, var(--pp-paper));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--pp-gold) 22%, transparent);
+}
+.pp-swatches img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #fff;
+  border-radius: 4px;
+  padding: 3px;
+}
+.pp-mini-book {
+  width: 70px;
+  height: 88px;
+  border-radius: 3px 8px 8px 3px;
+  background: var(--pp-cover);
+  box-shadow: inset 6px 0 8px -6px rgb(0 0 0 / 0.4), 0 8px 16px -10px rgb(37 48 38 / 0.6);
+  display: grid;
+  place-items: center;
+}
+.pp-mini-book span {
+  width: 42px;
+  height: 22px;
+  border-radius: 2px;
+  box-shadow: inset 0 0 0 1px #e2c67a;
+}
+.pp-entry-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: var(--pp-accent-soft);
+  color: var(--pp-accent);
+}
+
+/* Inside pages: shared header */
+.pp-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--pp-ink-soft);
+  text-decoration: none;
+}
+.pp-back:hover {
+  color: var(--pp-accent);
+}
+.pp-page-title {
+  font-family: var(--pp-serif);
+  font-size: clamp(2.6rem, 11vw, 3.6rem);
+  line-height: 1;
+  letter-spacing: -0.015em;
+  color: var(--pp-ink);
+}
+.pp-page-intro {
+  color: var(--pp-ink-soft);
+  margin-top: 0.6rem;
+  max-width: 34rem;
 }
 
 /* ------------------------------------------------------------------ */
@@ -202,8 +463,7 @@
   border-radius: 999px;
   font-size: 0.72rem;
   font-family: var(--pp-display);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  letter-spacing: 0.01em;
   color: var(--pp-ink-soft);
 }
 
@@ -329,8 +589,7 @@
   margin-top: 26%;
   font-family: var(--pp-display);
   font-size: 0.66rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  letter-spacing: 0.01em;
   color: var(--pp-ink-soft);
 }
 .pp-pass-body strong {
@@ -512,59 +771,83 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  padding: 0.85rem 1.25rem;
+  min-height: 2.9rem;
+  padding: 0.75rem 1.35rem;
   border-radius: 999px;
   background: var(--pp-accent);
-  color: var(--pp-paper);
-  font-family: var(--pp-display);
-  font-size: 1rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  color: #fff;
+  font-family: var(--pp-sans);
+  font-size: 1rem !important;
   font-weight: 600;
+  letter-spacing: 0.005em;
+  text-transform: none;
   text-decoration: none;
   border: 0;
   cursor: pointer;
-  box-shadow: 0 6px 14px -8px rgb(20 20 50 / 0.6);
+  box-shadow: 0 1px 0 rgb(255 255 255 / 0.2) inset, 0 8px 18px -12px color-mix(in srgb, var(--pp-accent) 90%, black);
+  transition: background-color 0.15s, box-shadow 0.15s, transform 0.15s;
+}
+.pp-btn:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--pp-accent) 86%, black);
+}
+.pp-btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+.pp-btn:focus-visible,
+.pp-field:focus-visible,
+.pp-link:focus-visible {
+  outline: 2px solid var(--pp-accent);
+  outline-offset: 3px;
 }
 .pp-btn:disabled {
-  opacity: 0.5;
+  opacity: 0.45;
   cursor: not-allowed;
 }
 .pp-btn-ghost {
-  background: transparent;
+  background: var(--pp-paper);
   color: var(--pp-accent);
-  box-shadow: inset 0 0 0 1.5px var(--pp-accent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--pp-accent) 45%, var(--pp-paper-edge));
+}
+.pp-btn-ghost:hover:not(:disabled) {
+  background: var(--pp-accent-soft);
 }
 .pp-field {
   width: 100%;
-  padding: 0.8rem 1rem;
+  padding: 0.75rem 0.95rem;
   border-radius: 10px;
-  border: 1px solid var(--pp-paper-edge);
-  background: #fffdf8;
+  border: 1px solid color-mix(in srgb, var(--pp-ink) 16%, var(--pp-paper-edge));
+  background: #fff;
   color: var(--pp-ink);
-  font-family: var(--pp-body);
-  font-size: 1.1rem;
+  font-family: var(--pp-sans);
+  font-size: 1rem;
   outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.pp-field::placeholder {
+  color: color-mix(in srgb, var(--pp-ink-soft) 70%, white);
 }
 .pp-field:focus {
   border-color: var(--pp-accent);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--pp-accent) 20%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--pp-accent) 18%, transparent);
 }
 .pp-link {
   color: var(--pp-accent);
+  font-weight: 500;
   text-decoration: underline;
-  text-underline-offset: 4px;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
   background: none;
   border: 0;
   padding: 0;
-  font: inherit;
+  font-family: inherit;
   cursor: pointer;
 }
 .pp-note {
   border-radius: 12px;
-  padding: 0.9rem 1rem;
-  background: color-mix(in srgb, var(--pp-gold-light) 35%, var(--pp-paper));
-  border: 1px solid color-mix(in srgb, var(--pp-gold) 45%, transparent);
+  padding: 0.85rem 1rem;
+  background: color-mix(in srgb, var(--pp-gold-light) 45%, var(--pp-paper));
+  border: 1px solid color-mix(in srgb, var(--pp-gold) 30%, transparent);
+  font-size: 0.95rem;
 }
 
 /* ------------------------------------------------------------------ */
@@ -581,8 +864,8 @@
   --color-blush: var(--pp-gold-light);
   --color-blush-soft: color-mix(in srgb, var(--pp-gold-light) 35%, var(--pp-paper));
   --color-line: var(--pp-paper-edge);
-  --font-display: var(--pp-display);
-  --font-sans: var(--pp-body);
+  --font-display: var(--pp-serif);
+  --font-sans: var(--pp-sans);
 }
 
 @keyframes pp-pulse {
@@ -593,8 +876,10 @@
 /* ------------------------------------------------------------------ */
 /* Guest book                                                          */
 /* ------------------------------------------------------------------ */
+/* Guests' own words: set in the serif's italic, like an inscription */
 .pp-hand {
-  font-family: var(--font-caveat), "Segoe Print", "Bradley Hand", cursive;
+  font-family: var(--pp-serif);
+  font-style: italic;
 }
 
 /* Closed book on the party page */
@@ -629,10 +914,13 @@
 .pp-book {
   position: relative;
   margin: 1.75rem auto 0;
-  padding: 10px;
-  border-radius: 10px;
-  background: color-mix(in srgb, var(--pp-accent) 88%, black);
-  box-shadow: 0 22px 40px -22px rgb(30 25 10 / 0.7), inset 0 0 0 2px rgb(255 255 255 / 0.08);
+  padding: 12px;
+  border-radius: 6px 12px 12px 6px;
+  background-color: var(--pp-cover);
+  background-image:
+    repeating-linear-gradient(0deg, rgb(255 255 255 / 0.05) 0 1px, transparent 1px 3px),
+    repeating-linear-gradient(90deg, rgb(0 0 0 / 0.05) 0 1px, transparent 1px 3px);
+  box-shadow: 0 26px 46px -26px rgb(37 48 38 / 0.6), inset 0 0 0 1px rgb(255 255 255 / 0.12);
 }
 .pp-book-pages {
   display: grid;
@@ -688,7 +976,7 @@
   min-height: 0;
 }
 .pp-bpage-text {
-  font-family: var(--font-caveat), "Segoe Print", "Bradley Hand", cursive;
+  font-family: var(--pp-serif); font-style: italic;
   font-size: 1.45rem;
   line-height: 32px;
   color: var(--pp-ink);
@@ -711,7 +999,7 @@
   outline: none;
   resize: none;
   background: transparent;
-  font-family: var(--font-caveat), "Segoe Print", "Bradley Hand", cursive;
+  font-family: var(--pp-serif); font-style: italic;
   font-size: 1.45rem;
   line-height: 32px;
   color: var(--pp-ink);
@@ -726,7 +1014,7 @@
   border-bottom: 1px solid var(--pp-ink-soft);
   background: transparent;
   outline: none;
-  font-family: var(--font-caveat), "Segoe Print", "Bradley Hand", cursive;
+  font-family: var(--pp-serif); font-style: italic;
   font-size: 1.5rem;
   color: var(--pp-ink);
   width: 70%;
@@ -757,31 +1045,15 @@
   transition: transform 0.25s ease;
 }
 .pp-album-item:hover {
-  transform: rotate(0deg) translateY(-3px) !important;
+  transform: translateY(-3px);
 }
 .pp-print {
   position: relative;
   margin: 0;
   padding: 8px 8px 12px;
-  background: #fffdf8;
-  box-shadow: 0 10px 20px -10px rgb(40 30 10 / 0.5), 0 1px 2px rgb(0 0 0 / 0.1);
-}
-/* a strip of tape on every other print */
-.pp-album-item:nth-child(odd) .pp-print::before {
-  content: "";
-  position: absolute;
-  top: -10px;
-  left: 50%;
-  width: 46%;
-  height: 20px;
-  transform: translateX(-50%) rotate(-4deg);
-  background-color: var(--pp-tape-b);
-  background-image:
-    linear-gradient(90deg, color-mix(in srgb, var(--pp-tape-a) 55%, transparent) 50%, transparent 50%),
-    linear-gradient(0deg, color-mix(in srgb, var(--pp-tape-a) 55%, transparent) 50%, transparent 50%);
-  background-size: 8px 8px;
-  opacity: 0.9;
-  z-index: 1;
+  background: #fff;
+  border-radius: 2px;
+  box-shadow: 0 1px 2px rgb(37 48 38 / 0.12), 0 14px 26px -16px rgb(37 48 38 / 0.45);
 }
 .pp-print-photo {
   display: block;
@@ -814,8 +1086,8 @@
 .pp-print-by {
   display: block;
   margin-top: 2px;
-  font-family: var(--pp-display);
-  font-size: 0.85rem;
+  font-family: var(--pp-sans);
+  font-size: 0.8rem;
   color: var(--pp-ink-soft);
 }
 .pp-heart {
@@ -851,7 +1123,8 @@
 /* Games                                                               */
 /* ------------------------------------------------------------------ */
 .pp-calendar {
-  width: 92px;
+  display: block;
+  width: 70px;
   border-radius: 8px;
   overflow: hidden;
   background: #fffdf8;
@@ -860,20 +1133,20 @@
   flex-shrink: 0;
 }
 .pp-calendar-top {
+  display: block;
   background: var(--pp-accent);
   color: var(--pp-paper);
-  font-family: var(--pp-display);
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  font-size: 0.7rem;
-  padding: 5px 0;
+  font-family: var(--pp-sans);
+  font-weight: 600;
+  font-size: 0.75rem;
+  padding: 4px 0;
 }
 .pp-calendar-day {
-  font-family: var(--pp-display);
-  font-weight: 600;
-  font-size: 2.4rem;
-  line-height: 1.2;
-  padding: 4px 0 8px;
+  display: block;
+  font-family: var(--pp-serif);
+  font-size: 2.3rem;
+  line-height: 1.15;
+  padding: 2px 0 6px;
   color: var(--pp-ink);
 }
 .pp-mini-polaroid {
@@ -913,8 +1186,7 @@
   border: 1px dashed currentColor;
   padding: 6px 10px;
   font-family: var(--pp-display);
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.01em;
   font-size: 0.62rem;
   opacity: 0.8;
 }
@@ -926,8 +1198,7 @@
 .pp-board-table th {
   text-align: left;
   font-family: var(--pp-display);
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.01em;
   font-size: 0.68rem;
   font-weight: 600;
   color: var(--pp-ink-soft);
@@ -962,7 +1233,7 @@
 /* Host dashboard width                                                */
 /* ------------------------------------------------------------------ */
 .pp-host-body { max-width: 48rem; }
-.pp-host-body:has(.gd) { max-width: 78rem; }
+.pp-page:has(.gd) .pp-host-body { max-width: 78rem; }
 
 /* ------------------------------------------------------------------ */
 /* Group gift designer                                                 */
@@ -1021,8 +1292,7 @@
   border-radius: 999px;
   font-family: var(--pp-display);
   font-size: 0.78rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  letter-spacing: 0.01em;
   color: var(--pp-ink-soft);
   cursor: pointer;
 }
@@ -1153,8 +1423,7 @@
 }
 .gd-panel h3 {
   font-family: var(--pp-display);
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.01em;
   font-size: 0.72rem;
   font-weight: 600;
 }
@@ -1272,7 +1541,7 @@
   line-height: 1.2;
 }
 .tc-quote {
-  font-family: var(--font-caveat), "Segoe Print", "Bradley Hand", cursive;
+  font-family: var(--pp-serif); font-style: italic;
   font-size: 1.25rem;
   line-height: 1.3;
 }
@@ -1338,21 +1607,26 @@
   overflow: hidden;
 }
 .tc-front {
-  background-color: var(--pp-accent);
-  background-image: var(--pp-bg-art);
-  background-size: 240px 240px;
-  box-shadow: 0 24px 40px -18px rgb(40 30 10 / 0.6), inset -6px 0 10px -6px rgb(0 0 0 / 0.25);
+  background-color: var(--pp-cover);
+  background-image:
+    repeating-linear-gradient(0deg, rgb(255 255 255 / 0.05) 0 1px, transparent 1px 3px),
+    repeating-linear-gradient(90deg, rgb(0 0 0 / 0.05) 0 1px, transparent 1px 3px),
+    radial-gradient(120% 90% at 30% 0%, rgb(255 255 255 / 0.18), transparent 60%);
+  box-shadow: 0 26px 44px -22px rgb(37 48 38 / 0.6), inset 8px 0 12px -8px rgb(0 0 0 / 0.3);
   display: grid;
   place-items: center;
-  padding: 10%;
+  padding: 9%;
+  color: var(--pp-cover-ink);
 }
 .tc-front-panel {
   width: 100%;
-  background: var(--pp-paper);
-  border-radius: 6px;
-  padding: 14% 8% 12%;
+  height: 100%;
+  display: grid;
+  place-content: center;
+  border-radius: 4px;
+  padding: 10% 6%;
   text-align: center;
-  box-shadow: inset 0 0 0 4px var(--pp-paper), inset 0 0 0 5px var(--pp-gold), 0 6px 14px -8px rgb(0 0 0 / 0.4);
+  box-shadow: inset 0 1px 1px rgb(0 0 0 / 0.18), inset 0 -1px 0 rgb(255 255 255 / 0.16), 0 1px 0 rgb(255 255 255 / 0.12);
 }
 .tc-back {
   transform: rotateY(180deg);
@@ -1370,7 +1644,7 @@
 }
 .tc-wrap[data-open="true"] + .tc-hint { opacity: 0; }
 .tc-message {
-  font-family: var(--font-caveat), "Segoe Print", "Bradley Hand", cursive;
+  font-family: var(--pp-serif); font-style: italic;
   font-size: clamp(1.25rem, 4.6vw, 1.55rem);
   line-height: 1.35;
   color: var(--pp-ink);
@@ -1469,7 +1743,7 @@
   transform: rotate(-0.6deg);
 }
 .rv-hand {
-  font-family: var(--font-caveat), "Segoe Print", "Bradley Hand", cursive;
+  font-family: var(--pp-serif); font-style: italic;
   font-size: clamp(1.45rem, 5vw, 1.9rem);
   line-height: 34px;
   white-space: pre-line;
@@ -1495,7 +1769,7 @@
 }
 .rv-polaroid img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; }
 .rv-polaroid figcaption {
-  font-family: var(--font-caveat), cursive;
+  font-family: var(--pp-serif); font-style: italic;
   font-size: 1.1rem;
   text-align: center;
   padding: 6px 2px 10px;
@@ -1529,7 +1803,7 @@
 .rv-designs figcaption { font-size: 0.75rem; text-align: center; margin-top: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .rv-gift { width: min(80vw, 420px); max-height: 50vh; object-fit: contain; margin-top: 1rem; border-radius: 10px; box-shadow: 0 22px 40px -24px rgb(40 30 10 / 0.6); }
 .rv-names { font-size: 0.95rem; line-height: 1.7; margin-top: 0.8rem; color: var(--pp-ink-soft); max-width: 36rem; }
-.rv-names-big { font-family: var(--font-caveat), cursive; font-size: 1.45rem; line-height: 1.5; color: var(--pp-ink); max-height: 40vh; overflow-y: auto; }
+.rv-names-big { font-family: var(--pp-serif); font-style: italic; font-size: 1.45rem; line-height: 1.5; color: var(--pp-ink); max-height: 40vh; overflow-y: auto; }
 .rv-nav { display: flex; justify-content: center; align-items: center; gap: 1.25rem; padding-top: 0.75rem; }
 .rv-nav button {
   width: 44px;
@@ -1546,3 +1820,97 @@
   .rv-photos { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (prefers-reduced-motion: reduce) { .rv-slide { animation: none; } }
+
+/* ------------------------------------------------------------------ */
+/* Inside pages: header                                                */
+/* ------------------------------------------------------------------ */
+.pp-head {
+  margin: 1.5rem 0 1.75rem;
+}
+.pp-page-kicker {
+  font-family: var(--pp-serif);
+  font-style: italic;
+  font-size: 1.4rem;
+  line-height: 1.2;
+  color: var(--pp-ink-soft);
+  margin-top: 0.35rem;
+}
+.pp-head > p.pp-soft {
+  margin-top: 0.6rem;
+  max-width: 36rem;
+}
+
+/* ------------------------------------------------------------------ */
+/* Host dashboard header                                               */
+/* ------------------------------------------------------------------ */
+.hd {
+  background: var(--pp-paper);
+  border-bottom: 1px solid var(--pp-paper-edge);
+}
+.hd-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  padding-top: 0.9rem !important;
+  padding-bottom: 0 !important;
+}
+.hd-brand {
+  font-family: var(--pp-serif);
+  font-size: 1.15rem;
+  color: var(--pp-ink);
+  text-decoration: none;
+}
+.hd-who {
+  font-size: 0.85rem;
+  color: var(--pp-ink-soft);
+  text-align: right;
+}
+.hd-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding-top: 1.1rem !important;
+  padding-bottom: 0.6rem !important;
+}
+.hd-title {
+  font-family: var(--pp-serif);
+  font-size: clamp(2rem, 7vw, 2.75rem);
+  line-height: 1.02;
+  letter-spacing: -0.015em;
+}
+.hd-view {
+  min-height: 2.4rem;
+  padding: 0.45rem 1rem;
+  font-size: 0.9rem !important;
+}
+.hd-tabs {
+  display: flex;
+  gap: 1.5rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+.hd-tabs::-webkit-scrollbar {
+  display: none;
+}
+.hd-tab {
+  flex: none;
+  padding: 0.8rem 0 0.7rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--pp-ink-soft);
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+}
+.hd-tab:hover {
+  color: var(--pp-ink);
+}
+.hd-tab[aria-current="page"] {
+  color: var(--pp-ink);
+  border-bottom-color: var(--pp-accent);
+}

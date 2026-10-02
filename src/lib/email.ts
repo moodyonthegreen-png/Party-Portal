@@ -56,25 +56,28 @@ const esc = (s: string) =>
   s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
 
 function layout(opts: { preheader: string; heading: string; body: string; button?: { label: string; url: string }; footer?: string }) {
+  const sans = "'Helvetica Neue',Helvetica,Arial,sans-serif";
+  const serif = "Georgia,'Times New Roman',serif";
   const button = opts.button
-    ? `<tr><td align="center" style="padding:8px 0 24px">
-         <a href="${esc(opts.button.url)}" style="display:inline-block;background:#5d7a53;color:#fffdf6;text-decoration:none;padding:14px 28px;border-radius:999px;font-family:Georgia,serif;font-size:15px;letter-spacing:1.5px;text-transform:uppercase">${esc(opts.button.label)}</a>
+    ? `<tr><td align="center" style="padding:10px 32px 30px">
+         <a href="${esc(opts.button.url)}" style="display:inline-block;background:#56704f;color:#ffffff;text-decoration:none;padding:14px 30px;border-radius:999px;font-family:${sans};font-size:16px;font-weight:600">${esc(opts.button.label)}</a>
        </td></tr>`
     : "";
-  return `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-<body style="margin:0;background:#f5f2e6;padding:24px 12px;font-family:Georgia,'Times New Roman',serif;color:#3b4836">
+  return `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"></head>
+<body style="margin:0;background:#f1f3ec;padding:28px 12px;font-family:${sans};color:#253026">
 <span style="display:none;max-height:0;overflow:hidden">${esc(opts.preheader)}</span>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;background:#fffdf6;border:1px solid #ece6d2;border-radius:6px">
-<tr><td style="height:8px;background:#e6be4f;border-radius:6px 6px 0 0;font-size:0;line-height:0">&nbsp;</td></tr>
-<tr><td style="padding:28px 28px 8px;text-align:center">
-  <p style="margin:0;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#66735f">Moody Celebrations</p>
-  <h1 style="margin:12px 0 0;font-size:28px;font-weight:normal;color:#5d7a53">${esc(opts.heading)}</h1>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:540px;background:#fffefb;border:1px solid #e2e6da;border-radius:14px;overflow:hidden">
+<tr><td style="background:#9aae91;padding:22px 32px;text-align:center;font-family:${serif};font-size:20px;color:#fbfaf3">Moody Celebrations
+  <div style="width:56px;height:1px;background:#e2c67a;margin:10px auto 0;font-size:0;line-height:0">&nbsp;</div></td></tr>
+<tr><td style="padding:30px 32px 6px;text-align:center">
+  <h1 style="margin:0;font-family:${serif};font-weight:normal;font-size:30px;line-height:1.15;color:#253026">${esc(opts.heading)}</h1>
 </td></tr>
-<tr><td style="padding:12px 28px 8px;font-size:17px;line-height:1.55">${opts.body}</td></tr>
+<tr><td style="padding:12px 32px 8px;font-size:16px;line-height:1.6;color:#3a4639">${opts.body}</td></tr>
 ${button}
-${opts.footer ? `<tr><td style="padding:0 28px 24px;font-size:13px;line-height:1.5;color:#66735f">${opts.footer}</td></tr>` : ""}
+${opts.footer ? `<tr><td style="padding:0 32px 28px;font-size:13px;line-height:1.55;color:#5d695b">${opts.footer}</td></tr>` : ""}
 </table>
+<p style="margin:18px 0 0;font-size:12px;color:#7a8578;font-family:${sans}">Sent by Moody Celebrations</p>
 </td></tr></table></body></html>`;
 }
 
@@ -82,7 +85,7 @@ export function hostLinkEmail(opts: { to: string; parties: { guestOfHonorName: s
   const one = opts.parties.length === 1;
   const first = opts.parties[0];
   const list = opts.parties
-    .map((p) => `<li style="margin:6px 0"><a href="${esc(p.url)}" style="color:#5d7a53">${esc(p.guestOfHonorName)}'s ${esc(p.occasion.toLowerCase())}</a></li>`)
+    .map((p) => `<li style="margin:6px 0"><a href="${esc(p.url)}" style="color:#56704f">${esc(p.guestOfHonorName)}'s ${esc(p.occasion.toLowerCase())}</a></li>`)
     .join("");
   return {
     to: opts.to,
@@ -119,7 +122,7 @@ export function coHostInviteEmail(opts: {
   return {
     to: opts.to,
     replyTo: opts.replyTo,
-    subject: opts.isGuestOfHonor ? `Your ${opts.occasion.toLowerCase()} party page is ready for you 💛` : `You're a co-host for ${party}`,
+    subject: opts.isGuestOfHonor ? `Your ${opts.occasion.toLowerCase()} party page is ready for you` : `You're a co-host for ${party}`,
     html: layout({
       preheader: opts.isGuestOfHonor ? "See everything your guests have shared" : "Open your co-host dashboard",
       heading: opts.isGuestOfHonor ? `For you, ${opts.name.split(" ")[0]}` : "You're a co-host!",
@@ -146,7 +149,7 @@ export function revealEmail(opts: {
   return {
     to: opts.to,
     replyTo: opts.replyTo,
-    subject: `${first}, your ${opts.occasion.toLowerCase()} keepsake is ready 💛`,
+    subject: `${first}, your ${opts.occasion.toLowerCase()} keepsake is ready`,
     html: layout({
       preheader: "Everything everyone shared, all in one place",
       heading: `For you, ${first}`,
@@ -162,7 +165,7 @@ export function revealEmail(opts: {
 /** Escape text, keep line breaks, and turn plain https links into links. */
 function richText(s: string) {
   return esc(s.trim())
-    .replace(/https?:\/\/[^\s<]+/g, (u) => `<a href="${u}" style="color:#5d7a53">${u}</a>`)
+    .replace(/https?:\/\/[^\s<]+/g, (u) => `<a href="${u}" style="color:#56704f">${u}</a>`)
     .replace(/\n/g, "<br>");
 }
 
@@ -180,14 +183,14 @@ export function raffleWinnerEmail(opts: {
   return {
     to: opts.to,
     replyTo: opts.replyTo,
-    subject: `You won the raffle at ${party}! 🎉`,
+    subject: `You won the raffle at ${party}!`,
     html: layout({
       preheader: `You won: ${opts.prize}`,
-      heading: "You won! 🎉",
+      heading: "You won!",
       body: `<p style="text-align:center">Hi ${esc(opts.name)},</p>
         <p style="text-align:center">Your name was drawn in the raffle at <strong>${esc(party)}</strong>. You won:</p>
-        <p style="text-align:center;font-size:22px;color:#5d7a53;margin:18px 0">${esc(opts.prize)}</p>
-        ${opts.details.trim() ? `<div style="background:#f5f2e6;border-radius:8px;padding:14px 16px;margin:8px 0 14px">${richText(opts.details)}</div>` : ""}
+        <p style="text-align:center;font-size:22px;color:#56704f;margin:18px 0">${esc(opts.prize)}</p>
+        ${opts.details.trim() ? `<div style="background:#f6f2df;border-radius:10px;padding:14px 16px;margin:8px 0 14px">${richText(opts.details)}</div>` : ""}
         <p style="text-align:center">Thank you for celebrating with us!<br>${esc(opts.fromName)}</p>`,
     }),
     text: `Hi ${opts.name},\n\nYou won the raffle at ${party}: ${opts.prize}\n\n${opts.details.trim()}\n\nThank you for celebrating with us!\n${opts.fromName}`,
@@ -241,7 +244,7 @@ export function thankYouCardEmail(opts: { to: string; recipientName: string; fro
   return {
     to: opts.to,
     replyTo: opts.replyTo,
-    subject: `A thank-you card for you from ${opts.fromName} 💌`,
+    subject: `A thank-you card for you from ${opts.fromName}`,
     html: layout({
       preheader: "Tap to open your card",
       heading: "You've got a card!",

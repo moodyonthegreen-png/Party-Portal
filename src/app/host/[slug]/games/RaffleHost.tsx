@@ -5,7 +5,7 @@ import { RULE_LABELS } from "@/lib/games/raffle";
 import { MAX_PRIZES, type RaffleRules, type RaffleSettings } from "@/lib/games/settings";
 import { clearRaffleWinner, drawRaffleWinner, emailRaffleWinner, saveRaffle, type ActionState } from "../actions";
 
-const card: React.CSSProperties = { padding: "1.5rem 1.25rem", borderRadius: 4, display: "grid", gap: "1rem" };
+const card: React.CSSProperties = { padding: "1.5rem 1.25rem", display: "grid", gap: "1rem" };
 const small: React.CSSProperties = { fontSize: "0.8rem", padding: "0.65rem 1rem" };
 const label: React.CSSProperties = { fontSize: "0.72rem", display: "block", marginBottom: "0.35rem" };
 
@@ -207,7 +207,7 @@ function PrizeRow({
   return (
     <div style={{ border: "1px dashed var(--pp-paper-edge)", borderRadius: 10, padding: "0.9rem 1rem", display: "grid", gap: "0.6rem" }}>
       <p className="pp-caps" style={{ fontSize: "0.7rem" }}>
-        🎁 {prize}
+        {prize}
       </p>
       {winner ? (
         <>

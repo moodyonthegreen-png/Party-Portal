@@ -19,18 +19,24 @@ export default async function HostLayout({ children, params }: Props) {
     <div data-theme="classic" className={`pp-page ${themeFontVars}`}>
       {party ? (
         <>
-          <header style={{ borderBottom: "1px solid var(--pp-paper-edge)", background: "rgb(255 253 246 / 0.85)" }}>
-            <div className="pp-wrap pp-host-body" style={{ paddingTop: "1rem", paddingBottom: "0.75rem" }}>
-              <p className="pp-caps pp-soft" style={{ fontSize: "0.7rem" }}>
-                {party.viewer.kind === "cohost"
-                  ? `Party dashboard · signed in as ${party.viewer.name}`
-                  : "Host dashboard"}
-              </p>
-              <p className="pp-script" style={{ fontSize: "2.2rem", color: "var(--pp-accent)", marginTop: "0.2rem" }}>
-                {party.guestOfHonorName}&apos;s {party.occasion.toLowerCase()}
-              </p>
-              <HostNav slug={party.slug} />
+          <header className="hd">
+            <div className="pp-wrap pp-host-body hd-bar">
+              <a href="/" className="hd-brand">
+                Moody Celebrations
+              </a>
+              <span className="hd-who">
+                {party.viewer.kind === "cohost" ? `Signed in as ${party.viewer.name}` : "Host dashboard"}
+              </span>
             </div>
+            <div className="pp-wrap pp-host-body hd-top">
+              <h1 className="hd-title">
+                {party.guestOfHonorName}’s {party.occasion.toLowerCase()}
+              </h1>
+              <a href={`/p/${party.slug}`} target="_blank" rel="noopener noreferrer" className="pp-btn pp-btn-ghost hd-view">
+                View guest page
+              </a>
+            </div>
+            <HostNav slug={party.slug} />
           </header>
           <div className="pp-wrap pp-host-body">{children}</div>
         </>

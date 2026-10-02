@@ -31,7 +31,7 @@ function toIso(local: string): string {
   return local ? new Date(local).toISOString() : "";
 }
 
-const card: React.CSSProperties = { padding: "1.5rem 1.25rem", borderRadius: 4, display: "grid", gap: "1.1rem" };
+const card: React.CSSProperties = { padding: "1.5rem 1.25rem", display: "grid", gap: "1.1rem" };
 const label: React.CSSProperties = { fontSize: "0.72rem", display: "block", marginBottom: "0.35rem" };
 const hint: React.CSSProperties = { fontSize: "0.88rem", marginTop: "0.3rem" };
 

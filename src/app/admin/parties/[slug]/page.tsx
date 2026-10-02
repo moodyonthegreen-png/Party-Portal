@@ -28,7 +28,7 @@ export default async function AdminParty({ params }: Props) {
           ← All parties
         </Link>
         <h1 className="pp-script" style={{ fontSize: "2.8rem", color: "var(--pp-accent)", marginTop: "0.5rem" }}>
-          {party.guestOfHonorName}&apos;s {party.occasion.toLowerCase()}
+          {party.guestOfHonorName}’s {party.occasion.toLowerCase()}
         </h1>
         <p className="pp-soft">
           Code <strong>{party.slug}</strong> · created {fmt(party.createdAt)} · <strong>{STAGE_LABEL[party.stage]}</strong>

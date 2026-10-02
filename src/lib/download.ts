@@ -174,23 +174,23 @@ export async function buildDownload(party: HostParty, section: DownloadSection):
 
   const page = `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(title)}</title>
 <style>
-body{margin:0;background:#f5f2e6;color:#3b4836;font:17px/1.55 Georgia,"Times New Roman",serif}
+body{margin:0;background:#f1f3ec;color:#253026;font:17px/1.55 Georgia,"Times New Roman",serif}
 main{max-width:900px;margin:0 auto;padding:40px 18px 80px}
 header{text-align:center;margin-bottom:28px}
 .kicker{letter-spacing:.18em;text-transform:uppercase;font-size:12px;color:#66735f}
-h1{font-weight:normal;font-size:44px;color:#5d7a53;margin:.2em 0}
-h2{font-weight:normal;color:#5d7a53;border-bottom:1px solid #e3dcc5;padding-bottom:6px;margin-top:44px}
+h1{font-weight:normal;font-size:44px;color:#56704f;margin:.2em 0}
+h2{font-weight:normal;color:#56704f;border-bottom:1px solid #e2e6da;padding-bottom:6px;margin-top:44px}
 h2 small{font-size:14px;color:#66735f}
 .note{background:#fffdf6;border:1px solid #ece6d2;border-radius:6px;padding:18px 20px;margin:14px 0;box-shadow:0 8px 16px -14px rgba(40,30,10,.5)}
 .hand{font-family:"Segoe Print","Bradley Hand","Comic Sans MS",cursive;font-size:20px;margin:0 0 8px}
-.from{text-align:right;color:#5d7a53;margin:0}.from span{color:#8a937f;font-size:13px;margin-left:6px}
+.from{text-align:right;color:#56704f;margin:0}.from span{color:#8a937f;font-size:13px;margin-left:6px}
 audio{width:100%;margin-bottom:8px}video{width:100%;max-height:70vh;background:#000;border-radius:6px;margin-bottom:8px}
 .grid{display:grid;gap:14px}.photos{grid-template-columns:repeat(auto-fill,minmax(180px,1fr))}.designs{grid-template-columns:repeat(auto-fill,minmax(120px,1fr))}
 figure{margin:0;background:#fff;padding:8px 8px 4px;box-shadow:0 8px 16px -12px rgba(40,30,10,.5)}
 figure img{width:100%;aspect-ratio:1;object-fit:cover;display:block}.designs img{object-fit:contain}
 figcaption{font-size:14px;text-align:center;padding:6px 2px}figcaption span{color:#8a937f;font-size:12px}
 .soft{color:#66735f;font-size:14px}.names{text-align:center;font-family:"Segoe Print","Bradley Hand",cursive;font-size:20px}
-a{color:#5d7a53}
+a{color:#56704f}
 </style></head><body><main>
 <header><p class="kicker">Moody Celebrations</p><h1>${esc(title)}</h1><p class="soft">Saved ${day(new Date().toISOString())}. Everything here is also in the folders next to this page.</p></header>
 ${html.join("\n") || `<p>Nothing here yet.</p>`}

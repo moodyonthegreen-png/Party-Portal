@@ -18,16 +18,12 @@ export default async function AlbumPage({ params }: Props) {
 
   return (
     <main className="pp-wrap" style={{ maxWidth: "54rem" }}>
-      <Link href={`/p/${party.slug}`} className="pp-caps pp-link" style={{ fontSize: "0.8rem" }}>
+      <Link href={`/p/${party.slug}`} className="pp-back">
         ← Back to the party
       </Link>
-      <header style={{ textAlign: "center", marginTop: "1.75rem" }}>
-        <p className="pp-caps pp-soft" style={{ fontSize: "0.75rem" }}>
-          Snapshots from everyone celebrating
-        </p>
-        <h1 className="pp-script" style={{ fontSize: "3.4rem", color: "var(--pp-accent)", marginTop: "0.4rem" }}>
-          Photo album
-        </h1>
+      <header className="pp-head">
+        <h1 className="pp-page-title">Photo album</h1>
+        <p className="pp-page-kicker">Snapshots from everyone celebrating</p>
       </header>
       <Album slug={party.slug} guestOfHonorName={party.guestOfHonorName} photos={photos} />
     </main>
