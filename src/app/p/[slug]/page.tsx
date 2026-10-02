@@ -87,9 +87,9 @@ export default async function PartyHome({ params }: Props) {
   const excerpt = more.note ? (more.note.body.length > 70 ? `${more.note.body.slice(0, 68).trimEnd()}…` : more.note.body) : null;
 
   return (
-    <main className="pp-wrap pp-home">
+    <>
       {/* The banner */}
-      <section className="pp-banner">
+      <section className="pp-banner pp-banner-full">
         <Ornament />
         <p className="pp-banner-top">{party.bannerTop ?? "Celebrating"}</p>
         <h1 className="pp-banner-name pp-foil">{party.bannerHeadline ?? party.guestOfHonorName}</h1>
@@ -101,7 +101,7 @@ export default async function PartyHome({ params }: Props) {
           </p>
         )}
       </section>
-
+    <main className="pp-wrap pp-home">
       <div className="pp-home-body">
       {/* The welcome: a video hello, a note, and photos from the host */}
       <section className="pp-paper pp-letter">
@@ -215,5 +215,6 @@ export default async function PartyHome({ params }: Props) {
       </p>
       </div>
     </main>
+    </>
   );
 }
