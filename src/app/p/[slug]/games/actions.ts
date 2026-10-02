@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { ensureDeviceHash } from "@/lib/device";
 import { getParty, hasPartyAccess, type PublicParty } from "@/lib/parties";
 import { drawScratchCard } from "@/lib/games/scratch";
+import { triviaQuestions } from "@/lib/games/trivia-bank";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 
 type Result = { ok: true } | { ok: false; error: string };
@@ -137,4 +138,39 @@ export async function drawScratch(
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : "We couldn't deal your card. Please try again." };
   }
+}
+
+/** Baby trivia: one go per browser. Answers are checked on the server; the page shows how they did. */
+export async function saveTrivia(slug: string, input: { name: string; answers: Record<string, number> }): Promise<Result> {
+  const party = await openGames(slug);
+  if ("ok" in party) return party;
+  const game = party.games.trivia;
+  if (!game.on) return fail("This game isn't running.");
+  if (game.closed) return fail("Trivia is closed. Thanks for playing!");
+
+  const name = cleanName(input.name);
+  if (!name) return fail("Please add your name.");
+  if (name.length > 80) return fail("That name is a bit long.");
+
+  const questions = triviaQuestions(game.questions);
+  const answers: Record<string, number> = {};
+  for (const q of questions) {
+    const a = input.answers?.[q.id];
+    if (Number.isInteger(a) && a >= 0 && a < q.options.length) answers[q.id] = a;
+  }
+  if (Object.keys(answers).length < questions.length) return fail("Please answer every question.");
+
+  const { error } = await supabaseAdmin().from("trivia_answers").insert({
+    party_id: party.id,
+    device_hash: await ensureDeviceHash(party),
+    player_name: name,
+    answers,
+  });
+  if (error) {
+    if (String(error.code) === "23505") return fail("You've already played trivia on this device.");
+    return fail("We couldn't save your answers. Please try again.");
+  }
+  revalidatePath(`/p/${party.slug}`, "layout");
+  revalidatePath(`/host/${party.slug}`, "layout");
+  return { ok: true };
 }

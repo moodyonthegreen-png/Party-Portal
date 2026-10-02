@@ -15,14 +15,17 @@ export default async function GamesHub({ params }: Props) {
   if (!party || !party.sections.games) notFound();
 
   const db = supabaseAdmin();
-  const [{ count: photoCount }, { count: babyPlayers }, { count: poolPlayers }, scratchCards] = await Promise.all([
+  const [{ count: photoCount }, { count: babyPlayers }, { count: poolPlayers }, scratchCards, triviaPlayers] = await Promise.all([
     db.from("baby_photos").select("id", { count: "exact", head: true }).eq("party_id", party.id),
     db.from("baby_photo_guesses").select("party_id", { count: "exact", head: true }).eq("party_id", party.id),
     db.from("pool_entries").select("party_id", { count: "exact", head: true }).eq("party_id", party.id),
     db.from("scratch_cards").select("player_name, is_winner").eq("party_id", party.id),
+    db.from("trivia_answers").select("party_id", { count: "exact", head: true }).eq("party_id", party.id),
   ]);
 
-  const { babyPhotos, pool, raffle, scratch } = party.games;
+  const { babyPhotos, pool, raffle, scratch, trivia } = party.games;
+  const showTrivia = trivia.on && trivia.questions.length > 0 && !triviaPlayers.error;
+  const triviaCount = triviaPlayers.count ?? 0;
   // Hidden until the host adds the photo (and the database update has been run)
   const showScratch = scratch.on && Boolean(scratch.photoPath) && !scratchCards.error;
   const scratchPlayers = scratchCards.data?.length ?? 0;
@@ -59,6 +62,27 @@ export default async function GamesHub({ params }: Props) {
             <div className="pp-entry-art">
               <span className="pp-entry-icon">
                 <Icon name="camera" size={28} />
+              </span>
+            </div>
+          </Link>
+        )}
+
+        {showTrivia && (
+          <Link href={`${base}/trivia`} className="pp-paper pp-entry">
+            <div>
+              <h3>Baby trivia</h3>
+              <p>
+                {trivia.closed
+                  ? "Trivia is closed. See the leaderboard."
+                  : `${trivia.questions.length} multiple-choice questions about babies. ${triviaCount} ${triviaCount === 1 ? "player" : "players"} so far.`}
+                {trivia.prize.on && trivia.prize.prize && !trivia.closed ? ` The top score wins ${trivia.prize.prize}.` : ""}
+              </p>
+            </div>
+            <div className="pp-entry-art">
+              <span className="tv-mini" aria-hidden="true">
+                <span>A</span>
+                <span>B</span>
+                <span>C</span>
               </span>
             </div>
           </Link>
@@ -123,7 +147,7 @@ export default async function GamesHub({ params }: Props) {
           </Link>
         )}
 
-        {!showBaby && !pool.on && !showRaffle && !showScratch && (
+        {!showBaby && !pool.on && !showRaffle && !showScratch && !showTrivia && (
           <p className="pp-soft">The host is still setting up the games. Check back soon.</p>
         )}
       </div>

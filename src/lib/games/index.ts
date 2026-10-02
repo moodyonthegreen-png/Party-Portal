@@ -65,3 +65,21 @@ export async function listPoolEntries(partyId: string, deviceHash: string | null
     mine: Boolean(deviceHash && r.device_hash === deviceHash),
   }));
 }
+
+export type TriviaRow = { name: string; answers: Record<string, number>; createdAt: string; mine: boolean };
+
+/** null = the trivia table hasn't been added to the database yet */
+export async function listTriviaAnswers(partyId: string, deviceHash: string | null): Promise<TriviaRow[] | null> {
+  const { data, error } = await supabaseAdmin()
+    .from("trivia_answers")
+    .select("player_name, answers, device_hash, created_at")
+    .eq("party_id", partyId)
+    .order("created_at");
+  if (error) return null;
+  return (data ?? []).map((r) => ({
+    name: r.player_name as string,
+    answers: (r.answers ?? {}) as Record<string, number>,
+    createdAt: r.created_at as string,
+    mine: Boolean(deviceHash && r.device_hash === deviceHash),
+  }));
+}

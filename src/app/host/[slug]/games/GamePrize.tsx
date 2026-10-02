@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import type { GamePrize as Prize } from "@/lib/games/settings";
 import { emailGameWinner, setGamePrize, type ActionState } from "../actions";
 
-type Game = "babyPhotos" | "pool" | "scratch";
+type Game = "babyPhotos" | "pool" | "scratch" | "trivia";
 type Winner = { key: string; name: string; emailedAt: string | null; email: string | null };
 
 const small: React.CSSProperties = { fontSize: "0.9rem", minHeight: "2.5rem", padding: "0.5rem 1rem" };
@@ -86,7 +86,11 @@ export function GamePrize({
           )
         ) : (
           <p className="pp-soft" style={{ fontSize: "0.9rem" }}>
-            {game === "scratch" ? "The winner appears here as soon as someone scratches the winning card." : <>The winner appears here once you {game === "babyPhotos" ? "reveal the answers" : "post the results"}.</>}
+            {game === "scratch"
+              ? "The winner appears here as soon as someone scratches the winning card."
+              : game === "trivia"
+                ? "The winner appears here once you close the game."
+                : <>The winner appears here once you {game === "babyPhotos" ? "reveal the answers" : "post the results"}.</>}
           </p>
         )
       )}

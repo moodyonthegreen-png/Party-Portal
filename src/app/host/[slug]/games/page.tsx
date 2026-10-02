@@ -1,9 +1,11 @@
 import { notFound } from "next/navigation";
 import { emailConfigured } from "@/lib/email";
-import { listBabyGuesses, listBabyPhotos, listPoolEntries } from "@/lib/games";
+import { listBabyGuesses, listBabyPhotos, listPoolEntries, listTriviaAnswers } from "@/lib/games";
+import { triviaQuestions } from "@/lib/games/trivia-bank";
+import { TriviaHost } from "./TriviaHost";
 import { raffleEntrants } from "@/lib/games/raffle";
 import { gameWinners } from "@/lib/games/winners";
-import { scoreBabyPhotos } from "@/lib/games/scoring";
+import { scoreBabyPhotos, scoreTrivia } from "@/lib/games/scoring";
 import { getHostParty } from "@/lib/host";
 import { listThankYous } from "@/lib/thanks";
 import { HostGames } from "./HostGames";
@@ -18,7 +20,7 @@ export default async function HostGamesPage({ params }: Props) {
   const party = await getHostParty(slug);
   if (!party) notFound();
 
-  const [photos, guesses, poolEntries, people, scratchCards, winningCard, scratchPhoto] = await Promise.all([
+  const [photos, guesses, poolEntries, people, scratchCards, winningCard, scratchPhoto, triviaAnswers] = await Promise.all([
     listBabyPhotos(party.id),
     listBabyGuesses(party.id, null),
     listPoolEntries(party.id, null),
@@ -26,10 +28,12 @@ export default async function HostGamesPage({ params }: Props) {
     listScratchCards(party.id),
     getWinningCard(party.id).catch(() => null),
     scratchPhotoUrl(party.games.scratch.photoPath),
+    listTriviaAnswers(party.id, null),
   ]);
+  const triviaBoard = scoreTrivia(triviaQuestions(party.games.trivia.questions), triviaAnswers ?? []);
   const emails = new Map(people.map((p) => [p.key, p.email]));
   const results = await gameWinners(party);
-  const winnersFor = (g: "babyPhotos" | "pool" | "scratch") =>
+  const winnersFor = (g: "babyPhotos" | "pool" | "scratch" | "trivia") =>
     (results.find((r) => r.game === g)?.winners ?? []).map((w) => ({ ...w, email: emails.get(w.key) ?? null }));
   const entrants = raffleEntrants(people, party.games.raffle.rules).map((e) => ({ ...e, email: emails.get(e.key) ?? null }));
   const babyBoard = scoreBabyPhotos(
@@ -38,7 +42,8 @@ export default async function HostGamesPage({ params }: Props) {
   );
 
   const g = party.games;
-  const added = [g.babyPhotos.on, g.pool.on, g.scratch.on, g.raffle.on].filter(Boolean).length;
+  const games = [g.babyPhotos.on, g.pool.on, g.scratch.on, g.trivia.on, g.raffle.on];
+  const added = games.filter(Boolean).length;
 
   return (
     <main style={{ paddingTop: "1.5rem", display: "grid", gap: "1rem" }}>
@@ -46,7 +51,7 @@ export default async function HostGamesPage({ params }: Props) {
         <h2 className="pp-script">Game library</h2>
         <p className="pp-soft">
           Add the games you&apos;d like at your party. Guests only see the games you&apos;ve added, and each one&apos;s setup opens
-          once it&apos;s added. {added} of 4 added.
+          once it&apos;s added. {added} of {games.length} added.
         </p>
       </header>
       {!party.sections.games && (
@@ -71,6 +76,13 @@ export default async function HostGamesPage({ params }: Props) {
         winners={winnersFor("scratch")}
         canEmail={emailConfigured()}
         guestListSize={people.filter((p) => p.onGuestList).length}
+      />
+      <TriviaHost
+        slug={party.slug}
+        game={party.games.trivia}
+        board={triviaBoard.map((r) => ({ name: r.name, correct: r.correct, total: r.total, place: r.place }))}
+        winners={winnersFor("trivia")}
+        canEmail={emailConfigured()}
       />
       <RaffleHost slug={party.slug} raffle={party.games.raffle} entrants={entrants} canEmail={emailConfigured()} />
     </main>

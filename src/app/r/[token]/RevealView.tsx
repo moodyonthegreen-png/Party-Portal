@@ -39,7 +39,7 @@ export function RevealView({
 }) {
   const first = guestOfHonorName.split(" ")[0];
   const g = data.games;
-  const hasGames = Boolean(g.babyPhoto?.length || g.pool || g.raffle.length || g.scratch);
+  const hasGames = Boolean(g.babyPhoto?.length || g.pool || g.raffle.length || g.scratch || g.trivia?.length);
 
   const slides = useMemo<Slide[]>(() => {
     const s: Slide[] = [{ t: "cover" }];
@@ -208,6 +208,17 @@ export function RevealView({
                 {g.pool.closest.length > 0 && <p className="rv-line">{g.pool.closest.join(", ")}</p>}
                 {g.pool.date.length > 0 && <p className="pp-soft">Closest birthday: {g.pool.date.join(", ")}</p>}
                 {g.pool.weight.length > 0 && <p className="pp-soft">Closest weight: {g.pool.weight.join(", ")}</p>}
+              </div>
+            )}
+            {g.trivia && g.trivia.length > 0 && (
+              <div className="rv-card">
+                <p className="pp-caps" style={{ fontSize: "0.68rem" }}>Baby trivia</p>
+                {g.prizes?.trivia && <p className="pp-soft">Winner&apos;s prize: {g.prizes.trivia}</p>}
+                {g.trivia.map((r) => (
+                  <p key={r.name} className="rv-line">
+                    {r.name} <span className="pp-soft">· {r.correct} of {r.total}</span>
+                  </p>
+                ))}
               </div>
             )}
             {g.scratch && (

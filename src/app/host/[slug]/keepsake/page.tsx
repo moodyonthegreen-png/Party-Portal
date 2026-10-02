@@ -26,8 +26,8 @@ export default async function KeepsakePage({ params }: Props) {
     { ok: data.photos.length > 0, text: plural(data.photos.length, "photo") },
     { ok: data.designs.length > 0, text: plural(data.designs.length, "design") },
     {
-      ok: Boolean(g.babyPhoto?.length || g.pool || g.raffle.length || g.scratch),
-      text: g.babyPhoto?.length || g.pool || g.raffle.length || g.scratch ? "Game winners" : "Game winners (once you reveal results or draw the raffle)",
+      ok: Boolean(g.babyPhoto?.length || g.pool || g.raffle.length || g.scratch || g.trivia?.length),
+      text: g.babyPhoto?.length || g.pool || g.raffle.length || g.scratch || g.trivia?.length ? "Game winners" : "Game winners (once you reveal results or draw the raffle)",
     },
     {
       ok: Boolean(data.gift),

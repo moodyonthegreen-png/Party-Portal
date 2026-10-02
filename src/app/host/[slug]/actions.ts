@@ -18,7 +18,8 @@ import { PHOTOS_BUCKET } from "@/lib/photos";
 import { MAX_WELCOME_PHOTOS } from "@/lib/welcome";
 import { MAX_MEMORIALS, memorialBucket } from "@/lib/memorials";
 import { getWinningCard, listScratchCards, setWinningCard } from "@/lib/games/scratch";
-import { MAX_SCRATCH_PLAYERS, type ScratchSettings } from "@/lib/games/settings";
+import { MAX_SCRATCH_PLAYERS, MAX_TRIVIA, type ScratchSettings } from "@/lib/games/settings";
+import { TRIVIA_BY_ID } from "@/lib/games/trivia-bank";
 import { createDraftProduct, deleteProduct, listGarmentOptions, PrintifyError, printifyConfigured, type GarmentOption, type Mockup } from "@/lib/printify";
 import { DESIGNS_BUCKET, supabaseAdmin } from "@/lib/supabase/admin";
 import { siteOrigin } from "@/lib/site";
@@ -1567,4 +1568,45 @@ export async function resetScratch(slug: string): Promise<ActionState> {
   }
   // Forget the old winner's emailed note too
   return saveGames(party, { ...party.games, scratch: { ...party.games.scratch, prize: { ...party.games.scratch.prize, emailed: {} } } });
+}
+
+// ---------------------------------------------------------------------------
+// Baby trivia
+// ---------------------------------------------------------------------------
+
+const MIN_TRIVIA = 3;
+
+export async function setTrivia(slug: string, patch: { on?: boolean; closed?: boolean; questions?: string[] }): Promise<ActionState> {
+  const party = await host(slug);
+  if (isState(party)) return party;
+  const next = { ...party.games.trivia };
+  if (patch.on !== undefined) {
+    next.on = Boolean(patch.on);
+    if (next.on) {
+      const { error } = await supabaseAdmin().from("trivia_answers").select("party_id", { count: "exact", head: true }).eq("party_id", party.id);
+      if (error) return { error: "Baby trivia isn't switched on yet (the database update hasn't been run)." };
+    }
+  }
+  if (patch.closed !== undefined) next.closed = Boolean(patch.closed);
+  if (patch.questions !== undefined) {
+    const ids = [...new Set(patch.questions.filter((id) => TRIVIA_BY_ID.has(id)))];
+    if (ids.length < MIN_TRIVIA) return { error: `Pick at least ${MIN_TRIVIA} questions.` };
+    if (ids.length > MAX_TRIVIA) return { error: `Pick up to ${MAX_TRIVIA} questions.` };
+    next.questions = ids;
+  }
+  const res = await saveGames(party, { ...party.games, trivia: next });
+  if (res.error) return res;
+  return { ok: true, message: patch.questions ? "Questions saved." : undefined };
+}
+
+/** Clear every guest's answers so everyone can play again. */
+export async function clearTrivia(slug: string): Promise<ActionState> {
+  const party = await host(slug);
+  if (isState(party)) return party;
+  const { error } = await supabaseAdmin().from("trivia_answers").delete().eq("party_id", party.id);
+  if (error) return { error: "We couldn't clear the answers. Please try again." };
+  return saveGames(party, {
+    ...party.games,
+    trivia: { ...party.games.trivia, closed: false, prize: { ...party.games.trivia.prize, emailed: {} } },
+  });
 }

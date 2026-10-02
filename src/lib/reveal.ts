@@ -1,7 +1,8 @@
 import "server-only";
 import { emailConfigured, isEmail, revealEmail, sendEmails } from "@/lib/email";
-import { listBabyGuesses, listBabyPhotos, listPoolEntries } from "@/lib/games";
-import { scoreBabyPhotos, scorePool } from "@/lib/games/scoring";
+import { listBabyGuesses, listBabyPhotos, listPoolEntries, listTriviaAnswers } from "@/lib/games";
+import { scoreBabyPhotos, scorePool, scoreTrivia } from "@/lib/games/scoring";
+import { triviaQuestions } from "@/lib/games/trivia-bank";
 import { listScratchCards } from "@/lib/games/scratch";
 import { scratchTitle } from "@/lib/games/settings";
 import { listGiftSources, listSavedGifts } from "@/lib/gift";
@@ -86,11 +87,13 @@ export type RevealData = {
   games: {
     babyPhoto: { name: string; correct: number; total: number }[] | null;
     /** Prize text per game, when the host offered one */
-    prizes: { babyPhotos: string | null; pool: string | null };
+    prizes: { babyPhotos: string | null; pool: string | null; trivia: string | null };
     pool: { closest: string[]; date: string[]; weight: string[] } | null;
     raffle: { prize: string; name: string }[];
     /** "Who has the daddy?": who scratched the winning card */
     scratch: { title: string; name: string; prize: string | null } | null;
+    /** Baby trivia top scores, once the host closes it */
+    trivia: { name: string; correct: number; total: number }[] | null;
   };
   gift: { productName: string; imageUrl: string } | null;
   /** The host's memorial notes, for the "watching over you" page */
@@ -112,6 +115,12 @@ export async function getRevealData(party: PublicParty): Promise<RevealData> {
   let babyPhoto: RevealData["games"]["babyPhoto"] = null;
   let pool: RevealData["games"]["pool"] = null;
   let scratch: RevealData["games"]["scratch"] = null;
+  let trivia: RevealData["games"]["trivia"] = null;
+  if (party.sections.games && party.games.trivia.on && party.games.trivia.closed) {
+    const board = scoreTrivia(triviaQuestions(party.games.trivia.questions), (await listTriviaAnswers(party.id, null)) ?? []);
+    const top = board.filter((r) => r.place <= 3).slice(0, 5).map((r) => ({ name: r.name, correct: r.correct, total: r.total }));
+    if (top.length) trivia = top;
+  }
   if (party.sections.games && party.games.scratch.on) {
     const found = (await listScratchCards(party.id))?.find((c) => c.winner);
     const sp = party.games.scratch.prize;
@@ -165,7 +174,9 @@ export async function getRevealData(party: PublicParty): Promise<RevealData> {
       pool,
       raffle,
       scratch,
+      trivia,
       prizes: {
+        trivia: party.games.trivia.prize.on && party.games.trivia.prize.prize ? party.games.trivia.prize.prize : null,
         babyPhotos: party.games.babyPhotos.prize.on && party.games.babyPhotos.prize.prize ? party.games.babyPhotos.prize.prize : null,
         pool: party.games.pool.prize.on && party.games.pool.prize.prize ? party.games.pool.prize.prize : null,
       },

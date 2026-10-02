@@ -49,3 +49,39 @@ test("weight formatting", () => {
   assert.equal(formatWeight(118), "7 lb 6 oz");
   assert.equal(formatWeight(128), "8 lb 0 oz");
 });
+
+test("trivia: scores against the current questions, ties share a place", async () => {
+  const { scoreTrivia } = await import("../src/lib/games/scoring.ts");
+  const key = [
+    { id: "a", answer: 1 },
+    { id: "b", answer: 0 },
+    { id: "c", answer: 2 },
+  ];
+  const res = scoreTrivia(key, [
+    { name: "Mimi", answers: { a: 1, b: 0, c: 2 } },
+    { name: "Joe", answers: { a: 1, b: 3, c: 2, gone: 1 } },
+    { name: "Sam", answers: { a: 1, b: 0, c: 0 } },
+    { name: "Kay", answers: {} },
+  ]);
+  assert.deepEqual(res.map((r) => [r.name, r.correct, r.total, r.place]), [
+    ["Mimi", 3, 3, 1],
+    ["Joe", 2, 3, 2],
+    ["Sam", 2, 3, 2],
+    ["Kay", 0, 3, 4],
+  ]);
+});
+
+test("trivia: settings keep only real questions, in order, without repeats", async () => {
+  const { parseGames } = await import("../src/lib/games/settings.ts");
+  const { DEFAULT_TRIVIA } = await import("../src/lib/games/settings.ts");
+  const { TRIVIA_BANK, triviaQuestions } = await import("../src/lib/games/trivia-bank.ts");
+  assert.deepEqual(parseGames({}).trivia.questions, DEFAULT_TRIVIA);
+  assert.deepEqual(parseGames({ trivia: { on: true, questions: ["joey", "nope", "joey", "bones", 5] } }).trivia.questions, ["joey", "nope", "bones"]);
+  assert.deepEqual(triviaQuestions(["joey", "nope", "bones"]).map((q) => q.id), ["joey", "bones"]);
+  for (const q of TRIVIA_BANK) {
+    assert.ok(q.answer >= 0 && q.answer < q.options.length, q.id);
+    assert.equal(new Set(q.options).size, q.options.length, q.id);
+  }
+  assert.equal(new Set(TRIVIA_BANK.map((q) => q.id)).size, TRIVIA_BANK.length);
+  for (const id of DEFAULT_TRIVIA) assert.ok(TRIVIA_BANK.some((q) => q.id === id), id);
+});

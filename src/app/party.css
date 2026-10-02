@@ -2805,3 +2805,54 @@
 .gl-switch-label { font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--pp-ink-soft); }
 .gl-error { color: var(--pp-leather); padding: 0 1.25rem 0.9rem; }
 .gl-body { display: grid; gap: 1rem; padding: 1.1rem 1.25rem 1.4rem; border-top: 1px solid var(--pp-paper-edge); }
+
+/* ------------------------------------------------------------------ */
+/* Baby trivia                                                         */
+/* ------------------------------------------------------------------ */
+.tv-play { margin-top: 1.25rem; display: grid; gap: 1rem; }
+.tv-progress { height: 6px; border-radius: 999px; background: color-mix(in srgb, var(--pp-accent) 14%, var(--pp-paper)); overflow: hidden; }
+.tv-progress > div { height: 100%; background: var(--pp-accent); transition: width 0.3s ease; }
+.tv-q { padding: 1.5rem 1.25rem; display: grid; gap: 0.9rem; animation: rv-in 0.35s ease both; }
+.tv-count { font-size: 0.7rem; }
+.tv-ask { font-family: var(--pp-display); font-size: clamp(1.45rem, 5.5vw, 1.85rem); line-height: 1.2; color: var(--pp-ink); }
+.tv-options { display: grid; gap: 0.6rem; }
+.tv-option {
+  display: flex; align-items: center; gap: 0.8rem; width: 100%; text-align: left; cursor: pointer;
+  padding: 0.85rem 1rem; border-radius: 12px; font: inherit; font-size: 1.02rem; color: var(--pp-ink);
+  background: #fff; border: 1.5px solid var(--pp-paper-edge); transition: border-color 0.15s, background 0.15s, transform 0.1s;
+}
+.tv-option:hover { border-color: color-mix(in srgb, var(--pp-accent) 55%, var(--pp-paper-edge)); }
+.tv-option:active { transform: scale(0.99); }
+.tv-option[data-picked="true"] { border-color: var(--pp-accent); background: color-mix(in srgb, var(--pp-accent) 10%, #fff); }
+.tv-letter {
+  flex: none; display: grid; place-items: center; width: 1.9rem; height: 1.9rem; border-radius: 50%;
+  font-size: 0.8rem; font-weight: 600; color: var(--pp-accent); background: color-mix(in srgb, var(--pp-accent) 10%, var(--pp-paper));
+}
+.tv-option[data-picked="true"] .tv-letter { background: var(--pp-accent); color: #fff; }
+.tv-nav { display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
+.tv-score { margin-top: 1.25rem; padding: 1.5rem 1.25rem; text-align: center; display: grid; gap: 0.3rem; }
+.tv-score-big { font-size: clamp(3rem, 14vw, 4.2rem); color: var(--pp-accent); line-height: 1; }
+.tv-review { list-style: none; padding: 0; margin: 0.6rem 0 0; display: grid; gap: 0.6rem; }
+.tv-review li { padding: 0.95rem 1.1rem; display: grid; gap: 0.3rem; }
+.tv-review-q { font-weight: 600; display: flex; gap: 0.55rem; align-items: baseline; }
+.tv-mark { flex: none; font-weight: 700; color: var(--pp-accent); }
+.tv-review li[data-right="false"] .tv-mark { color: var(--pp-leather); }
+.tv-review-a { padding-left: 1.4rem; }
+.tv-fact { padding-left: 1.4rem; font-size: 0.92rem; line-height: 1.45; }
+.tv-mini { display: flex; gap: 4px; }
+.tv-mini span {
+  display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; font-size: 0.7rem; font-weight: 600;
+  color: var(--pp-accent); background: color-mix(in srgb, var(--pp-accent) 12%, var(--pp-paper));
+}
+.tv-mini span:first-child { background: var(--pp-accent); color: #fff; }
+
+/* Host: choosing questions */
+.tv-picked { margin: 0; padding-left: 1.3rem; display: grid; gap: 0.3rem; font-size: 0.95rem; }
+.tv-pick { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.35rem; max-height: 26rem; overflow-y: auto; }
+.tv-pick label {
+  display: flex; gap: 0.65rem; align-items: flex-start; cursor: pointer; padding: 0.55rem 0.7rem; border-radius: 8px;
+  border: 1px solid var(--pp-paper-edge); font-size: 0.95rem;
+}
+.tv-pick label[data-on="true"] { border-color: var(--pp-accent); background: color-mix(in srgb, var(--pp-accent) 6%, var(--pp-paper)); }
+.tv-pick input { margin-top: 0.2rem; width: 17px; height: 17px; accent-color: var(--pp-accent); flex: none; }
+.tv-pick-a { display: block; font-size: 0.82rem; margin-top: 0.15rem; }

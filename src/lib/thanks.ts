@@ -25,7 +25,7 @@ export type ThankRow = {
  */
 export async function listThankYous(partyId: string): Promise<ThankRow[]> {
   const db = supabaseAdmin();
-  const [guests, messages, photos, babyGuesses, pool, saved, scratch] = await Promise.all([
+  const [guests, messages, photos, babyGuesses, pool, saved, scratch, trivia] = await Promise.all([
     db.from("guests").select("name, email, added_by, designs(image_path, status)").eq("party_id", partyId),
     db.from("messages").select("author_name, body, media_type, created_at").eq("party_id", partyId).eq("status", "visible").order("created_at"),
     db.from("photos").select("author_name").eq("party_id", partyId).eq("status", "visible"),
@@ -33,6 +33,7 @@ export async function listThankYous(partyId: string): Promise<ThankRow[]> {
     db.from("pool_entries").select("player_name").eq("party_id", partyId),
     db.from("thank_yous").select("person_key, gift_note, thanked_at, emailed_at").eq("party_id", partyId),
     db.from("scratch_cards").select("player_name").eq("party_id", partyId),
+    db.from("trivia_answers").select("player_name").eq("party_id", partyId),
   ]);
   const cards = await db.from("thank_cards").select("person_key, opened_at").eq("party_id", partyId);
   if (guests.error) throw dbError("loading guests for thank-yous", guests.error);
@@ -85,6 +86,7 @@ export async function listThankYous(partyId: string): Promise<ThankRow[]> {
   for (const e of pool.data ?? []) get(e.player_name).contributions.games = true;
   // Missing until the scratch-off game's database update is run; that's fine
   for (const c of (scratch.error ? [] : scratch.data) ?? []) get(c.player_name).contributions.games = true;
+  for (const t of (trivia.error ? [] : trivia.data) ?? []) get(t.player_name).contributions.games = true;
   for (const s of saved.data ?? []) {
     const p = people.get(s.person_key);
     if (!p) continue;

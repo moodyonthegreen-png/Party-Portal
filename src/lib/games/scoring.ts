@@ -93,3 +93,19 @@ export function formatWeight(oz: number) {
   const rest = oz % 16;
   return `${lb} lb ${rest} oz`;
 }
+
+// ---------------------------------------------------------------------------
+// Baby trivia
+// ---------------------------------------------------------------------------
+
+export type TriviaEntry = { name: string; answers: Record<string, number> };
+
+/** Score against the host's current questions; `key` maps each question id to its right option. */
+export function scoreTrivia<E extends TriviaEntry>(key: { id: string; answer: number }[], entries: E[]) {
+  const rows = entries.map((e) => ({
+    ...e,
+    correct: key.filter((q) => e.answers[q.id] === q.answer).length,
+    total: key.length,
+  }));
+  return placeBy(rows, (r) => r.correct, "high");
+}
