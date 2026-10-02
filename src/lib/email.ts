@@ -143,3 +143,19 @@ export function thankYouEmail(opts: { to: string; message: string; fromName: str
     text: opts.message,
   };
 }
+
+export function thankYouCardEmail(opts: { to: string; recipientName: string; fromName: string; guestOfHonorName: string; url: string; replyTo?: string }): Email {
+  return {
+    to: opts.to,
+    replyTo: opts.replyTo,
+    subject: `A thank-you card for you from ${opts.fromName} 💌`,
+    html: layout({
+      preheader: "Tap to open your card",
+      heading: "You've got a card!",
+      body: `<p style="text-align:center">Hi ${esc(opts.recipientName)},</p>
+        <p style="text-align:center">${esc(opts.fromName)} sent you a little thank-you card for celebrating <strong>${esc(opts.guestOfHonorName)}</strong>.</p>`,
+      button: { label: "Open your card", url: opts.url },
+    }),
+    text: `Hi ${opts.recipientName},\n\n${opts.fromName} sent you a thank-you card for celebrating ${opts.guestOfHonorName}. Open it here: ${opts.url}`,
+  };
+}

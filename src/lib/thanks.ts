@@ -13,6 +13,9 @@ export type ThankRow = {
   giftNote: string | null;
   thankedAt: string | null;
   emailedAt: string | null;
+  /** When they opened their thank-you card, if one was made */
+  cardOpenedAt: string | null;
+  hasCard: boolean;
 };
 
 /**
@@ -30,6 +33,7 @@ export async function listThankYous(partyId: string): Promise<ThankRow[]> {
     db.from("pool_entries").select("player_name").eq("party_id", partyId),
     db.from("thank_yous").select("person_key, gift_note, thanked_at, emailed_at").eq("party_id", partyId),
   ]);
+  const cards = await db.from("thank_cards").select("person_key, opened_at").eq("party_id", partyId);
   if (guests.error) throw dbError("loading guests for thank-yous", guests.error);
 
   const people = new Map<string, ThankRow & { designPath: string | null }>();
@@ -49,6 +53,8 @@ export async function listThankYous(partyId: string): Promise<ThankRow[]> {
         giftNote: null,
         thankedAt: null,
         emailedAt: null,
+        cardOpenedAt: null,
+        hasCard: false,
       };
       people.set(key, p);
     }
@@ -82,6 +88,13 @@ export async function listThankYous(partyId: string): Promise<ThankRow[]> {
     p.giftNote = s.gift_note;
     p.thankedAt = s.thanked_at;
     p.emailedAt = s.emailed_at;
+  }
+
+  for (const c of cards.data ?? []) {
+    const p = people.get(c.person_key);
+    if (!p) continue;
+    p.hasCard = true;
+    p.cardOpenedAt = c.opened_at;
   }
 
   const rows = [...people.values()];

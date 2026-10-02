@@ -3,7 +3,7 @@
 import { useMemo, useRef, useState } from "react";
 import type { ThankRow } from "@/lib/thanks";
 import { contributionPhrases, draftThankYou, joinList } from "@/lib/thanks-draft";
-import { emailThankYou, setGiftNote, setThanked } from "../actions";
+import { emailThankYou, getCardLink, setGiftNote, setThanked } from "../actions";
 
 type Filter = "all" | "todo" | "done";
 
@@ -205,13 +205,36 @@ function PersonCard({
     if (!window.confirm(`Email this thank-you to ${email}?`)) return;
     setBusy(true);
     setStatus(null);
-    const res = await emailThankYou(slug, p.key, email, text);
+    const res = await emailThankYou(slug, p.key, p.name, email, text);
     setBusy(false);
     if (res.error) setStatus(res.error);
     else {
       const now = new Date().toISOString();
-      onChange({ emailedAt: now, thankedAt: now, email });
-      setStatus("Sent! Marked as thanked.");
+      onChange({ emailedAt: now, thankedAt: now, email, hasCard: true });
+      setStatus("Card sent! Marked as thanked.");
+    }
+  }
+
+  /** Save the card, then copy its link or open a preview. */
+  async function cardLink(then: "copy" | "preview") {
+    // Open the tab straight away so pop-up blockers allow it
+    const tab = then === "preview" ? window.open("", "_blank") : null;
+    setBusy(true);
+    setStatus(null);
+    const res = await getCardLink(slug, p.key, p.name, text);
+    setBusy(false);
+    if (res.error || !res.url) {
+      tab?.close();
+      setStatus(res.error ?? "Something went wrong.");
+      return;
+    }
+    onChange({ hasCard: true });
+    if (then === "preview") {
+      if (tab) tab.location.href = `${res.url}?preview=1`;
+      else window.open(`${res.url}?preview=1`, "_blank");
+    } else {
+      await navigator.clipboard.writeText(res.url);
+      setStatus("Card link copied. Paste it into a text message!");
     }
   }
 
@@ -239,7 +262,7 @@ function PersonCard({
           <p className="pp-soft" style={{ fontSize: "0.85rem" }}>
             {badges.length ? badges.join(" · ") : p.onGuestList ? "On the guest list" : ""}
             {p.giftNote ? ` · 🎁 ${p.giftNote}` : ""}
-            {p.emailedAt ? " · ✉️ thank-you emailed" : ""}
+            {p.cardOpenedAt ? " · 💌 card opened" : p.emailedAt ? " · ✉️ card sent" : ""}
           </p>
         </div>
         <button type="button" className="pp-link" style={{ fontSize: "0.9rem", flexShrink: 0 }} onClick={onToggleOpen}>
@@ -291,42 +314,55 @@ function PersonCard({
               </button>
             )}
           </div>
-          <div style={{ display: "flex", gap: "0.6rem", flexWrap: "wrap", alignItems: "center" }}>
-            <button
-              type="button"
-              className="pp-btn pp-btn-ghost"
-              style={{ fontSize: "0.75rem", padding: "0.6rem 1rem" }}
-              onClick={async () => {
-                await navigator.clipboard.writeText(text);
-                setStatus("Copied. Paste it into a card, text or email.");
-              }}
-            >
-              Copy note
-            </button>
-            {canEmail && (
-              <>
-                <input
-                  type="email"
-                  className="pp-field"
-                  value={email}
-                  placeholder="their email"
-                  onChange={(e) => setEmail(e.target.value)}
-                  style={{ width: "auto", minWidth: 200, padding: "0.55rem 0.75rem", fontSize: "0.95rem" }}
-                  aria-label="Their email"
-                />
-                <button
-                  type="button"
-                  className="pp-btn"
-                  style={{ fontSize: "0.75rem", padding: "0.6rem 1rem" }}
-                  disabled={busy || !email.includes("@")}
-                  onClick={send}
-                >
-                  {busy ? "Sending…" : p.emailedAt ? "Email again" : "Email it"}
-                </button>
-              </>
-            )}
+          <div style={{ display: "grid", gap: "0.6rem" }}>
+            <p className="pp-caps" style={{ fontSize: "0.7rem" }}>
+              Send it as a card that opens 💌
+            </p>
+            <div style={{ display: "flex", gap: "0.6rem", flexWrap: "wrap", alignItems: "center" }}>
+              {canEmail && (
+                <>
+                  <input
+                    type="email"
+                    className="pp-field"
+                    value={email}
+                    placeholder="their email"
+                    onChange={(e) => setEmail(e.target.value)}
+                    style={{ width: "auto", minWidth: 200, padding: "0.55rem 0.75rem", fontSize: "0.95rem" }}
+                    aria-label="Their email"
+                  />
+                  <button
+                    type="button"
+                    className="pp-btn"
+                    style={{ fontSize: "0.75rem", padding: "0.6rem 1rem" }}
+                    disabled={busy || !email.includes("@")}
+                    onClick={send}
+                  >
+                    {busy ? "Working…" : p.emailedAt ? "Email the card again" : "Email the card"}
+                  </button>
+                </>
+              )}
+              <button type="button" className="pp-btn pp-btn-ghost" style={{ fontSize: "0.75rem", padding: "0.6rem 1rem" }} disabled={busy} onClick={() => cardLink("copy")}>
+                Copy card link
+              </button>
+              <button type="button" className="pp-link" style={{ fontSize: "0.9rem" }} disabled={busy} onClick={() => cardLink("preview")}>
+                Preview card
+              </button>
+            </div>
+            <p className="pp-soft" style={{ fontSize: "0.85rem" }}>
+              Writing a paper card instead?{" "}
+              <button
+                type="button"
+                className="pp-link"
+                onClick={async () => {
+                  await navigator.clipboard.writeText(text);
+                  setStatus("Note copied.");
+                }}
+              >
+                Copy just the note
+              </button>
+            </p>
           </div>
-          {status && <p style={{ fontSize: "0.9rem", color: status.startsWith("Sent") || status.startsWith("Copied") ? "var(--pp-accent)" : "var(--pp-leather)" }}>{status}</p>}
+          {status && <p style={{ fontSize: "0.9rem", color: /^(Card|Note|Sent)/.test(status) ? "var(--pp-accent)" : "var(--pp-leather)" }}>{status}</p>}
         </div>
       )}
     </li>

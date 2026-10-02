@@ -3,9 +3,10 @@
 import { revalidatePath } from "next/cache";
 import { sanitizeLayout } from "@/lib/gift/layout";
 import { ownedProducts, PRODUCTS, type ProductKey } from "@/lib/gift/products";
-import { EmailError, emailConfigured, isEmail, reminderEmail, sendEmails, thankYouEmail } from "@/lib/email";
+import { EmailError, emailConfigured, isEmail, reminderEmail, sendEmails, thankYouCardEmail } from "@/lib/email";
 import { parseGuestLines } from "@/lib/guests";
 import { requireHost, type HostParty } from "@/lib/host";
+import { newCardToken } from "@/lib/thank-cards";
 import { createDraftProduct, deleteProduct, PrintifyError, printifyConfigured, type Mockup } from "@/lib/printify";
 import { DESIGNS_BUCKET, supabaseAdmin } from "@/lib/supabase/admin";
 import { siteOrigin } from "@/lib/site";
@@ -711,7 +712,58 @@ export async function setGiftNote(slug: string, key: string, note: string): Prom
   return { ok: true };
 }
 
-export async function emailThankYou(slug: string, key: string, to: string, message: string): Promise<ActionState> {
+/** Create or update this person's thank-you card and return its link. */
+async function upsertCard(party: HostParty, key: string, name: string, message: string) {
+  const db = supabaseAdmin();
+  const esc = key.replace(/[\\%_]/g, (c) => `\\${c}`);
+  // Their design (if any) goes on the inside of the card
+  const { data: guest } = await db
+    .from("guests")
+    .select("id, email, designs(image_path, status)")
+    .eq("party_id", party.id)
+    .ilike("name", esc)
+    .maybeSingle();
+  const design = (guest?.designs as unknown as { image_path: string; status: string }[] | null)?.find((d) => d.status === "visible");
+
+  const { data: existing } = await db
+    .from("thank_cards")
+    .select("token")
+    .eq("party_id", party.id)
+    .eq("person_key", key)
+    .maybeSingle();
+  const token = existing?.token ?? newCardToken();
+  const now = new Date().toISOString();
+  const { error } = await db.from("thank_cards").upsert(
+    {
+      token,
+      party_id: party.id,
+      person_key: key,
+      recipient_name: name.trim().slice(0, 80) || key,
+      message: message.trim().slice(0, 5000),
+      design_path: design?.image_path ?? null,
+      updated_at: now,
+    },
+    { onConflict: "token" },
+  );
+  if (error) throw new Error("We couldn't save the card. Please try again.");
+  return { url: `${await siteOrigin()}/c/${token}`, guest };
+}
+
+/** Save the card and hand back its private link (to text, or to preview). */
+export async function getCardLink(slug: string, key: string, name: string, message: string): Promise<ActionState & { url?: string }> {
+  const party = await host(slug);
+  if (isState(party)) return party;
+  const k = cleanKey(key);
+  if (!k || !message.trim()) return { error: "Write a message first." };
+  try {
+    const { url } = await upsertCard(party, k, name, message);
+    return { ok: true, url };
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : "Something went wrong." };
+  }
+}
+
+export async function emailThankYou(slug: string, key: string, name: string, to: string, message: string): Promise<ActionState> {
   const party = await host(slug);
   if (isState(party)) return party;
   const k = cleanKey(key);
@@ -721,22 +773,26 @@ export async function emailThankYou(slug: string, key: string, to: string, messa
   if (message.length > 5000) return { error: "That message is a bit long." };
   if (!emailConfigured()) return { error: "Email isn't set up yet." };
 
-  // Remember the address on the guest list for next time
-  const db = supabaseAdmin();
-  const { data: guest } = await db
-    .from("guests")
-    .select("id, email, name")
-    .eq("party_id", party.id)
-    .ilike("name", k.replace(/[\\%_]/g, (c) => `\\${c}`))
-    .maybeSingle();
-  if (guest && !guest.email) await db.from("guests").update({ email: to.trim().toLowerCase() }).eq("id", guest.id);
+  let url: string;
+  try {
+    const card = await upsertCard(party, k, name, message);
+    url = card.url;
+    // Remember the address on the guest list for next time
+    if (card.guest && !card.guest.email) {
+      await supabaseAdmin().from("guests").update({ email: to.trim().toLowerCase() }).eq("id", card.guest.id);
+    }
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : "Something went wrong." };
+  }
 
   try {
     await sendEmails([
-      thankYouEmail({
+      thankYouCardEmail({
         to: to.trim(),
-        message,
+        recipientName: name.trim(),
         fromName: party.hostName ?? `${party.guestOfHonorName}'s ${party.occasion.toLowerCase()}`,
+        guestOfHonorName: party.guestOfHonorName,
+        url,
         replyTo: isEmail(party.hostEmail) ? party.hostEmail : undefined,
       }),
     ]);
@@ -745,5 +801,5 @@ export async function emailThankYou(slug: string, key: string, to: string, messa
   }
   const now = new Date().toISOString();
   await saveThank(party.id, k, { emailed_at: now, thanked_at: now });
-  return { ok: true, message: "Sent!" };
+  return { ok: true, message: "Card sent! Marked as thanked." };
 }
