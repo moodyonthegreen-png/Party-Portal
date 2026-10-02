@@ -140,7 +140,7 @@ export function SettingsForm({
             placeholder={taglineDefault ?? "e.g. The mom-to-be"}
           />
         </Field>
-        <Field id="welcome_message" title="Welcome message" help="Shown on the welcome card. Leave blank to use the friendly default shown.">
+        <Field id="welcome_message" title="Welcome message" help="Shown at the top of the party page. Leave blank to use the friendly default shown. You can add a welcome video and photos further down this page.">
           <textarea
             id="welcome_message"
             name="welcome_message"

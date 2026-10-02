@@ -1,7 +1,9 @@
 import { notFound } from "next/navigation";
 import { getHostParty, listCoHosts } from "@/lib/host";
 import { THEMES } from "@/themes";
+import { getWelcome, MAX_WELCOME_PHOTOS } from "@/lib/welcome";
 import { CoHosts } from "./CoHosts";
+import { WelcomeMedia } from "./WelcomeMedia";
 import { PasswordForm, SettingsForm } from "./SettingsForm";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -11,7 +13,7 @@ export default async function HostSettings({ params }: Props) {
   const party = await getHostParty(slug);
   if (!party) notFound();
 
-  const coHosts = await listCoHosts(party.id);
+  const [coHosts, welcome] = await Promise.all([listCoHosts(party.id), getWelcome(party.id)]);
   const themes = Object.values(THEMES).map((t) => ({ id: t.id, name: t.name }));
 
   return (
@@ -32,6 +34,14 @@ export default async function HostSettings({ params }: Props) {
           requireGuestList: party.requireGuestList,
           hostName: party.hostName ?? "",
         }}
+      />
+      <WelcomeMedia
+        slug={party.slug}
+        firstName={party.guestOfHonorName.split(" ")[0]}
+        video={welcome.video}
+        photos={welcome.photos}
+        ready={welcome.ready}
+        maxPhotos={MAX_WELCOME_PHOTOS}
       />
       <CoHosts
         slug={party.slug}

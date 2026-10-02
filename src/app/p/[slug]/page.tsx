@@ -7,6 +7,8 @@ import { countMessages } from "@/lib/messages";
 import { albumPreview } from "@/lib/photos";
 import { getParty } from "@/lib/parties";
 import { DESIGNS_BUCKET, supabaseAdmin } from "@/lib/supabase/admin";
+import { getWelcome } from "@/lib/welcome";
+import { WelcomeGallery } from "./WelcomeGallery";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -75,10 +77,11 @@ export default async function PartyHome({ params }: Props) {
   // Both are the host's own words when they've written them
   const tagline = party.tagline ?? defaultTagline(party.occasion);
   const welcome = party.welcomeMessage ?? defaultWelcome(party.guestOfHonorName);
-  const [messageCount, album, more] = await Promise.all([
+  const [messageCount, album, more, hello] = await Promise.all([
     party.sections.messages ? countMessages(party.id) : 0,
     party.sections.album ? albumPreview(party.id) : { count: 0, urls: [] },
     previews(party.id),
+    getWelcome(party.id),
   ]);
   const raffle = party.games.raffle;
   const excerpt = more.note ? (more.note.body.length > 70 ? `${more.note.body.slice(0, 68).trimEnd()}…` : more.note.body) : null;
@@ -104,9 +107,16 @@ export default async function PartyHome({ params }: Props) {
       </div>
 
       <div className="pp-home-body">
-      {/* A note from the host */}
+      {/* The welcome: a video hello, a note, and photos from the host */}
       <section className="pp-paper pp-letter">
+        {hello.video && (
+          <figure className="pp-hello">
+            <video src={hello.video.url} controls playsInline preload="metadata" />
+            {hello.video.by && <figcaption>A hello from {hello.video.by}</figcaption>}
+          </figure>
+        )}
         <p>{welcome}</p>
+        {hello.photos.length > 0 && <WelcomeGallery photos={hello.photos} />}
       </section>
 
       <h2 className="pp-contents-title">At the party</h2>

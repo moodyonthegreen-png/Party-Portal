@@ -12,6 +12,9 @@ import { coHostInviteEmail, EmailError, raffleWinnerEmail, emailConfigured, isEm
 import { parseGuestLines } from "@/lib/guests";
 import { issueCoHostLink, requireHost, viewerName, type HostParty } from "@/lib/host";
 import { newCardToken } from "@/lib/thank-cards";
+import { MAX_MEDIA_BYTES, MEDIA_BUCKET, MEDIA_TYPES } from "@/lib/messages";
+import { PHOTOS_BUCKET } from "@/lib/photos";
+import { MAX_WELCOME_PHOTOS } from "@/lib/welcome";
 import { createDraftProduct, deleteProduct, listGarmentOptions, PrintifyError, printifyConfigured, type GarmentOption, type Mockup } from "@/lib/printify";
 import { DESIGNS_BUCKET, supabaseAdmin } from "@/lib/supabase/admin";
 import { siteOrigin } from "@/lib/site";
@@ -1136,4 +1139,129 @@ export async function getGiftOptions(
     console.error("[gift] colors and sizes failed", e instanceof PrintifyError ? e.message : e);
     return { ok: false, error: "We couldn't load the colors and sizes. Please try again in a minute." };
   }
+}
+
+// ---------------------------------------------------------------------------
+// Welcome video and photos (shown at the top of the guest home page)
+// ---------------------------------------------------------------------------
+
+const WELCOME_NOT_READY = "Welcome videos and photos aren't switched on yet (the database update hasn't been run).";
+
+export async function startWelcomeVideo(
+  slug: string,
+  input: { mime: string; size: number },
+): Promise<{ ok: true; path: string; token: string } | { ok: false; error: string }> {
+  const party = await host(slug);
+  if (isState(party)) return { ok: false, error: party.error ?? "Please open your host link again." };
+  const base = input.mime.split(";")[0].trim().toLowerCase();
+  const type = MEDIA_TYPES[base];
+  if (!type || type.kind !== "video") return { ok: false, error: "That kind of video isn't supported. Try an MP4 or MOV, or record one here." };
+  if (input.size > MAX_MEDIA_BYTES) return { ok: false, error: "That video is too large (the limit is 50 MB). Try recording it here, or a shorter clip." };
+  const path = `${party.id}/welcome-${crypto.randomUUID()}.${type.ext}`;
+  const { data, error } = await supabaseAdmin().storage.from(MEDIA_BUCKET).createSignedUploadUrl(path);
+  if (error || !data) return { ok: false, error: "We couldn't get ready to upload. Please try again." };
+  return { ok: true, path: data.path, token: data.token };
+}
+
+export async function finishWelcomeVideo(slug: string, path: string): Promise<ActionState> {
+  const party = await host(slug);
+  if (isState(party)) return party;
+  if (!path.startsWith(`${party.id}/welcome-`)) return { error: "That video wasn't found." };
+  const db = supabaseAdmin();
+  const name = path.split("/").pop()!;
+  const { data: files } = await db.storage.from(MEDIA_BUCKET).list(party.id, { search: name, limit: 2 });
+  if (!(files ?? []).some((f) => f.name === name)) return { error: "Your video didn't finish uploading. Please try again." };
+
+  const { data: cur, error: readErr } = await db.from("parties").select("welcome_video_path").eq("id", party.id).single();
+  if (readErr) return { error: WELCOME_NOT_READY };
+  const { error } = await db.from("parties").update({ welcome_video_path: path, welcome_video_by: viewerName(party) }).eq("id", party.id);
+  if (error) return { error: "We couldn't save your video. Please try again." };
+  if (cur?.welcome_video_path && cur.welcome_video_path !== path) await db.storage.from(MEDIA_BUCKET).remove([cur.welcome_video_path]);
+  refresh(party.slug);
+  return { ok: true, message: "Your welcome video is on the party page." };
+}
+
+export async function removeWelcomeVideo(slug: string): Promise<ActionState> {
+  const party = await host(slug);
+  if (isState(party)) return party;
+  const db = supabaseAdmin();
+  const { data: cur, error: readErr } = await db.from("parties").select("welcome_video_path").eq("id", party.id).single();
+  if (readErr) return { error: WELCOME_NOT_READY };
+  await db.from("parties").update({ welcome_video_path: null, welcome_video_by: null }).eq("id", party.id);
+  if (cur?.welcome_video_path) await db.storage.from(MEDIA_BUCKET).remove([cur.welcome_video_path]);
+  refresh(party.slug);
+  return { ok: true, message: "Video removed." };
+}
+
+export async function startWelcomePhoto(slug: string): Promise<{ ok: true; id: string; path: string; token: string } | { ok: false; error: string }> {
+  const party = await host(slug);
+  if (isState(party)) return { ok: false, error: party.error ?? "Please open your host link again." };
+  const db = supabaseAdmin();
+  const { count, error } = await db.from("welcome_photos").select("id", { count: "exact", head: true }).eq("party_id", party.id);
+  if (error) return { ok: false, error: WELCOME_NOT_READY };
+  if ((count ?? 0) >= MAX_WELCOME_PHOTOS) return { ok: false, error: `You can share up to ${MAX_WELCOME_PHOTOS} photos here.` };
+  const id = crypto.randomUUID();
+  const path = `${party.id}/welcome/${id}.jpg`;
+  const { data, error: upErr } = await db.storage.from(PHOTOS_BUCKET).createSignedUploadUrl(path);
+  if (upErr || !data) return { ok: false, error: "We couldn't get ready to upload. Please try again." };
+  return { ok: true, id, path: data.path, token: data.token };
+}
+
+export async function finishWelcomePhoto(slug: string, id: string, caption: string): Promise<ActionState> {
+  const party = await host(slug);
+  if (isState(party)) return party;
+  if (!UUID.test(id)) return { error: "That photo wasn't found." };
+  const db = supabaseAdmin();
+  const path = `${party.id}/welcome/${id}.jpg`;
+  const { data: files } = await db.storage.from(PHOTOS_BUCKET).list(`${party.id}/welcome`, { search: id, limit: 2 });
+  if (!(files ?? []).length) return { error: "Your photo didn't finish uploading. Please try again." };
+  const { count } = await db.from("welcome_photos").select("id", { count: "exact", head: true }).eq("party_id", party.id);
+  const { error } = await db
+    .from("welcome_photos")
+    .insert({ id, party_id: party.id, image_path: path, caption: caption.trim().slice(0, 140) || null, sort: count ?? 0 });
+  if (error) return { error: "We couldn't add your photo. Please try again." };
+  refresh(party.slug);
+  return { ok: true };
+}
+
+export async function setWelcomePhotoCaption(slug: string, id: string, caption: string): Promise<ActionState> {
+  const party = await host(slug);
+  if (isState(party)) return party;
+  if (!UUID.test(id)) return { error: "That photo wasn't found." };
+  const { error } = await supabaseAdmin()
+    .from("welcome_photos")
+    .update({ caption: caption.trim().slice(0, 140) || null })
+    .eq("party_id", party.id)
+    .eq("id", id);
+  if (error) return { error: "We couldn't save the caption." };
+  refresh(party.slug);
+  return { ok: true };
+}
+
+export async function moveWelcomePhoto(slug: string, id: string, dir: -1 | 1): Promise<ActionState> {
+  const party = await host(slug);
+  if (isState(party)) return party;
+  const db = supabaseAdmin();
+  const { data } = await db.from("welcome_photos").select("id").eq("party_id", party.id).order("sort").order("created_at");
+  const ids = (data ?? []).map((r) => r.id as string);
+  const i = ids.indexOf(id);
+  const j = i + dir;
+  if (i < 0 || j < 0 || j >= ids.length) return { ok: true };
+  [ids[i], ids[j]] = [ids[j], ids[i]];
+  await Promise.all(ids.map((pid, k) => db.from("welcome_photos").update({ sort: k }).eq("id", pid).eq("party_id", party.id)));
+  refresh(party.slug);
+  return { ok: true };
+}
+
+export async function deleteWelcomePhoto(slug: string, id: string): Promise<ActionState> {
+  const party = await host(slug);
+  if (isState(party)) return party;
+  if (!UUID.test(id)) return { error: "That photo wasn't found." };
+  const db = supabaseAdmin();
+  const { data } = await db.from("welcome_photos").select("image_path").eq("party_id", party.id).eq("id", id).maybeSingle();
+  if (!data) return { error: "That photo wasn't found." };
+  await db.from("welcome_photos").delete().eq("id", id).eq("party_id", party.id);
+  await db.storage.from(PHOTOS_BUCKET).remove([data.image_path as string]);
+  refresh(party.slug);
+  return { ok: true };
 }
