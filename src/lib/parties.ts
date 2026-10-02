@@ -22,6 +22,9 @@ export type PublicParty = {
   welcomeMessage: string | null;
   /** Line under the name, e.g. "A little explorer is landing soon" */
   tagline: string | null;
+  /** Banner text the host can change: the small line on top and the big text (default: the name) */
+  bannerTop: string | null;
+  bannerHeadline: string | null;
   /** When the celebration itself happens (optional) */
   eventDate: string | null;
   /** Deadline for guests to add their design for the group gift */
@@ -57,6 +60,8 @@ export const getParty = cache(async (slug: string): Promise<PublicParty | null> 
     title: data.title,
     welcomeMessage: data.welcome_message,
     tagline: data.tagline ?? null,
+    bannerTop: data.banner_top ?? null,
+    bannerHeadline: data.banner_headline ?? null,
     eventDate: data.event_date ?? null,
     deadline: data.deadline,
     theme: data.theme,

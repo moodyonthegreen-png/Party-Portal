@@ -245,26 +245,37 @@ export async function updateDetails(slug: string, _prev: ActionState, formData: 
     registry: Boolean(registryUrl),
   };
 
-  const { error } = await supabaseAdmin()
-    .from("parties")
-    .update({
-      guest_of_honor_name: name,
-      occasion,
-      tagline: text(formData, "tagline", 120),
-      welcome_message: text(formData, "welcome_message", 1500),
-      event_date: eventDate,
-      deadline,
-      theme,
-      registry_url: registryUrl,
-      sections,
-      require_guest_list: formData.get("require_guest_list") === "on",
-      host_name: text(formData, "host_name", 80),
-    })
-    .eq("id", party.id);
+  const details = {
+    guest_of_honor_name: name,
+    occasion,
+    tagline: text(formData, "tagline", 120),
+    welcome_message: text(formData, "welcome_message", 1500),
+    event_date: eventDate,
+    deadline,
+    theme,
+    registry_url: registryUrl,
+    sections,
+    require_guest_list: formData.get("require_guest_list") === "on",
+    host_name: text(formData, "host_name", 80),
+  };
+  const banner = { banner_top: text(formData, "banner_top", 60), banner_headline: text(formData, "banner_headline", 60) };
+  const db = supabaseAdmin();
+  let { error } = await db.from("parties").update({ ...details, ...banner }).eq("id", party.id);
+  let bannerSkipped = false;
+  if (error && (error.code === "PGRST204" || error.code === "42703")) {
+    // Banner columns not added yet: save everything else
+    ({ error } = await db.from("parties").update(details).eq("id", party.id));
+    bannerSkipped = true;
+  }
   if (error) return { error: "We couldn't save your changes. Please try again." };
 
   refresh(party.slug);
-  return { ok: true, message: "Saved! Your guest page is updated." };
+  return {
+    ok: true,
+    message: bannerSkipped
+      ? "Saved, except the banner text: that needs a quick database update first."
+      : "Saved! Your guest page is updated.",
+  };
 }
 
 export async function setPartyPassword(slug: string, _prev: ActionState, formData: FormData): Promise<ActionState> {

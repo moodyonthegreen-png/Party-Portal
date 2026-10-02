@@ -8,6 +8,8 @@ type Initial = {
   guestOfHonorName: string;
   occasion: string;
   tagline: string;
+  bannerTop: string;
+  bannerHeadline: string;
   welcomeMessage: string;
   eventDate: string | null;
   deadline: string;
@@ -81,6 +83,9 @@ export function SettingsForm({
 }) {
   const [state, action, pending] = useActionState<ActionState, FormData>(updateDetails.bind(null, slug), {});
   const [name, setName] = useState(initial.guestOfHonorName);
+  const [bannerTop, setBannerTop] = useState(initial.bannerTop);
+  const [bannerHeadline, setBannerHeadline] = useState(initial.bannerHeadline);
+  const [tagline, setTagline] = useState(initial.tagline);
   const [occasion, setOccasion] = useState(initial.occasion);
   const [theme, setTheme] = useState(initial.theme);
   const [eventLocal, setEventLocal] = useState("");
@@ -129,20 +134,7 @@ export function SettingsForm({
             ))}
           </datalist>
         </Field>
-        <Field
-          id="tagline"
-          title="Line under the name"
-          help={taglineDefault ? `Leave blank to use “${taglineDefault}”.` : "Optional."}
-        >
-          <input
-            id="tagline"
-            name="tagline"
-            className="pp-field"
-            maxLength={120}
-            defaultValue={initial.tagline}
-            placeholder={taglineDefault ?? "e.g. The mom-to-be"}
-          />
-        </Field>
+
         <Field id="welcome_message" title="Welcome message" help="Shown at the top of the party page. Leave blank to use the friendly default shown. You can add a welcome video and photos below.">
           <textarea
             id="welcome_message"
@@ -157,6 +149,29 @@ export function SettingsForm({
         </Field>
         <Field id="host_name" title="Your name" help="Optional. For your own records and future emails to guests.">
           <input id="host_name" name="host_name" className="pp-field" maxLength={80} defaultValue={initial.hostName} />
+        </Field>
+      </section>
+
+      <section className="pp-paper" style={card}>
+        <h2 className="pp-caps" style={{ fontSize: "0.8rem" }}>
+          Banner
+        </h2>
+        <p className="pp-soft" style={{ marginTop: "-0.5rem" }}>
+          The banner across the top of the party page. Leave any line blank to use the suggestion shown.
+        </p>
+        <div data-theme={theme} className="pp-banner pp-banner-preview" aria-hidden="true">
+          <p className="pp-banner-top">{bannerTop.trim() || "Celebrating"}</p>
+          <p className="pp-banner-name pp-foil">{bannerHeadline.trim() || name || "Their name"}</p>
+          {(tagline.trim() || taglineDefault) && <p className="pp-banner-sub">{tagline.trim() || taglineDefault}</p>}
+        </div>
+        <Field id="banner_top" title="Small line on top">
+          <input id="banner_top" name="banner_top" className="pp-field" maxLength={60} value={bannerTop} onChange={(e) => setBannerTop(e.target.value)} placeholder="Celebrating" />
+        </Field>
+        <Field id="banner_headline" title="Big text" help="Usually the guest of honor's name.">
+          <input id="banner_headline" name="banner_headline" className="pp-field" maxLength={60} value={bannerHeadline} onChange={(e) => setBannerHeadline(e.target.value)} placeholder={name || "Their name"} />
+        </Field>
+        <Field id="tagline" title="Line underneath" help={taglineDefault ? `Leave blank to use “${taglineDefault}”.` : "Optional."}>
+          <input id="tagline" name="tagline" className="pp-field" maxLength={120} value={tagline} onChange={(e) => setTagline(e.target.value)} placeholder={taglineDefault ?? "e.g. The mom-to-be"} />
         </Field>
       </section>
 

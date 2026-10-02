@@ -25,6 +25,8 @@ export default async function HostSettings({ params }: Props) {
           guestOfHonorName: party.guestOfHonorName,
           occasion: party.occasion,
           tagline: party.tagline ?? "",
+          bannerTop: party.bannerTop ?? "",
+          bannerHeadline: party.bannerHeadline ?? "",
           welcomeMessage: party.welcomeMessage ?? "",
           eventDate: party.eventDate,
           deadline: party.deadline,

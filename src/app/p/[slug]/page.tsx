@@ -88,23 +88,19 @@ export default async function PartyHome({ params }: Props) {
 
   return (
     <main className="pp-wrap pp-home">
-      {/* The book cover */}
-      <div className="pp-home-cover">
-      <section className="pp-cover">
+      {/* The banner */}
+      <section className="pp-banner">
         <Ornament />
-        <p className="pp-cover-sub" style={{ marginTop: "1.1rem", opacity: 0.92 }}>
-          Celebrating
-        </p>
-        <h1 className="pp-cover-name pp-foil">{party.guestOfHonorName}</h1>
-        {party.title && <p className="pp-cover-sub">{party.title}</p>}
-        {tagline && <p className="pp-cover-sub">{tagline}</p>}
+        <p className="pp-banner-top">{party.bannerTop ?? "Celebrating"}</p>
+        <h1 className="pp-banner-name pp-foil">{party.bannerHeadline ?? party.guestOfHonorName}</h1>
+        {party.title && <p className="pp-banner-sub">{party.title}</p>}
+        {tagline && <p className="pp-banner-sub">{tagline}</p>}
         {party.eventDate && (
-          <p className="pp-cover-meta">
+          <p className="pp-banner-meta">
             <EventLine iso={party.eventDate} />
           </p>
         )}
       </section>
-      </div>
 
       <div className="pp-home-body">
       {/* The welcome: a video hello, a note, and photos from the host */}
