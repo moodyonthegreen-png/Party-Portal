@@ -61,7 +61,7 @@ export function TriviaHost({
     <GameCard
       id="trivia"
       title="Baby trivia"
-      blurb="Multiple-choice questions about babies, from soft spots to baby swans. Highest score wins."
+      blurb="Multiple-choice questions about babies, from soft spots to first steps. Highest score wins."
       on={game.on}
       onToggle={(v) => run(() => setTrivia(slug, { on: v }))}
       busy={pending}

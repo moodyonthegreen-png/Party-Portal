@@ -1,7 +1,7 @@
 /** Per-party game settings, stored in parties.games. Safe to import anywhere. */
 
 /** Baby trivia: a good mix to start with (ids from trivia-bank.ts) */
-export const DEFAULT_TRIVIA = ["bones", "kneecaps", "stomach", "soft-spot", "due-date", "vernix", "colostrum", "top-girl-name", "joey", "cygnet"];
+export const DEFAULT_TRIVIA = ["bones", "kneecaps", "stomach", "soft-spot", "due-date", "vernix", "colostrum", "top-girl-name", "first-tooth-age", "moro"];
 export const MAX_TRIVIA = 20;
 export type PoolActualStored = { date: string; time: string | null; weightOz: number; lengthIn: number | null };
 

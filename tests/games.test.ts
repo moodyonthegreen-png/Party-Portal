@@ -76,8 +76,8 @@ test("trivia: settings keep only real questions, in order, without repeats", asy
   const { DEFAULT_TRIVIA } = await import("../src/lib/games/settings.ts");
   const { TRIVIA_BANK, triviaQuestions } = await import("../src/lib/games/trivia-bank.ts");
   assert.deepEqual(parseGames({}).trivia.questions, DEFAULT_TRIVIA);
-  assert.deepEqual(parseGames({ trivia: { on: true, questions: ["joey", "nope", "joey", "bones", 5] } }).trivia.questions, ["joey", "nope", "bones"]);
-  assert.deepEqual(triviaQuestions(["joey", "nope", "bones"]).map((q) => q.id), ["joey", "bones"]);
+  assert.deepEqual(parseGames({ trivia: { on: true, questions: ["moro", "nope", "moro", "bones", 5] } }).trivia.questions, ["moro", "nope", "bones"]);
+  assert.deepEqual(triviaQuestions(["moro", "nope", "joey", "bones"]).map((q) => q.id), ["moro", "bones"]);
   for (const q of TRIVIA_BANK) {
     assert.ok(q.answer >= 0 && q.answer < q.options.length, q.id);
     assert.equal(new Set(q.options).size, q.options.length, q.id);
