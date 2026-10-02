@@ -6,7 +6,7 @@ import { PHOTOS_BUCKET } from "@/lib/photos";
 import { dbError, supabaseAdmin } from "@/lib/supabase/admin";
 import { personKey } from "@/lib/thanks-draft";
 import { listThankYous } from "@/lib/thanks";
-import { GAME_TITLES, gameWinners } from "@/lib/games/winners";
+import { gameWinners } from "@/lib/games/winners";
 
 /** One guest's part in the celebration, for the inside of their thank-you card. */
 export type WrapUp = {
@@ -85,7 +85,7 @@ export async function getWrapUp(party: PublicParty, key: string): Promise<WrapUp
 
   const gamePrizes = (await gameWinners(party))
     .filter((r) => r.winners.some((w) => w.key === key))
-    .map((r) => ({ game: GAME_TITLES[r.game], prize: r.prize }));
+    .map((r) => ({ game: r.title, prize: r.prize }));
 
   const joined = people.filter((p) => p.contributions.design || p.contributions.note || p.contributions.photos > 0 || p.contributions.games);
   return {

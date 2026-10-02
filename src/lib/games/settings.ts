@@ -18,8 +18,22 @@ export type RaffleSettings = {
 export type GamePrize = { on: boolean; prize: string; emailed: Record<string, string> };
 export const NO_PRIZE: GamePrize = { on: false, prize: "", emailed: {} };
 
+/** "Who has the daddy?": everyone scratches a card, one card hides the clear photo */
+export type ScratchWho = "daddy" | "mommy";
+export type ScratchSettings = {
+  on: boolean;
+  who: ScratchWho;
+  /** About how many guests will play; the secret winning card is picked from 1 to this */
+  expected: number;
+  photoPath: string | null;
+  prize: GamePrize;
+};
+export const scratchTitle = (who: ScratchWho) => (who === "mommy" ? "Who has the mommy?" : "Who has the daddy?");
+export const MAX_SCRATCH_PLAYERS = 300;
+
 export type GameSettings = {
   babyPhotos: { on: boolean; revealed: boolean; prize: GamePrize };
+  scratch: ScratchSettings;
   pool: { on: boolean; closed: boolean; actual: PoolActualStored | null; prize: GamePrize };
   raffle: RaffleSettings;
 };
@@ -27,6 +41,7 @@ export type GameSettings = {
 export const DEFAULT_GAMES: GameSettings = {
   babyPhotos: { on: true, revealed: false, prize: NO_PRIZE },
   pool: { on: true, closed: false, actual: null, prize: NO_PRIZE },
+  scratch: { on: false, who: "daddy", expected: 20, photoPath: null, prize: NO_PRIZE },
   raffle: { on: false, prizes: [], rules: { design: true, note: false, photos: false, games: false }, winners: [] },
 };
 
@@ -52,11 +67,24 @@ export function parseGames(raw: unknown): GameSettings {
   return {
     babyPhotos: { ...DEFAULT_GAMES.babyPhotos, ...(g.babyPhotos ?? {}), prize: parsePrize(g.babyPhotos?.prize) },
     pool: { ...DEFAULT_GAMES.pool, ...(g.pool ?? {}), prize: parsePrize(g.pool?.prize) },
+    scratch: parseScratch(g.scratch),
     raffle: {
       on: Boolean(r.on),
       prizes,
       rules: { ...DEFAULT_GAMES.raffle.rules, ...(r.rules ?? {}) },
       winners,
     },
+  };
+}
+
+function parseScratch(raw: unknown): ScratchSettings {
+  const s = (raw && typeof raw === "object" ? raw : {}) as Partial<ScratchSettings>;
+  const expected = Math.round(Number(s.expected));
+  return {
+    on: Boolean(s.on),
+    who: s.who === "mommy" ? "mommy" : "daddy",
+    expected: Number.isFinite(expected) && expected >= 1 ? Math.min(expected, MAX_SCRATCH_PLAYERS) : DEFAULT_GAMES.scratch.expected,
+    photoPath: typeof s.photoPath === "string" && s.photoPath ? s.photoPath : null,
+    prize: parsePrize(s.prize),
   };
 }

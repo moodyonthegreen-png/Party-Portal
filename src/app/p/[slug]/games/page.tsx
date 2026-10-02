@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Icon } from "@/components/Icon";
 import { notFound } from "next/navigation";
 import { getParty } from "@/lib/parties";
+import { scratchTitle } from "@/lib/games/settings";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -14,13 +15,19 @@ export default async function GamesHub({ params }: Props) {
   if (!party || !party.sections.games) notFound();
 
   const db = supabaseAdmin();
-  const [{ count: photoCount }, { count: babyPlayers }, { count: poolPlayers }] = await Promise.all([
+  const [{ count: photoCount }, { count: babyPlayers }, { count: poolPlayers }, scratchCards] = await Promise.all([
     db.from("baby_photos").select("id", { count: "exact", head: true }).eq("party_id", party.id),
     db.from("baby_photo_guesses").select("party_id", { count: "exact", head: true }).eq("party_id", party.id),
     db.from("pool_entries").select("party_id", { count: "exact", head: true }).eq("party_id", party.id),
+    db.from("scratch_cards").select("player_name, is_winner").eq("party_id", party.id),
   ]);
 
-  const { babyPhotos, pool, raffle } = party.games;
+  const { babyPhotos, pool, raffle, scratch } = party.games;
+  // Hidden until the host adds the photo (and the database update has been run)
+  const showScratch = scratch.on && Boolean(scratch.photoPath) && !scratchCards.error;
+  const scratchPlayers = scratchCards.data?.length ?? 0;
+  const scratchWinner = scratchCards.data?.find((c) => c.is_winner)?.player_name as string | undefined;
+  const scratchPerson = scratch.who === "mommy" ? "mommy" : "daddy";
   const showRaffle = raffle.on && raffle.prizes.length > 0;
   const raffleWinners = raffle.winners.filter(Boolean).length;
   const showBaby = babyPhotos.on && (photoCount ?? 0) > 0;
@@ -52,6 +59,25 @@ export default async function GamesHub({ params }: Props) {
             <div className="pp-entry-art">
               <span className="pp-entry-icon">
                 <Icon name="camera" size={28} />
+              </span>
+            </div>
+          </Link>
+        )}
+
+        {showScratch && (
+          <Link href={`${base}/scratch`} className="pp-paper pp-entry">
+            <div>
+              <h3>{scratchTitle(scratch.who)}</h3>
+              <p>
+                {scratchWinner
+                  ? `${scratchWinner} found the ${scratchPerson}!`
+                  : `Scratch off your card. One lucky card shows the ${scratchPerson}. ${scratchPlayers} ${scratchPlayers === 1 ? "card" : "cards"} scratched so far.`}
+                {scratch.prize.on && scratch.prize.prize && !scratchWinner ? ` The winner gets ${scratch.prize.prize}.` : ""}
+              </p>
+            </div>
+            <div className="pp-entry-art">
+              <span className="sc-mini" aria-hidden="true">
+                <span>?</span>
               </span>
             </div>
           </Link>
@@ -97,7 +123,7 @@ export default async function GamesHub({ params }: Props) {
           </Link>
         )}
 
-        {!showBaby && !pool.on && !showRaffle && (
+        {!showBaby && !pool.on && !showRaffle && !showScratch && (
           <p className="pp-soft">The host is still setting up the games. Check back soon.</p>
         )}
       </div>

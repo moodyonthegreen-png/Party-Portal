@@ -2,6 +2,8 @@ import "server-only";
 import { emailConfigured, isEmail, revealEmail, sendEmails } from "@/lib/email";
 import { listBabyGuesses, listBabyPhotos, listPoolEntries } from "@/lib/games";
 import { scoreBabyPhotos, scorePool } from "@/lib/games/scoring";
+import { listScratchCards } from "@/lib/games/scratch";
+import { scratchTitle } from "@/lib/games/settings";
 import { listGiftSources, listSavedGifts } from "@/lib/gift";
 import { PRODUCTS, type ProductKey } from "@/lib/gift/products";
 import { previewImageUrl } from "@/lib/gift/preview-url";
@@ -87,6 +89,8 @@ export type RevealData = {
     prizes: { babyPhotos: string | null; pool: string | null };
     pool: { closest: string[]; date: string[]; weight: string[] } | null;
     raffle: { prize: string; name: string }[];
+    /** "Who has the daddy?": who scratched the winning card */
+    scratch: { title: string; name: string; prize: string | null } | null;
   };
   gift: { productName: string; imageUrl: string } | null;
   /** The host's memorial notes, for the "watching over you" page */
@@ -107,6 +111,12 @@ export async function getRevealData(party: PublicParty): Promise<RevealData> {
   // Games: only results the host has already revealed
   let babyPhoto: RevealData["games"]["babyPhoto"] = null;
   let pool: RevealData["games"]["pool"] = null;
+  let scratch: RevealData["games"]["scratch"] = null;
+  if (party.sections.games && party.games.scratch.on) {
+    const found = (await listScratchCards(party.id))?.find((c) => c.winner);
+    const sp = party.games.scratch.prize;
+    if (found) scratch = { title: scratchTitle(party.games.scratch.who), name: found.name, prize: sp.on && sp.prize ? sp.prize : null };
+  }
   if (party.sections.games) {
     const [bp, guesses, entries] = await Promise.all([listBabyPhotos(party.id), listBabyGuesses(party.id, null), listPoolEntries(party.id, null)]);
     if (party.games.babyPhotos.revealed && bp.length && guesses.length) {
@@ -154,6 +164,7 @@ export async function getRevealData(party: PublicParty): Promise<RevealData> {
       babyPhoto,
       pool,
       raffle,
+      scratch,
       prizes: {
         babyPhotos: party.games.babyPhotos.prize.on && party.games.babyPhotos.prize.prize ? party.games.babyPhotos.prize.prize : null,
         pool: party.games.pool.prize.on && party.games.pool.prize.prize ? party.games.pool.prize.prize : null,

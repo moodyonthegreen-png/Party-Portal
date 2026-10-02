@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import type { GamePrize as Prize } from "@/lib/games/settings";
 import { emailGameWinner, setGamePrize, type ActionState } from "../actions";
 
-type Game = "babyPhotos" | "pool";
+type Game = "babyPhotos" | "pool" | "scratch";
 type Winner = { key: string; name: string; emailedAt: string | null; email: string | null };
 
 const small: React.CSSProperties = { fontSize: "0.9rem", minHeight: "2.5rem", padding: "0.5rem 1rem" };
@@ -58,7 +58,7 @@ export function GamePrize({
             onChange={(e) => setText(e.target.value)}
           />
           <p className="pp-soft" style={{ fontSize: "0.85rem", marginTop: "0.35rem" }}>
-            Guests see the prize on the game. If people tie for first place, they all win.
+            Guests see the prize on the game.{game === "scratch" ? "" : " If people tie for first place, they all win."}
           </p>
         </div>
       )}
@@ -86,7 +86,7 @@ export function GamePrize({
           )
         ) : (
           <p className="pp-soft" style={{ fontSize: "0.9rem" }}>
-            The winner appears here once you {game === "babyPhotos" ? "reveal the answers" : "post the results"}.
+            {game === "scratch" ? "The winner appears here as soon as someone scratches the winning card." : <>The winner appears here once you {game === "babyPhotos" ? "reveal the answers" : "post the results"}.</>}
           </p>
         )
       )}

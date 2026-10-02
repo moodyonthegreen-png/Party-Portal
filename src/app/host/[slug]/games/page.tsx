@@ -8,6 +8,8 @@ import { getHostParty } from "@/lib/host";
 import { listThankYous } from "@/lib/thanks";
 import { HostGames } from "./HostGames";
 import { RaffleHost } from "./RaffleHost";
+import { ScratchHost } from "./ScratchHost";
+import { getWinningCard, listScratchCards, scratchPhotoUrl } from "@/lib/games/scratch";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -16,15 +18,18 @@ export default async function HostGamesPage({ params }: Props) {
   const party = await getHostParty(slug);
   if (!party) notFound();
 
-  const [photos, guesses, poolEntries, people] = await Promise.all([
+  const [photos, guesses, poolEntries, people, scratchCards, winningCard, scratchPhoto] = await Promise.all([
     listBabyPhotos(party.id),
     listBabyGuesses(party.id, null),
     listPoolEntries(party.id, null),
     listThankYous(party.id),
+    listScratchCards(party.id),
+    getWinningCard(party.id).catch(() => null),
+    scratchPhotoUrl(party.games.scratch.photoPath),
   ]);
   const emails = new Map(people.map((p) => [p.key, p.email]));
   const results = await gameWinners(party);
-  const winnersFor = (g: "babyPhotos" | "pool") =>
+  const winnersFor = (g: "babyPhotos" | "pool" | "scratch") =>
     (results.find((r) => r.game === g)?.winners ?? []).map((w) => ({ ...w, email: emails.get(w.key) ?? null }));
   const entrants = raffleEntrants(people, party.games.raffle.rules).map((e) => ({ ...e, email: emails.get(e.key) ?? null }));
   const babyBoard = scoreBabyPhotos(
@@ -45,6 +50,17 @@ export default async function HostGamesPage({ params }: Props) {
         poolCount={poolEntries.length}
         winners={{ babyPhotos: winnersFor("babyPhotos"), pool: winnersFor("pool") }}
         canEmail={emailConfigured()}
+      />
+      <ScratchHost
+        slug={party.slug}
+        game={party.games.scratch}
+        ready={scratchCards !== null}
+        photoUrl={scratchPhoto}
+        cards={(scratchCards ?? []).map((c) => ({ cardNo: c.cardNo, name: c.name, winner: c.winner }))}
+        winningCard={winningCard}
+        winners={winnersFor("scratch")}
+        canEmail={emailConfigured()}
+        guestListSize={people.filter((p) => p.onGuestList).length}
       />
       <RaffleHost slug={party.slug} raffle={party.games.raffle} entrants={entrants} canEmail={emailConfigured()} />
     </main>

@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { drawEntrant, raffleEntrants, secureRandom } from "@/lib/games/raffle";
-import { GAME_NAMES, gameWinners, type PrizeGame } from "@/lib/games/winners";
+import { gameName, gameWinners, PRIZE_GAMES, type PrizeGame } from "@/lib/games/winners";
 import { MAX_PRIZES, type RaffleRules } from "@/lib/games/settings";
 import { sanitizeLayout } from "@/lib/gift/layout";
 import { listThankYous } from "@/lib/thanks";
@@ -17,6 +17,8 @@ import { MAX_MEDIA_BYTES, MEDIA_BUCKET, MEDIA_TYPES } from "@/lib/messages";
 import { PHOTOS_BUCKET } from "@/lib/photos";
 import { MAX_WELCOME_PHOTOS } from "@/lib/welcome";
 import { MAX_MEMORIALS, memorialBucket } from "@/lib/memorials";
+import { getWinningCard, listScratchCards, setWinningCard } from "@/lib/games/scratch";
+import { MAX_SCRATCH_PLAYERS, type ScratchSettings } from "@/lib/games/settings";
 import { createDraftProduct, deleteProduct, listGarmentOptions, PrintifyError, printifyConfigured, type GarmentOption, type Mockup } from "@/lib/printify";
 import { DESIGNS_BUCKET, supabaseAdmin } from "@/lib/supabase/admin";
 import { siteOrigin } from "@/lib/site";
@@ -1291,7 +1293,7 @@ export async function deleteWelcomePhoto(slug: string, id: string): Promise<Acti
 export async function setGamePrize(slug: string, game: PrizeGame, input: { on: boolean; prize: string }): Promise<ActionState> {
   const party = await host(slug);
   if (isState(party)) return party;
-  if (game !== "babyPhotos" && game !== "pool") return { error: "That game wasn't found." };
+  if (!PRIZE_GAMES.includes(game)) return { error: "That game wasn't found." };
   const prize = String(input.prize ?? "").trim().replace(/\s+/g, " ");
   if (input.on && !prize) return { error: "Say what the winner gets." };
   if (prize.length > 80) return { error: "Keep the prize under 80 characters." };
@@ -1304,7 +1306,7 @@ export async function setGamePrize(slug: string, game: PrizeGame, input: { on: b
 export async function emailGameWinner(slug: string, game: PrizeGame, key: string, to: string, details: string): Promise<ActionState> {
   const party = await host(slug);
   if (isState(party)) return party;
-  if (game !== "babyPhotos" && game !== "pool") return { error: "That game wasn't found." };
+  if (!PRIZE_GAMES.includes(game)) return { error: "That game wasn't found." };
   if (!isEmail(to)) return { error: "That email address doesn't look right." };
   if (details.length > 2000) return { error: "Those details are a bit long." };
   if (!emailConfigured()) return { error: "Email isn't set up yet." };
@@ -1319,7 +1321,7 @@ export async function emailGameWinner(slug: string, game: PrizeGame, key: string
         to: to.trim(),
         name: w.name,
         prize: result.prize,
-        contest: GAME_NAMES[game],
+        contest: gameName(game, party),
         guestOfHonorName: party.guestOfHonorName,
         occasion: party.occasion,
         details,
@@ -1474,4 +1476,95 @@ export async function deleteMemorial(slug: string, id: string): Promise<ActionSt
   if (cur.media_path) await db.storage.from(memorialBucket(cur.media_kind as MemorialKind)).remove([cur.media_path as string]);
   refresh(party.slug);
   return { ok: true };
+}
+
+// ---------------------------------------------------------------------------
+// "Who has the daddy?" scratch-off game
+// ---------------------------------------------------------------------------
+
+const SCRATCH_NOT_READY = "The scratch-off game isn't switched on yet (the database update hasn't been run).";
+
+/** Re-pick the secret winning card among the cards nobody has drawn yet (unless it's already been found). */
+async function repickWinner(party: HostParty, expected: number): Promise<ActionState | null> {
+  const cards = await listScratchCards(party.id);
+  if (!cards) return { error: SCRATCH_NOT_READY };
+  if (cards.some((c) => c.winner)) return null;
+  try {
+    await setWinningCard(party.id, cards.at(-1)?.cardNo ?? 0, expected);
+  } catch {
+    return { error: SCRATCH_NOT_READY };
+  }
+  return null;
+}
+
+export async function setScratchGame(slug: string, patch: { on?: boolean; who?: "daddy" | "mommy"; expected?: number }): Promise<ActionState> {
+  const party = await host(slug);
+  if (isState(party)) return party;
+  const cur = party.games.scratch;
+  const next: ScratchSettings = { ...cur };
+  if (patch.on !== undefined) next.on = Boolean(patch.on);
+  if (patch.who !== undefined) next.who = patch.who === "mommy" ? "mommy" : "daddy";
+  if (patch.expected !== undefined) {
+    const n = Math.round(Number(patch.expected));
+    if (!Number.isFinite(n) || n < 1 || n > MAX_SCRATCH_PLAYERS) return { error: `Pick a number between 1 and ${MAX_SCRATCH_PLAYERS}.` };
+    next.expected = n;
+  }
+  // A new guest count (or switching the game on) picks a new secret card
+  if ((patch.expected !== undefined && next.expected !== cur.expected) || (next.on && !cur.on) || (next.on && (await getWinningCard(party.id)) === null)) {
+    const err = await repickWinner(party, next.expected);
+    if (err) return err;
+  }
+  return saveGames(party, { ...party.games, scratch: next });
+}
+
+export async function startScratchPhoto(slug: string): Promise<{ ok: true; path: string; token: string } | { ok: false; error: string }> {
+  const party = await host(slug);
+  if (isState(party)) return { ok: false, error: party.error ?? "Please open your host link again." };
+  const path = `${party.id}/scratch/${crypto.randomUUID()}.jpg`;
+  const { data, error } = await supabaseAdmin().storage.from(PHOTOS_BUCKET).createSignedUploadUrl(path);
+  if (error || !data) return { ok: false, error: "We couldn't get ready to upload. Please try again." };
+  return { ok: true, path: data.path, token: data.token };
+}
+
+export async function finishScratchPhoto(slug: string, path: string): Promise<ActionState> {
+  const party = await host(slug);
+  if (isState(party)) return party;
+  if (!path.startsWith(`${party.id}/scratch/`) || !path.endsWith(".jpg")) return { error: "That photo wasn't found." };
+  const db = supabaseAdmin();
+  const file = path.split("/").pop()!;
+  const { data: files } = await db.storage.from(PHOTOS_BUCKET).list(`${party.id}/scratch`, { search: file, limit: 2 });
+  if (!(files ?? []).some((f) => f.name === file)) return { error: "Your photo didn't finish uploading. Please try again." };
+  const old = party.games.scratch.photoPath;
+  const res = await saveGames(party, { ...party.games, scratch: { ...party.games.scratch, photoPath: path } });
+  if (!res.error && old && old !== path) await db.storage.from(PHOTOS_BUCKET).remove([old]);
+  return res;
+}
+
+/** Nobody's found the winning card yet: make the very next card the winner. */
+export async function giveScratchToNext(slug: string): Promise<ActionState> {
+  const party = await host(slug);
+  if (isState(party)) return party;
+  const cards = await listScratchCards(party.id);
+  if (!cards) return { error: SCRATCH_NOT_READY };
+  if (cards.some((c) => c.winner)) return { error: "Someone already has the winning card." };
+  const next = (cards.at(-1)?.cardNo ?? 0) + 1;
+  const { error } = await supabaseAdmin().from("parties").update({ scratch_winner: next }).eq("id", party.id);
+  if (error) return { error: SCRATCH_NOT_READY };
+  refresh(party.slug);
+  return { ok: true, message: `Done. Card No. ${next}, the next card dealt, is the winner.` };
+}
+
+/** Start over: clear every card and pick a new secret winning card. */
+export async function resetScratch(slug: string): Promise<ActionState> {
+  const party = await host(slug);
+  if (isState(party)) return party;
+  const { error } = await supabaseAdmin().from("scratch_cards").delete().eq("party_id", party.id);
+  if (error) return { error: SCRATCH_NOT_READY };
+  try {
+    await setWinningCard(party.id, 0, party.games.scratch.expected);
+  } catch {
+    return { error: SCRATCH_NOT_READY };
+  }
+  // Forget the old winner's emailed note too
+  return saveGames(party, { ...party.games, scratch: { ...party.games.scratch, prize: { ...party.games.scratch.prize, emailed: {} } } });
 }

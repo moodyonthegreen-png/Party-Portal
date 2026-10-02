@@ -39,7 +39,7 @@ export function RevealView({
 }) {
   const first = guestOfHonorName.split(" ")[0];
   const g = data.games;
-  const hasGames = Boolean(g.babyPhoto?.length || g.pool || g.raffle.length);
+  const hasGames = Boolean(g.babyPhoto?.length || g.pool || g.raffle.length || g.scratch);
 
   const slides = useMemo<Slide[]>(() => {
     const s: Slide[] = [{ t: "cover" }];
@@ -208,6 +208,13 @@ export function RevealView({
                 {g.pool.closest.length > 0 && <p className="rv-line">{g.pool.closest.join(", ")}</p>}
                 {g.pool.date.length > 0 && <p className="pp-soft">Closest birthday: {g.pool.date.join(", ")}</p>}
                 {g.pool.weight.length > 0 && <p className="pp-soft">Closest weight: {g.pool.weight.join(", ")}</p>}
+              </div>
+            )}
+            {g.scratch && (
+              <div className="rv-card">
+                <p className="pp-caps" style={{ fontSize: "0.68rem" }}>{g.scratch.title}</p>
+                {g.scratch.prize && <p className="pp-soft">Winner&apos;s prize: {g.scratch.prize}</p>}
+                <p className="rv-line">{g.scratch.name}</p>
               </div>
             )}
             {g.raffle.length > 0 && (

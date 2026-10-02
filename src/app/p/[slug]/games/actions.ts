@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { ensureDeviceHash } from "@/lib/device";
 import { getParty, hasPartyAccess, type PublicParty } from "@/lib/parties";
+import { drawScratchCard } from "@/lib/games/scratch";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 
 type Result = { ok: true } | { ok: false; error: string };
@@ -112,4 +113,28 @@ export async function savePoolEntry(
   revalidatePath(`/p/${party.slug}`, "layout");
   revalidatePath(`/host/${party.slug}`, "layout");
   return { ok: true };
+}
+
+/** "Who has the daddy?": deal this browser its card (the same one every time). */
+export async function drawScratch(
+  slug: string,
+  input: { name: string },
+): Promise<{ ok: true; card: { cardNo: number; winner: boolean } } | { ok: false; error: string }> {
+  const party = await openGames(slug);
+  if ("ok" in party) return party as { ok: false; error: string };
+  const game = party.games.scratch;
+  if (!game.on || !game.photoPath) return fail("This game isn't running.") as { ok: false; error: string };
+
+  const name = cleanName(input.name);
+  if (!name) return { ok: false, error: "Please add your name." };
+  if (name.length > 80) return { ok: false, error: "That name is a bit long." };
+
+  try {
+    const card = await drawScratchCard(party, await ensureDeviceHash(party), name);
+    revalidatePath(`/p/${party.slug}`, "layout");
+    revalidatePath(`/host/${party.slug}`, "layout");
+    return { ok: true, card: { cardNo: card.cardNo, winner: card.winner } };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "We couldn't deal your card. Please try again." };
+  }
 }
