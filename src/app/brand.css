@@ -65,6 +65,10 @@
 .mc-stage {
   position: relative;
 }
+.mc-form {
+  display: grid;
+  gap: 0.75rem;
+}
 .mc-card {
   position: relative;
   z-index: 1;
@@ -80,6 +84,10 @@
   font-family: var(--mc-script);
   font-weight: 400;
   line-height: 1;
+}
+.mc-logo a {
+  display: block;
+  line-height: 0;
 }
 .mc-card h1 {
   font-size: clamp(3.2rem, 14vw, 4.2rem);
@@ -127,7 +135,16 @@
   cursor: pointer;
   transition: background-color 0.15s, color 0.15s, transform 0.15s;
 }
-.mc-button:hover {
+a.mc-button {
+  display: block;
+  text-align: center;
+  text-decoration: none;
+}
+.mc-button:disabled {
+  opacity: 0.55;
+  cursor: progress;
+}
+.mc-button:hover:not(:disabled) {
   background: var(--mc-pink);
   color: var(--mc-black);
 }
@@ -137,6 +154,21 @@
 .mc-button:focus-visible {
   outline: 3px solid var(--mc-lavender);
   outline-offset: 3px;
+}
+
+.mc-note {
+  padding: 1rem 1.1rem;
+  border: 2px solid var(--mc-black);
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--mc-lavender) 22%, #fff);
+  font-size: 1.05rem;
+  line-height: 1.45;
+}
+.mc-error {
+  padding: 0.6rem 0.9rem;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--mc-pink) 22%, #fff);
+  font-weight: 500;
 }
 
 .mc-float {
@@ -186,7 +218,7 @@
   padding: 0.9rem 1.6rem 1rem;
   background: #fff;
   border: 2.5px solid var(--mc-black);
-  border-radius: 999px;
+  border-radius: 24px;
   text-align: center;
 }
 .mc-badge {
