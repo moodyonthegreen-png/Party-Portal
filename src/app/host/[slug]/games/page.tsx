@@ -37,8 +37,18 @@ export default async function HostGamesPage({ params }: Props) {
     guesses.map((g) => ({ name: g.name, guesses: g.guesses })),
   );
 
+  const g = party.games;
+  const added = [g.babyPhotos.on, g.pool.on, g.scratch.on, g.raffle.on].filter(Boolean).length;
+
   return (
-    <main style={{ paddingTop: "1.5rem", display: "grid", gap: "1.75rem" }}>
+    <main style={{ paddingTop: "1.5rem", display: "grid", gap: "1rem" }}>
+      <header className="gl-intro">
+        <h2 className="pp-script">Game library</h2>
+        <p className="pp-soft">
+          Add the games you&apos;d like at your party. Guests only see the games you&apos;ve added, and each one&apos;s setup opens
+          once it&apos;s added. {added} of 4 added.
+        </p>
+      </header>
       {!party.sections.games && (
         <p className="pp-note">Games are turned off for guests. You can turn them on in Party details.</p>
       )}

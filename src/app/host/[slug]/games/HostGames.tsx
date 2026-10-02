@@ -4,6 +4,7 @@ import { useRef, useState, useTransition } from "react";
 import type { BabyPhoto } from "@/lib/games";
 import type { GameSettings } from "@/lib/games/settings";
 import { resizeToJpeg } from "@/lib/image/resize";
+import { GameCard } from "./GameCard";
 import { GamePrize } from "./GamePrize";
 import { supabaseBrowser } from "@/lib/supabase/browser";
 import {
@@ -16,7 +17,6 @@ import {
   type ActionState,
 } from "../actions";
 
-const card: React.CSSProperties = { padding: "1.5rem 1.25rem", display: "grid", gap: "1rem" };
 const small: React.CSSProperties = { fontSize: "0.8rem", padding: "0.65rem 1rem" };
 const label: React.CSSProperties = { fontSize: "0.72rem", display: "block", marginBottom: "0.35rem" };
 
@@ -99,7 +99,7 @@ export function HostGames({
   const [len, setLen] = useState(actual?.lengthIn != null ? String(actual.lengthIn) : "");
 
   return (
-    <div style={{ display: "grid", gap: "1.75rem", opacity: pending ? 0.7 : 1, transition: "opacity .2s" }}>
+    <div style={{ display: "grid", gap: "1rem" }}>
       {error && (
         <p role="alert" className="pp-note" style={{ color: "var(--pp-leather)" }}>
           {error}
@@ -107,13 +107,21 @@ export function HostGames({
       )}
 
       {/* Guess the baby photo */}
-      <section className="pp-paper" style={card}>
-        <h2 className="pp-caps" style={{ fontSize: "0.8rem" }}>
-          Guess the baby photo
-        </h2>
-        <Toggle on={games.babyPhotos.on} onChange={(v) => run(() => setBabyPhotoGame(slug, { on: v }))}>
-          Show this game to guests
-        </Toggle>
+      <GameCard
+        id="baby-photos"
+        title="Guess the baby photo"
+        blurb="Guests match baby photos of family and friends to the grown-ups they became."
+        on={games.babyPhotos.on}
+        onToggle={(v) => run(() => setBabyPhotoGame(slug, { on: v }))}
+        busy={pending}
+        status={
+          !photos.length
+            ? "Add a photo to show it to guests"
+            : games.babyPhotos.revealed
+              ? `Answers revealed · ${babyBoard.length} played`
+              : `${photos.length} ${photos.length === 1 ? "photo" : "photos"} · ${babyBoard.length} played`
+        }
+      >
         <p className="pp-soft" style={{ fontSize: "0.95rem" }}>
           Add baby photos of family and friends, and who each one is. Guests pick names from the list of answers you add. The game
           appears once there&apos;s at least one photo.
@@ -211,16 +219,18 @@ export function HostGames({
           </div>
         </div>
         <GamePrize slug={slug} game="babyPhotos" prize={games.babyPhotos.prize} resultsOut={games.babyPhotos.revealed} winners={winners.babyPhotos} canEmail={canEmail} />
-      </section>
+      </GameCard>
 
       {/* Due date pool */}
-      <section className="pp-paper" style={card}>
-        <h2 className="pp-caps" style={{ fontSize: "0.8rem" }}>
-          Due date &amp; weight pool
-        </h2>
-        <Toggle on={games.pool.on} onChange={(v) => run(() => setPoolGame(slug, { on: v }))}>
-          Show this game to guests
-        </Toggle>
+      <GameCard
+        id="pool"
+        title="Due date & weight pool"
+        blurb="Guests guess the birthday, weight and length. Closest guess wins once baby arrives."
+        on={games.pool.on}
+        onToggle={(v) => run(() => setPoolGame(slug, { on: v }))}
+        busy={pending}
+        status={games.pool.actual ? `Results posted · ${poolCount} played` : `${poolCount} ${poolCount === 1 ? "guess" : "guesses"}${games.pool.closed ? " · guessing closed" : ""}`}
+      >
         <Toggle on={games.pool.closed} onChange={(v) => run(() => setPoolGame(slug, { closed: v }))}>
           Close guessing
         </Toggle>
@@ -285,7 +295,7 @@ export function HostGames({
           </p>
         </div>
         <GamePrize slug={slug} game="pool" prize={games.pool.prize} resultsOut={Boolean(games.pool.actual)} winners={winners.pool} canEmail={canEmail} />
-      </section>
+      </GameCard>
     </div>
   );
 }

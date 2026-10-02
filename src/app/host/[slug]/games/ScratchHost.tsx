@@ -6,11 +6,11 @@ import type { ScratchSettings } from "@/lib/games/settings";
 import { resizeToJpeg } from "@/lib/image/resize";
 import { supabaseBrowser } from "@/lib/supabase/browser";
 import { finishScratchPhoto, giveScratchToNext, resetScratch, setScratchGame, startScratchPhoto, type ActionState } from "../actions";
+import { GameCard } from "./GameCard";
 import { GamePrize } from "./GamePrize";
 
 type Winner = { key: string; name: string; emailedAt: string | null; email: string | null };
 
-const card: React.CSSProperties = { padding: "1.5rem 1.25rem", display: "grid", gap: "1rem" };
 const small: React.CSSProperties = { fontSize: "0.85rem", padding: "0.6rem 1rem" };
 const label: React.CSSProperties = { fontSize: "0.72rem", display: "block", marginBottom: "0.35rem" };
 
@@ -76,31 +76,31 @@ export function ScratchHost({
   }
 
   return (
-    <section className="pp-paper" style={{ ...card, opacity: pending ? 0.7 : 1, transition: "opacity .2s" }} id="scratch">
-      <div>
-        <h2 className="pp-caps" style={{ fontSize: "0.8rem" }}>
-          Who has the {person}? (scratch-off)
-        </h2>
-        <p className="pp-soft" style={{ fontSize: "0.95rem", marginTop: "0.35rem" }}>
-          Every guest scratches one card. One secret card shows a photo of the {person}-to-be; every other card shows it blurred
-          with &ldquo;Not this time!&rdquo;
-        </p>
-      </div>
+    <GameCard
+      id="scratch"
+      title={game.on ? `Who has the ${person}?` : "Who has the daddy (or mommy)?"}
+      blurb={`A scratch-off card for every guest. One secret card shows the ${person}-to-be.`}
+      on={game.on}
+      onToggle={(v) => run(() => setScratchGame(slug, { on: v }))}
+      busy={pending}
+      error={msg?.error}
+      status={
+        !photoUrl
+          ? `Add a photo of the ${person} to show it to guests`
+          : found
+            ? `${found.name} has the ${person}!`
+            : `${cards.length} ${cards.length === 1 ? "card" : "cards"} scratched`
+      }
+    >
+      <p className="pp-soft" style={{ fontSize: "0.95rem" }}>
+        Every guest scratches one card. One secret card shows a photo of the {person}-to-be; every other card shows it blurred
+        with &ldquo;Not this time!&rdquo;
+      </p>
 
       {!ready ? (
         <p className="pp-note">This game isn&apos;t switched on yet. Moody Celebrations needs to run one quick database update first.</p>
       ) : (
         <>
-          <label style={{ display: "flex", gap: "0.6rem", alignItems: "center", cursor: "pointer" }}>
-            <input
-              type="checkbox"
-              checked={game.on}
-              onChange={(e) => run(() => setScratchGame(slug, { on: e.target.checked }))}
-              style={{ width: 18, height: 18, accentColor: "var(--pp-accent)" }}
-            />
-            Show this game to guests
-          </label>
-
           <fieldset className="sc-who">
             <legend className="pp-caps" style={label}>
               The game
@@ -233,12 +233,7 @@ export function ScratchHost({
         </>
       )}
 
-      {msg?.error && (
-        <p role="alert" style={{ color: "var(--pp-leather)" }}>
-          {msg.error}
-        </p>
-      )}
       {msg?.message && <p style={{ color: "var(--pp-accent)" }}>{msg.message}</p>}
-    </section>
+    </GameCard>
   );
 }

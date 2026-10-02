@@ -3,9 +3,9 @@
 import { useState, useTransition } from "react";
 import { RULE_LABELS } from "@/lib/games/raffle";
 import { MAX_PRIZES, type RaffleRules, type RaffleSettings } from "@/lib/games/settings";
+import { GameCard } from "./GameCard";
 import { clearRaffleWinner, drawRaffleWinner, emailRaffleWinner, saveRaffle, type ActionState } from "../actions";
 
-const card: React.CSSProperties = { padding: "1.5rem 1.25rem", display: "grid", gap: "1rem" };
 const small: React.CSSProperties = { fontSize: "0.8rem", padding: "0.65rem 1rem" };
 const label: React.CSSProperties = { fontSize: "0.72rem", display: "block", marginBottom: "0.35rem" };
 
@@ -55,19 +55,30 @@ export function RaffleHost({
   const byKey = new Map(entrants.map((e) => [e.key, e]));
 
   return (
-    <section className="pp-paper" style={{ ...card, opacity: pending ? 0.7 : 1 }} id="raffle">
-      <h2 className="pp-caps" style={{ fontSize: "0.8rem" }}>
-        Raffle
-      </h2>
+    <GameCard
+      id="raffle"
+      title="Raffle"
+      blurb="Guests are entered automatically just for joining in. Draw a winner for each prize."
+      on={on}
+      onToggle={(v) => {
+        setOn(v);
+        setState(null);
+        // Switching it off takes it away from guests right away
+        if (!v && raffle.on) run(() => saveRaffle(slug, { on: false, prizes, rules }));
+      }}
+      busy={pending}
+      error={state?.error}
+      status={
+        raffle.on
+          ? `${raffle.prizes.length} ${raffle.prizes.length === 1 ? "prize" : "prizes"} · ${entrants.length} entered`
+          : "Add a prize and save to show the raffle to guests"
+      }
+    >
       <p className="pp-soft" style={{ fontSize: "0.95rem" }}>
         A little thank-you for joining in. Guests are entered automatically when they do the things you pick below, so
         there&apos;s nothing to sign up for. Each activity counts as one entry.
       </p>
 
-      <label style={{ display: "flex", gap: "0.6rem", alignItems: "center", cursor: "pointer" }}>
-        <input type="checkbox" checked={on} onChange={(e) => setOn(e.target.checked)} style={{ width: 18, height: 18, accentColor: "var(--pp-accent)" }} />
-        Show the raffle to guests
-      </label>
 
       <div style={{ display: "grid", gap: "0.5rem" }}>
         <span className="pp-caps" style={label}>
@@ -174,8 +185,8 @@ export function RaffleHost({
           reached, draw again.
         </p>
       </div>
-      <Msg state={state} />
-    </section>
+      <Msg state={state?.error ? null : state} />
+    </GameCard>
   );
 }
 
