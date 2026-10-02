@@ -8,6 +8,7 @@ import { listMessages } from "@/lib/messages";
 import { listPhotos } from "@/lib/photos";
 import { listThankYous } from "@/lib/thanks";
 import { extensionOf, safeFileName } from "@/lib/zip";
+import { promptTag } from "@/lib/booth/prompts";
 
 /**
  * "Download everything": the list of files for the host's browser to fetch
@@ -91,7 +92,7 @@ export async function buildDownload(party: HostParty, section: DownloadSection):
           files.push({ name: shown, url: p.url });
         }
         html.push(
-          `<figure><a href="${attr(file)}"><img loading="lazy" src="${attr(shown)}" alt=""></a><figcaption>${esc(p.caption || p.authorName)}${p.caption ? `<br><span>${esc(p.authorName)}</span>` : ""}${p.hearts ? ` <span>♥ ${p.hearts}</span>` : ""}${p.story ? `<p class="story"><b>${p.prompt === "memory" ? "A memory" : "Hello"}</b> ${esc(p.story)}</p>` : ""}</figcaption></figure>`,
+          `<figure><a href="${attr(file)}"><img loading="lazy" src="${attr(shown)}" alt=""></a><figcaption>${esc(p.caption || p.authorName)}${p.caption ? `<br><span>${esc(p.authorName)}</span>` : ""}${p.hearts ? ` <span>♥ ${p.hearts}</span>` : ""}${p.story ? `<p class="story">${promptTag(p.prompt) ? `<b>${promptTag(p.prompt)}</b> ` : ""}${esc(p.story)}</p>` : ""}</figcaption></figure>`,
         );
       });
       html.push(`</div>`);

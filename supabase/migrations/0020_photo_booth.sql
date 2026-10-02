@@ -4,7 +4,7 @@
 alter table public.photos add column if not exists prompt text;
 alter table public.photos add column if not exists story text;
 do $$ begin
-  alter table public.photos add constraint photos_prompt_check check (prompt is null or prompt in ('intro', 'memory'));
+  alter table public.photos add constraint photos_prompt_check check (prompt is null or prompt in ('note', 'intro', 'memory'));
 exception when duplicate_object then null; end $$;
 do $$ begin
   alter table public.photos add constraint photos_story_check check (story is null or char_length(story) <= 600);

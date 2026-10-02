@@ -1,5 +1,6 @@
 import "server-only";
 import { dbError, supabaseAdmin } from "@/lib/supabase/admin";
+import { isBoothPrompt, type BoothPrompt } from "@/lib/booth/prompts";
 
 export const PHOTOS_BUCKET = "photos";
 export const MAX_PHOTO_BYTES = 25 * 1024 * 1024;
@@ -18,7 +19,7 @@ export type Photo = {
   authorName: string;
   caption: string | null;
   /** Photo booth: what they wrote, and which prompt they answered */
-  prompt: "intro" | "memory" | null;
+  prompt: BoothPrompt | null;
   story: string | null;
   url: string | null;
   /** Full-quality original (host view only) */
@@ -62,7 +63,7 @@ export async function listPhotos(
       id: r.id,
       authorName: r.author_name,
       caption: r.caption,
-      prompt: r.prompt === "intro" || r.prompt === "memory" ? r.prompt : null,
+      prompt: isBoothPrompt(r.prompt) ? r.prompt : null,
       story: r.story ?? null,
       url: urls.get(r.image_path) ?? null,
       originalUrl: opts.withOriginals ? (urls.get(r.original_path) ?? null) : undefined,

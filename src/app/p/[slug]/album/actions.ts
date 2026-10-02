@@ -5,6 +5,7 @@ import { ensureDeviceHash } from "@/lib/device";
 import { getParty, hasPartyAccess, type PublicParty } from "@/lib/parties";
 import { MAX_PHOTO_BYTES, PHOTO_TYPES, PHOTOS_BUCKET, removePhotoFiles } from "@/lib/photos";
 import { supabaseAdmin } from "@/lib/supabase/admin";
+import { isBoothPrompt, type BoothPrompt } from "@/lib/booth/prompts";
 
 type Fail = { ok: false; error: string };
 const fail = (error: string): Fail => ({ ok: false, error });
@@ -39,7 +40,7 @@ export async function startPhoto(
     originalMime: string;
     originalSize: number;
     /** Photo booth answers (optional) */
-    prompt?: "intro" | "memory" | null;
+    prompt?: BoothPrompt | null;
     story?: string;
   },
 ): Promise<StartPhotoResult> {
@@ -53,7 +54,7 @@ export async function startPhoto(
   if (caption.length > 200) return fail("Captions can be up to 200 characters.");
   const story = (input.story ?? "").trim();
   if (story.length > 600) return fail("Please keep it under 600 characters.");
-  const prompt = story && (input.prompt === "intro" || input.prompt === "memory") ? input.prompt : null;
+  const prompt = story && isBoothPrompt(input.prompt) ? input.prompt : null;
 
   const ext = PHOTO_TYPES[input.originalMime.toLowerCase()];
   if (!ext) return fail("That kind of file isn't supported. Try a JPEG or PNG photo.");

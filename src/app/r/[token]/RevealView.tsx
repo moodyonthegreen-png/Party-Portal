@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Ornament } from "@/components/Icon";
+import { promptHeading } from "@/lib/booth/prompts";
 import { Motif } from "@/components/Motif";
 import type { RevealData } from "@/lib/reveal";
 import type { Theme } from "@/themes";
@@ -162,7 +163,7 @@ export function RevealView({
             <img src={slide.photo.url} alt={`Photo from ${slide.photo.author}`} />
             <div>
               <p className="pp-page-kicker" style={{ marginTop: 0 }}>
-                {slide.photo.prompt === "memory" ? `A memory of ${first}` : `How I know ${first}`}
+                {promptHeading(slide.photo.prompt, first)}
               </p>
               <p className="rv-hand" style={{ marginTop: "0.6rem" }}>
                 {slide.photo.story}

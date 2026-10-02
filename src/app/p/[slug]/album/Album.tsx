@@ -7,6 +7,7 @@ import { resizeToJpeg } from "@/lib/image/resize";
 import { supabaseBrowser } from "@/lib/supabase/browser";
 import { deleteMyPhoto, finishPhoto, startPhoto, toggleHeart } from "./actions";
 import { PhotoBooth } from "./PhotoBooth";
+import { promptHeading, promptTag } from "@/lib/booth/prompts";
 
 const DISPLAY_MAX = 1600;
 const MAX_BYTES = 25 * 1024 * 1024;
@@ -257,7 +258,7 @@ export function Album({
                     {p.caption && <span className="pp-hand pp-print-caption">{p.caption}</span>}
                     {p.story && (
                       <span className="pp-print-story">
-                        <span className="pp-print-prompt">{p.prompt === "memory" ? "A memory" : "Hello!"}</span> {p.story}
+                        {promptTag(p.prompt) && <span className="pp-print-prompt">{promptTag(p.prompt)}</span>} {p.story}
                       </span>
                     )}
                     <span className="pp-print-by">— {p.authorName}</span>
@@ -288,7 +289,7 @@ export function Album({
               {open.caption && <span className="pp-hand pp-print-caption">{open.caption}</span>}
               {open.story && (
                 <span className="pp-print-story" data-full="true">
-                  <span className="pp-print-prompt">{open.prompt === "memory" ? `A memory of ${guestOfHonorName.split(" ")[0]}` : `How I know ${guestOfHonorName.split(" ")[0]}`}</span>
+                  <span className="pp-print-prompt">{promptHeading(open.prompt, guestOfHonorName.split(" ")[0])}</span>
                   <br />
                   {open.story}
                 </span>

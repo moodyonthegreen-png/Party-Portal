@@ -1,5 +1,6 @@
 "use client";
 
+import { promptTag } from "@/lib/booth/prompts";
 import { useState, useTransition } from "react";
 import type { Photo } from "@/lib/photos";
 import { deletePhoto, setPhotoHidden, type ActionState } from "../actions";
@@ -61,7 +62,7 @@ export function HostPhotos({ slug, photos }: { slug: string; photos: Photo[] }) 
             )}
             {p.story && (
               <p style={{ fontSize: "0.85rem", lineHeight: 1.35, marginTop: 2 }}>
-                <span className="pp-print-prompt">{p.prompt === "memory" ? "A memory" : "Hello"}</span> {p.story}
+                {promptTag(p.prompt) && <span className="pp-print-prompt">{promptTag(p.prompt)}</span>} {p.story}
               </p>
             )}
             <p className="pp-soft" style={{ fontSize: "0.8rem" }}>

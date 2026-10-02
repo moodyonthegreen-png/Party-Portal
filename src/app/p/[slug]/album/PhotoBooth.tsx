@@ -17,10 +17,11 @@ import {
 } from "@/lib/booth/art";
 import { supabaseBrowser } from "@/lib/supabase/browser";
 import { finishPhoto, startPhoto } from "./actions";
+import { BOOTH_PROMPTS, type BoothPrompt } from "@/lib/booth/prompts";
 
 type Step = "start" | "edit" | "share" | "done";
 type Tool = "frames" | "stickers" | "draw";
-type Prompt = "intro" | "memory";
+type Prompt = BoothPrompt;
 
 const PEN_COLORS = ["#ffffff", "#253026", "#56704f", "#e8c25a", "#efb1bd", "#8fb5d9"];
 const PEN_SIZES = [
@@ -100,7 +101,7 @@ export function PhotoBooth({
   const [scene, setScene] = useState<Scene>({ frameId: frames[0].id, photo: { zoom: 1, dx: 0, dy: 0 }, strokes: [], stickers: [] });
   const [selected, setSelected] = useState<string | null>(null);
   const [pen, setPen] = useState({ color: PEN_COLORS[0], size: PEN_SIZES[1].size });
-  const [prompt, setPrompt] = useState<Prompt>("intro");
+  const [prompt, setPrompt] = useState<Prompt>("note");
   const [story, setStory] = useState("");
   const [name, setName] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
@@ -362,6 +363,7 @@ export function PhotoBooth({
   }
 
   const questions: Record<Prompt, { title: string; ask: string; placeholder: string }> = {
+    note: { title: "Just a note", ask: `Anything you'd like to say to ${first}?`, placeholder: "Working on a little something for you…" },
     intro: { title: "Introduce yourself", ask: `How do you know ${first}?`, placeholder: `I'm ${first}'s college roommate! We…` },
     memory: { title: "Share a memory", ask: `What's a favorite memory with ${first}?`, placeholder: "I'll never forget the time…" },
   };
@@ -534,7 +536,7 @@ export function PhotoBooth({
           <div className="pb-share-form">
             <h2 className="pb-title">Say hello</h2>
             <div className="pb-prompts" role="radiogroup" aria-label="What would you like to share?">
-              {(["intro", "memory"] as const).map((k) => (
+              {BOOTH_PROMPTS.map((k) => (
                 <button key={k} type="button" role="radio" aria-checked={prompt === k} className="pb-prompt" onClick={() => setPrompt(k)}>
                   <strong>{questions[k].title}</strong>
                   <span>{questions[k].ask}</span>

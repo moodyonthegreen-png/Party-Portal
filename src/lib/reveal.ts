@@ -5,6 +5,7 @@ import { scoreBabyPhotos, scorePool } from "@/lib/games/scoring";
 import { listGiftSources, listSavedGifts } from "@/lib/gift";
 import { PRODUCTS, type ProductKey } from "@/lib/gift/products";
 import { previewImageUrl } from "@/lib/gift/preview-url";
+import type { BoothPrompt } from "@/lib/booth/prompts";
 import { listMessages } from "@/lib/messages";
 import { getParty, type PublicParty } from "@/lib/parties";
 import { listPhotos } from "@/lib/photos";
@@ -77,7 +78,7 @@ export async function markRevealOpened(partyId: string) {
 
 export type RevealData = {
   notes: { id: string; author: string; body: string | null; mediaType: "audio" | "video" | null; mediaUrl: string | null }[];
-  photos: { id: string; author: string; caption: string | null; url: string; prompt: "intro" | "memory" | null; story: string | null }[];
+  photos: { id: string; author: string; caption: string | null; url: string; prompt: BoothPrompt | null; story: string | null }[];
   designs: { name: string; url: string }[];
   games: {
     babyPhoto: { name: string; correct: number; total: number }[] | null;

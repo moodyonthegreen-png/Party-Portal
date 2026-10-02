@@ -2238,7 +2238,7 @@
 }
 .pb-prompts {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.6rem;
 }
 .pb-prompt {
@@ -2254,7 +2254,7 @@
 .pb-prompt strong {
   font-family: var(--pp-serif);
   font-weight: 400;
-  font-size: 1.3rem;
+  font-size: 1.2rem;
   line-height: 1.1;
 }
 .pb-prompt span {
@@ -2322,5 +2322,14 @@
   .rv-booth {
     grid-template-columns: minmax(0, 360px) minmax(0, 1fr);
     gap: 2.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .pb-prompts {
+    grid-template-columns: 1fr;
+  }
+  .pb-prompt {
+    padding: 0.6rem 0.8rem;
   }
 }
