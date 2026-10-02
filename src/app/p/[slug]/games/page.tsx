@@ -15,15 +15,18 @@ export default async function GamesHub({ params }: Props) {
   if (!party || !party.sections.games) notFound();
 
   const db = supabaseAdmin();
-  const [{ count: photoCount }, { count: babyPlayers }, { count: poolPlayers }, scratchCards, triviaPlayers] = await Promise.all([
+  const [{ count: photoCount }, { count: babyPlayers }, { count: poolPlayers }, scratchCards, triviaPlayers, animalPlayers] = await Promise.all([
     db.from("baby_photos").select("id", { count: "exact", head: true }).eq("party_id", party.id),
     db.from("baby_photo_guesses").select("party_id", { count: "exact", head: true }).eq("party_id", party.id),
     db.from("pool_entries").select("party_id", { count: "exact", head: true }).eq("party_id", party.id),
     db.from("scratch_cards").select("player_name, is_winner").eq("party_id", party.id),
     db.from("trivia_answers").select("party_id", { count: "exact", head: true }).eq("party_id", party.id),
+    db.from("game_answers").select("party_id", { count: "exact", head: true }).eq("party_id", party.id).eq("game", "animals"),
   ]);
 
-  const { babyPhotos, pool, raffle, scratch, trivia } = party.games;
+  const { babyPhotos, pool, raffle, scratch, trivia, animals } = party.games;
+  const showAnimals = animals.on && animals.questions.length > 0 && !animalPlayers.error;
+  const animalCount = animalPlayers.count ?? 0;
   const showTrivia = trivia.on && trivia.questions.length > 0 && !triviaPlayers.error;
   const triviaCount = triviaPlayers.count ?? 0;
   // Hidden until the host adds the photo (and the database update has been run)
@@ -88,6 +91,25 @@ export default async function GamesHub({ params }: Props) {
           </Link>
         )}
 
+        {showAnimals && (
+          <Link href={`${base}/animals`} className="pp-paper pp-entry">
+            <div>
+              <h3>Baby animal names</h3>
+              <p>
+                {animals.closed
+                  ? "This game is closed. See the leaderboard."
+                  : `A baby kangaroo is a joey. Can you name the rest? ${animalCount} ${animalCount === 1 ? "player" : "players"} so far.`}
+                {animals.prize.on && animals.prize.prize && !animals.closed ? ` The top score wins ${animals.prize.prize}.` : ""}
+              </p>
+            </div>
+            <div className="pp-entry-art">
+              <span className="pp-entry-icon">
+                <Icon name="pencil" size={28} />
+              </span>
+            </div>
+          </Link>
+        )}
+
         {showScratch && (
           <Link href={`${base}/scratch`} className="pp-paper pp-entry">
             <div>
@@ -147,7 +169,7 @@ export default async function GamesHub({ params }: Props) {
           </Link>
         )}
 
-        {!showBaby && !pool.on && !showRaffle && !showScratch && !showTrivia && (
+        {!showBaby && !pool.on && !showRaffle && !showScratch && !showTrivia && !showAnimals && (
           <p className="pp-soft">The host is still setting up the games. Check back soon.</p>
         )}
       </div>

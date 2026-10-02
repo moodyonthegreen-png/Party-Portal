@@ -2856,3 +2856,21 @@
 .tv-pick label[data-on="true"] { border-color: var(--pp-accent); background: color-mix(in srgb, var(--pp-accent) 6%, var(--pp-paper)); }
 .tv-pick input { margin-top: 0.2rem; width: 17px; height: 17px; accent-color: var(--pp-accent); flex: none; }
 .tv-pick-a { display: block; font-size: 0.82rem; margin-top: 0.15rem; }
+
+/* ------------------------------------------------------------------ */
+/* Baby animal names                                                   */
+/* ------------------------------------------------------------------ */
+.an-ask { font-family: var(--pp-display); font-size: clamp(1.4rem, 5vw, 1.7rem); line-height: 1.25; color: var(--pp-ink); }
+.an-animal { display: block; font-family: var(--pp-script); font-size: clamp(2.8rem, 13vw, 3.8rem); color: var(--pp-accent); line-height: 1.05; text-transform: capitalize; }
+.an-input { font-size: 1.2rem; padding: 0.8rem 1rem; }
+.an-picked { font-size: 0.92rem; line-height: 1.6; text-transform: capitalize; }
+.an-pick { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+.an-review { display: grid; gap: 0.6rem; }
+.an-review-row { display: grid; gap: 0.35rem; padding-top: 0.5rem; border-top: 1px dashed var(--pp-paper-edge); }
+.an-chips { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.an-chip {
+  font: inherit; font-size: 0.85rem; cursor: pointer; padding: 0.25rem 0.7rem; border-radius: 999px;
+  border: 1px solid var(--pp-paper-edge); background: #fff; color: var(--pp-ink);
+}
+.an-chip:hover { border-color: var(--pp-accent); }
+.an-chip[data-on="true"] { background: color-mix(in srgb, var(--pp-accent) 12%, #fff); border-color: var(--pp-accent); color: var(--pp-accent); }

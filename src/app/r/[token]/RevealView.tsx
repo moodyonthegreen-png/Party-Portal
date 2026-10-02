@@ -39,7 +39,7 @@ export function RevealView({
 }) {
   const first = guestOfHonorName.split(" ")[0];
   const g = data.games;
-  const hasGames = Boolean(g.babyPhoto?.length || g.pool || g.raffle.length || g.scratch || g.trivia?.length);
+  const hasGames = Boolean(g.babyPhoto?.length || g.pool || g.raffle.length || g.scratch || g.trivia?.length || g.animals?.length);
 
   const slides = useMemo<Slide[]>(() => {
     const s: Slide[] = [{ t: "cover" }];
@@ -215,6 +215,17 @@ export function RevealView({
                 <p className="pp-caps" style={{ fontSize: "0.68rem" }}>Baby trivia</p>
                 {g.prizes?.trivia && <p className="pp-soft">Winner&apos;s prize: {g.prizes.trivia}</p>}
                 {g.trivia.map((r) => (
+                  <p key={r.name} className="rv-line">
+                    {r.name} <span className="pp-soft">· {r.correct} of {r.total}</span>
+                  </p>
+                ))}
+              </div>
+            )}
+            {g.animals && g.animals.length > 0 && (
+              <div className="rv-card">
+                <p className="pp-caps" style={{ fontSize: "0.68rem" }}>Baby animal names</p>
+                {g.prizes?.animals && <p className="pp-soft">Winner&apos;s prize: {g.prizes.animals}</p>}
+                {g.animals.map((r) => (
                   <p key={r.name} className="rv-line">
                     {r.name} <span className="pp-soft">· {r.correct} of {r.total}</span>
                   </p>

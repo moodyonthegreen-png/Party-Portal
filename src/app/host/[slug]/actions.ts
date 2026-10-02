@@ -18,7 +18,9 @@ import { PHOTOS_BUCKET } from "@/lib/photos";
 import { MAX_WELCOME_PHOTOS } from "@/lib/welcome";
 import { MAX_MEMORIALS, memorialBucket } from "@/lib/memorials";
 import { getWinningCard, listScratchCards, setWinningCard } from "@/lib/games/scratch";
-import { MAX_SCRATCH_PLAYERS, MAX_TRIVIA, type ScratchSettings } from "@/lib/games/settings";
+import { MAX_ANIMALS, MAX_SCRATCH_PLAYERS, MAX_TRIVIA, type ScratchSettings } from "@/lib/games/settings";
+import { ANIMAL_BY_ID } from "@/lib/games/animal-babies";
+import { normalizeAnswer } from "@/lib/games/answer-match";
 import { TRIVIA_BY_ID } from "@/lib/games/trivia-bank";
 import { createDraftProduct, deleteProduct, listGarmentOptions, PrintifyError, printifyConfigured, type GarmentOption, type Mockup } from "@/lib/printify";
 import { DESIGNS_BUCKET, supabaseAdmin } from "@/lib/supabase/admin";
@@ -1608,5 +1610,58 @@ export async function clearTrivia(slug: string): Promise<ActionState> {
   return saveGames(party, {
     ...party.games,
     trivia: { ...party.games.trivia, closed: false, prize: { ...party.games.trivia.prize, emailed: {} } },
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Baby animal names
+// ---------------------------------------------------------------------------
+
+export async function setAnimals(slug: string, patch: { on?: boolean; closed?: boolean; questions?: string[] }): Promise<ActionState> {
+  const party = await host(slug);
+  if (isState(party)) return party;
+  const next = { ...party.games.animals };
+  if (patch.on !== undefined) {
+    next.on = Boolean(patch.on);
+    if (next.on) {
+      const { error } = await supabaseAdmin().from("game_answers").select("party_id", { count: "exact", head: true }).eq("party_id", party.id);
+      if (error) return { error: "Baby animal names isn't switched on yet (the database update hasn't been run)." };
+    }
+  }
+  if (patch.closed !== undefined) next.closed = Boolean(patch.closed);
+  if (patch.questions !== undefined) {
+    const ids = [...new Set(patch.questions.filter((id) => ANIMAL_BY_ID.has(id)))];
+    if (ids.length < MIN_TRIVIA) return { error: `Pick at least ${MIN_TRIVIA} animals.` };
+    if (ids.length > MAX_ANIMALS) return { error: `Pick up to ${MAX_ANIMALS} animals.` };
+    next.questions = ids;
+  }
+  const res = await saveGames(party, { ...party.games, animals: next });
+  if (res.error) return res;
+  return { ok: true, message: patch.questions ? "Animals saved." : undefined };
+}
+
+/** Count (or stop counting) a typed answer as right for everyone, e.g. "bunny" for rabbit. */
+export async function acceptAnimalAnswer(slug: string, id: string, answer: string, accept: boolean): Promise<ActionState> {
+  const party = await host(slug);
+  if (isState(party)) return party;
+  if (!ANIMAL_BY_ID.has(id)) return { error: "That animal wasn't found." };
+  const clean = normalizeAnswer(answer).slice(0, 40);
+  if (!clean) return { error: "That answer is empty." };
+  const cur = party.games.animals;
+  const list = (cur.accepted[id] ?? []).filter((a) => a !== clean);
+  if (accept) list.push(clean);
+  const accepted = { ...cur.accepted, [id]: list.slice(0, 20) };
+  if (!accepted[id].length) delete accepted[id];
+  return saveGames(party, { ...party.games, animals: { ...cur, accepted } });
+}
+
+export async function clearAnimals(slug: string): Promise<ActionState> {
+  const party = await host(slug);
+  if (isState(party)) return party;
+  const { error } = await supabaseAdmin().from("game_answers").delete().eq("party_id", party.id).eq("game", "animals");
+  if (error) return { error: "We couldn't clear the answers. Please try again." };
+  return saveGames(party, {
+    ...party.games,
+    animals: { ...party.games.animals, closed: false, prize: { ...party.games.animals.prize, emailed: {} } },
   });
 }

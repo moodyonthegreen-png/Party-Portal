@@ -3,6 +3,10 @@
 /** Baby trivia: a good mix to start with (ids from trivia-bank.ts) */
 export const DEFAULT_TRIVIA = ["bones", "kneecaps", "stomach", "soft-spot", "due-date", "vernix", "colostrum", "top-girl-name", "first-tooth-age", "moro"];
 export const MAX_TRIVIA = 20;
+
+/** Baby animal names: a starting set (ids from animal-babies.ts) */
+export const DEFAULT_ANIMALS = ["kangaroo", "swan", "owl", "goat", "deer", "goose", "horse", "frog", "hare", "turkey", "platypus", "llama"];
+export const MAX_ANIMALS = 25;
 export type PoolActualStored = { date: string; time: string | null; weightOz: number; lengthIn: number | null };
 
 /** What earns a raffle entry. Each activity a guest has done is one entry. */
@@ -38,9 +42,13 @@ export const MAX_SCRATCH_PLAYERS = 300;
 /** Baby trivia: multiple choice, questions picked from the built-in bank */
 export type TriviaSettings = { on: boolean; questions: string[]; closed: boolean; prize: GamePrize };
 
+/** Baby animal names: typed answers; `accepted` = extra answers the host counts as right, per animal */
+export type AnimalSettings = { on: boolean; questions: string[]; closed: boolean; accepted: Record<string, string[]>; prize: GamePrize };
+
 export type GameSettings = {
   babyPhotos: { on: boolean; revealed: boolean; prize: GamePrize };
   trivia: TriviaSettings;
+  animals: AnimalSettings;
   scratch: ScratchSettings;
   pool: { on: boolean; closed: boolean; actual: PoolActualStored | null; prize: GamePrize };
   raffle: RaffleSettings;
@@ -51,6 +59,7 @@ export const DEFAULT_GAMES: GameSettings = {
   pool: { on: true, closed: false, actual: null, prize: NO_PRIZE },
   scratch: { on: false, who: "daddy", expected: 20, photoPath: null, prize: NO_PRIZE },
   trivia: { on: false, questions: DEFAULT_TRIVIA, closed: false, prize: NO_PRIZE },
+  animals: { on: false, questions: DEFAULT_ANIMALS, closed: false, accepted: {}, prize: NO_PRIZE },
   raffle: { on: false, prizes: [], rules: { design: true, note: false, photos: false, games: false }, winners: [] },
 };
 
@@ -78,6 +87,7 @@ export function parseGames(raw: unknown): GameSettings {
     pool: { ...DEFAULT_GAMES.pool, ...(g.pool ?? {}), prize: parsePrize(g.pool?.prize) },
     scratch: parseScratch(g.scratch),
     trivia: parseTrivia(g.trivia),
+    animals: parseAnimals(g.animals),
     raffle: {
       on: Boolean(r.on),
       prizes,
@@ -105,4 +115,20 @@ function parseTrivia(raw: unknown): TriviaSettings {
     ? [...new Set(t.questions.filter((id): id is string => typeof id === "string" && /^[a-z0-9-]{1,40}$/.test(id)))].slice(0, MAX_TRIVIA)
     : DEFAULT_TRIVIA;
   return { on: Boolean(t.on), questions, closed: Boolean(t.closed), prize: parsePrize(t.prize) };
+}
+
+function parseAnimals(raw: unknown): AnimalSettings {
+  const t = (raw && typeof raw === "object" ? raw : {}) as Partial<AnimalSettings>;
+  const questions = Array.isArray(t.questions)
+    ? [...new Set(t.questions.filter((id): id is string => typeof id === "string" && /^[a-z0-9-]{1,40}$/.test(id)))].slice(0, MAX_ANIMALS)
+    : DEFAULT_ANIMALS;
+  const accepted: Record<string, string[]> = {};
+  if (t.accepted && typeof t.accepted === "object") {
+    for (const [id, list] of Object.entries(t.accepted)) {
+      if (!/^[a-z0-9-]{1,40}$/.test(id) || !Array.isArray(list)) continue;
+      const clean = list.filter((a): a is string => typeof a === "string" && a.length > 0 && a.length <= 40).slice(0, 20);
+      if (clean.length) accepted[id] = clean;
+    }
+  }
+  return { on: Boolean(t.on), questions, closed: Boolean(t.closed), accepted, prize: parsePrize(t.prize) };
 }

@@ -5,6 +5,7 @@ import { ensureDeviceHash } from "@/lib/device";
 import { getParty, hasPartyAccess, type PublicParty } from "@/lib/parties";
 import { drawScratchCard } from "@/lib/games/scratch";
 import { triviaQuestions } from "@/lib/games/trivia-bank";
+import { animalQuestions } from "@/lib/games/animal-babies";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 
 type Result = { ok: true } | { ok: false; error: string };
@@ -168,6 +169,41 @@ export async function saveTrivia(slug: string, input: { name: string; answers: R
   });
   if (error) {
     if (String(error.code) === "23505") return fail("You've already played trivia on this device.");
+    return fail("We couldn't save your answers. Please try again.");
+  }
+  revalidatePath(`/p/${party.slug}`, "layout");
+  revalidatePath(`/host/${party.slug}`, "layout");
+  return { ok: true };
+}
+
+/** Baby animal names: typed answers, one go per browser. */
+export async function saveAnimals(slug: string, input: { name: string; answers: Record<string, string> }): Promise<Result> {
+  const party = await openGames(slug);
+  if ("ok" in party) return party;
+  const game = party.games.animals;
+  if (!game.on) return fail("This game isn't running.");
+  if (game.closed) return fail("This game is closed. Thanks for playing!");
+
+  const name = cleanName(input.name);
+  if (!name) return fail("Please add your name.");
+  if (name.length > 80) return fail("That name is a bit long.");
+
+  const answers: Record<string, string> = {};
+  for (const q of animalQuestions(game.questions)) {
+    const a = String(input.answers?.[q.id] ?? "").trim().replace(/\s+/g, " ").slice(0, 40);
+    if (a) answers[q.id] = a;
+  }
+  if (!Object.keys(answers).length) return fail("Take a guess at one or more first!");
+
+  const { error } = await supabaseAdmin().from("game_answers").insert({
+    party_id: party.id,
+    game: "animals",
+    device_hash: await ensureDeviceHash(party),
+    player_name: name,
+    answers,
+  });
+  if (error) {
+    if (String(error.code) === "23505") return fail("You've already played this game on this device.");
     return fail("We couldn't save your answers. Please try again.");
   }
   revalidatePath(`/p/${party.slug}`, "layout");

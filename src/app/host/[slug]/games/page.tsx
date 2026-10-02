@@ -1,6 +1,9 @@
 import { notFound } from "next/navigation";
 import { emailConfigured } from "@/lib/email";
-import { listBabyGuesses, listBabyPhotos, listPoolEntries, listTriviaAnswers } from "@/lib/games";
+import { listBabyGuesses, listBabyPhotos, listGameAnswers, listPoolEntries, listTriviaAnswers } from "@/lib/games";
+import { answerMatches, normalizeAnswer, scoreTyped } from "@/lib/games/answer-match";
+import { animalQuestions } from "@/lib/games/animal-babies";
+import { AnimalHost, type AnimalReview } from "./AnimalHost";
 import { triviaQuestions } from "@/lib/games/trivia-bank";
 import { TriviaHost } from "./TriviaHost";
 import { raffleEntrants } from "@/lib/games/raffle";
@@ -20,7 +23,7 @@ export default async function HostGamesPage({ params }: Props) {
   const party = await getHostParty(slug);
   if (!party) notFound();
 
-  const [photos, guesses, poolEntries, people, scratchCards, winningCard, scratchPhoto, triviaAnswers] = await Promise.all([
+  const [photos, guesses, poolEntries, people, scratchCards, winningCard, scratchPhoto, triviaAnswers, animalAnswers] = await Promise.all([
     listBabyPhotos(party.id),
     listBabyGuesses(party.id, null),
     listPoolEntries(party.id, null),
@@ -29,11 +32,28 @@ export default async function HostGamesPage({ params }: Props) {
     getWinningCard(party.id).catch(() => null),
     scratchPhotoUrl(party.games.scratch.photoPath),
     listTriviaAnswers(party.id, null),
+    listGameAnswers(party.id, "animals", null),
   ]);
+  const ag = party.games.animals;
+  const animalQs = animalQuestions(ag.questions);
+  const animalBoard = scoreTyped(animalQs, ag.accepted, animalAnswers ?? []);
+  // Typed answers that didn't count, grouped, so the host can accept any that should
+  const animalReview: AnimalReview[] = animalQs.map((q) => {
+    const extra = ag.accepted[q.id] ?? [];
+    const counts = new Map<string, number>();
+    for (const e of animalAnswers ?? []) {
+      const typed = e.answers[q.id];
+      if (!typed || answerMatches(typed, [...q.accepted, ...extra])) continue;
+      const t = normalizeAnswer(typed);
+      if (t) counts.set(t, (counts.get(t) ?? 0) + 1);
+    }
+    const wrong = [...counts].map(([text, count]) => ({ text, count })).sort((a, b) => b.count - a.count || a.text.localeCompare(b.text));
+    return { id: q.id, animal: q.animal, answer: q.accepted.join(", "), wrong, extra };
+  });
   const triviaBoard = scoreTrivia(triviaQuestions(party.games.trivia.questions), triviaAnswers ?? []);
   const emails = new Map(people.map((p) => [p.key, p.email]));
   const results = await gameWinners(party);
-  const winnersFor = (g: "babyPhotos" | "pool" | "scratch" | "trivia") =>
+  const winnersFor = (g: "babyPhotos" | "pool" | "scratch" | "trivia" | "animals") =>
     (results.find((r) => r.game === g)?.winners ?? []).map((w) => ({ ...w, email: emails.get(w.key) ?? null }));
   const entrants = raffleEntrants(people, party.games.raffle.rules).map((e) => ({ ...e, email: emails.get(e.key) ?? null }));
   const babyBoard = scoreBabyPhotos(
@@ -42,7 +62,7 @@ export default async function HostGamesPage({ params }: Props) {
   );
 
   const g = party.games;
-  const games = [g.babyPhotos.on, g.pool.on, g.scratch.on, g.trivia.on, g.raffle.on];
+  const games = [g.babyPhotos.on, g.pool.on, g.scratch.on, g.trivia.on, g.animals.on, g.raffle.on];
   const added = games.filter(Boolean).length;
 
   return (
@@ -82,6 +102,14 @@ export default async function HostGamesPage({ params }: Props) {
         game={party.games.trivia}
         board={triviaBoard.map((r) => ({ name: r.name, correct: r.correct, total: r.total, place: r.place }))}
         winners={winnersFor("trivia")}
+        canEmail={emailConfigured()}
+      />
+      <AnimalHost
+        slug={party.slug}
+        game={ag}
+        board={animalBoard.map((r) => ({ name: r.name, correct: r.correct, total: r.total, place: r.place }))}
+        review={animalReview}
+        winners={winnersFor("animals")}
         canEmail={emailConfigured()}
       />
       <RaffleHost slug={party.slug} raffle={party.games.raffle} entrants={entrants} canEmail={emailConfigured()} />

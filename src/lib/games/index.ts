@@ -83,3 +83,22 @@ export async function listTriviaAnswers(partyId: string, deviceHash: string | nu
     mine: Boolean(deviceHash && r.device_hash === deviceHash),
   }));
 }
+
+export type TypedRow = { name: string; answers: Record<string, string>; createdAt: string; mine: boolean };
+
+/** Answers for a newer game (game_answers table). null = that table hasn't been added yet. */
+export async function listGameAnswers(partyId: string, game: string, deviceHash: string | null): Promise<TypedRow[] | null> {
+  const { data, error } = await supabaseAdmin()
+    .from("game_answers")
+    .select("player_name, answers, device_hash, created_at")
+    .eq("party_id", partyId)
+    .eq("game", game)
+    .order("created_at");
+  if (error) return null;
+  return (data ?? []).map((r) => ({
+    name: r.player_name as string,
+    answers: (r.answers ?? {}) as Record<string, string>,
+    createdAt: r.created_at as string,
+    mine: Boolean(deviceHash && r.device_hash === deviceHash),
+  }));
+}
