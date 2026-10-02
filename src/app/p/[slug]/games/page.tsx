@@ -19,7 +19,9 @@ export default async function GamesHub({ params }: Props) {
     db.from("pool_entries").select("party_id", { count: "exact", head: true }).eq("party_id", party.id),
   ]);
 
-  const { babyPhotos, pool } = party.games;
+  const { babyPhotos, pool, raffle } = party.games;
+  const showRaffle = raffle.on && raffle.prizes.length > 0;
+  const raffleWinners = raffle.winners.filter(Boolean).length;
   const showBaby = babyPhotos.on && (photoCount ?? 0) > 0;
   const base = `/p/${party.slug}/games`;
 
@@ -92,7 +94,28 @@ export default async function GamesHub({ params }: Props) {
           </Link>
         )}
 
-        {!showBaby && !pool.on && (
+        {showRaffle && (
+          <Link href={`${base}/raffle`} className="pp-paper pp-object" style={{ ...card, transform: "rotate(-0.5deg)" }}>
+            <div className="pp-ticket" aria-hidden="true">
+              <span>Admit one</span>
+            </div>
+            <div>
+              <p className="pp-script" style={{ fontSize: "2.1rem", color: "var(--pp-accent)" }}>
+                Raffle
+              </p>
+              <p className="pp-soft" style={{ fontSize: "1rem", marginTop: 4 }}>
+                {raffleWinners
+                  ? "The winners have been drawn! See who won."
+                  : `Up for grabs: ${raffle.prizes.join(", ")}. You're entered just for joining in!`}
+              </p>
+              <p className="pp-caps" style={{ fontSize: "0.68rem", marginTop: 6 }}>
+                {raffle.prizes.length} {raffle.prizes.length === 1 ? "prize" : "prizes"}
+              </p>
+            </div>
+          </Link>
+        )}
+
+        {!showBaby && !pool.on && !showRaffle && (
           <p className="pp-soft" style={{ textAlign: "center" }}>
             The host is still setting up the games. Check back soon!
           </p>

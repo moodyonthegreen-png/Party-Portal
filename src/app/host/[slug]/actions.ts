@@ -1,9 +1,13 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { drawEntrant, raffleEntrants, secureRandom } from "@/lib/games/raffle";
+import { MAX_PRIZES, type RaffleRules } from "@/lib/games/settings";
 import { sanitizeLayout } from "@/lib/gift/layout";
+import { listThankYous } from "@/lib/thanks";
+import { ensureRevealToken, getRevealSettings, sendReveal } from "@/lib/reveal";
 import { ownedProducts, PRODUCTS, type ProductKey } from "@/lib/gift/products";
-import { coHostInviteEmail, EmailError, emailConfigured, isEmail, reminderEmail, sendEmails, thankYouCardEmail } from "@/lib/email";
+import { coHostInviteEmail, EmailError, raffleWinnerEmail, emailConfigured, isEmail, reminderEmail, sendEmails, thankYouCardEmail } from "@/lib/email";
 import { parseGuestLines } from "@/lib/guests";
 import { issueCoHostLink, requireHost, viewerName, type HostParty } from "@/lib/host";
 import { newCardToken } from "@/lib/thank-cards";
@@ -927,4 +931,162 @@ export async function removeCoHost(slug: string, id: string): Promise<ActionStat
   if (error) return { error: "We couldn't remove them. Please try again." };
   refresh(party.slug);
   return { ok: true, message: "Removed. Their link no longer works." };
+}
+
+// ---------------------------------------------------------------------------
+// Raffle
+// ---------------------------------------------------------------------------
+
+export async function saveRaffle(slug: string, input: { on: boolean; prizes: string[]; rules: RaffleRules }): Promise<ActionState> {
+  const party = await host(slug);
+  if (isState(party)) return party;
+
+  const prizes = input.prizes.map((p) => String(p).trim().replace(/\s+/g, " ")).filter(Boolean);
+  if (prizes.length > MAX_PRIZES) return { error: `Up to ${MAX_PRIZES} prizes, please.` };
+  if (prizes.some((p) => p.length > 80)) return { error: "Keep each prize under 80 characters." };
+  const rules: RaffleRules = {
+    design: Boolean(input.rules.design),
+    note: Boolean(input.rules.note),
+    photos: Boolean(input.rules.photos),
+    games: Boolean(input.rules.games),
+  };
+  if (input.on && !prizes.length) return { error: "Add at least one prize." };
+  if (input.on && !Object.values(rules).some(Boolean)) return { error: "Pick at least one way to enter." };
+
+  // Keep a prize's winner as long as that prize stays in the list
+  const old = party.games.raffle;
+  const winners = prizes.map((p) => {
+    const i = old.prizes.indexOf(p);
+    return i >= 0 ? (old.winners[i] ?? null) : null;
+  });
+  const res = await saveGames(party, { ...party.games, raffle: { on: Boolean(input.on), prizes, rules, winners } });
+  return res.error ? res : { ok: true, message: "Raffle saved." };
+}
+
+/** Draw (or redraw) the winner for one prize. Past winners of other prizes can't win twice. */
+export async function drawRaffleWinner(slug: string, index: number): Promise<ActionState> {
+  const party = await host(slug);
+  if (isState(party)) return party;
+  const raffle = party.games.raffle;
+  const prize = raffle.prizes[index];
+  if (prize === undefined) return { error: "That prize wasn't found." };
+
+  const entrants = raffleEntrants(await listThankYous(party.id), raffle.rules);
+  // Redrawing also skips the current winner of this prize (e.g. they couldn't be reached)
+  const exclude = new Set(raffle.winners.filter((w): w is NonNullable<typeof w> => Boolean(w)).map((w) => w.key));
+  const pick = drawEntrant(entrants, exclude, secureRandom);
+  if (!pick) {
+    return { error: entrants.length ? "Everyone who entered has already won a prize!" : "Nobody has entered yet." };
+  }
+  const winners = [...raffle.winners];
+  winners[index] = { prize, name: pick.name, key: pick.key, drawnAt: new Date().toISOString(), emailedAt: null };
+  const res = await saveGames(party, { ...party.games, raffle: { ...raffle, winners } });
+  return res.error ? res : { ok: true, message: `${pick.name} won ${prize}!` };
+}
+
+export async function clearRaffleWinner(slug: string, index: number): Promise<ActionState> {
+  const party = await host(slug);
+  if (isState(party)) return party;
+  const raffle = party.games.raffle;
+  if (raffle.prizes[index] === undefined) return { error: "That prize wasn't found." };
+  const winners = [...raffle.winners];
+  winners[index] = null;
+  return saveGames(party, { ...party.games, raffle: { ...raffle, winners } });
+}
+
+/**
+ * Email the winner. The prize details (a gift card link or code) go straight
+ * into the email and are never stored.
+ */
+export async function emailRaffleWinner(slug: string, index: number, to: string, details: string): Promise<ActionState> {
+  const party = await host(slug);
+  if (isState(party)) return party;
+  const raffle = party.games.raffle;
+  const w = raffle.winners[index];
+  if (!w) return { error: "Draw a winner first." };
+  if (!isEmail(to)) return { error: "That email address doesn't look right." };
+  if (details.length > 2000) return { error: "Those details are a bit long." };
+  if (!emailConfigured()) return { error: "Email isn't set up yet." };
+
+  try {
+    await sendEmails([
+      raffleWinnerEmail({
+        to: to.trim(),
+        name: w.name,
+        prize: w.prize,
+        guestOfHonorName: party.guestOfHonorName,
+        occasion: party.occasion,
+        details,
+        fromName: viewerName(party) ?? `${party.guestOfHonorName}'s ${party.occasion.toLowerCase()}`,
+        replyTo: isEmail(party.viewer.email) ? party.viewer.email : undefined,
+      }),
+    ]);
+  } catch (e) {
+    return { error: e instanceof EmailError ? e.message : "The email didn't send. Please try again." };
+  }
+  // Remember their address on the guest list for next time
+  const db = supabaseAdmin();
+  const { data: g } = await db.from("guests").select("id, email").eq("party_id", party.id).ilike("name", w.name.replace(/[\\%_]/g, (c) => `\\${c}`)).maybeSingle();
+  if (g && !g.email) await db.from("guests").update({ email: to.trim().toLowerCase() }).eq("id", g.id);
+
+  const winners = [...raffle.winners];
+  winners[index] = { ...w, emailedAt: new Date().toISOString() };
+  await saveGames(party, { ...party.games, raffle: { ...raffle, winners } });
+  return { ok: true, message: `Sent to ${to.trim()}!` };
+}
+
+// ---------------------------------------------------------------------------
+// Keepsake reveal for the guest of honor
+// ---------------------------------------------------------------------------
+
+export async function saveRevealSettings(slug: string, input: { email: string; auto: boolean }): Promise<ActionState> {
+  const party = await host(slug);
+  if (isState(party)) return party;
+  const email = input.email.trim().toLowerCase();
+  if (email && (!isEmail(email) || email.length > 200)) return { error: "That email address doesn't look right." };
+  if (input.auto && !email) return { error: "Add her email so the keepsake can be sent." };
+  const { error } = await supabaseAdmin()
+    .from("parties")
+    .update({ reveal_email: email || null, reveal_auto: Boolean(input.auto) })
+    .eq("id", party.id);
+  if (error) {
+    return { error: error.code === "42703" || error.code === "PGRST204" ? "The keepsake isn't switched on yet (the database update hasn't been run)." : "We couldn't save that. Please try again." };
+  }
+  refresh(party.slug);
+  return { ok: true, message: input.auto ? "Saved! It'll be sent the morning after the party closes." : "Saved." };
+}
+
+export async function revealPreviewLink(slug: string): Promise<ActionState & { url?: string }> {
+  const party = await host(slug);
+  if (isState(party)) return party;
+  try {
+    const token = await ensureRevealToken(party.id);
+    return { ok: true, url: `/r/${token}?preview=1` };
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : "Something went wrong." };
+  }
+}
+
+export async function sendRevealNow(slug: string, email: string): Promise<ActionState> {
+  const party = await host(slug);
+  if (isState(party)) return party;
+  const to = email.trim().toLowerCase();
+  if (!isEmail(to)) return { error: "Add her email address first." };
+  const settings = await getRevealSettings(party.id);
+  if (!settings) return { error: "The keepsake isn't switched on yet (the database update hasn't been run)." };
+  if (settings.sentAt && Date.now() - new Date(settings.sentAt).getTime() < 60_000) {
+    return { error: "It just went out. Give it a minute to arrive." };
+  }
+  try {
+    await supabaseAdmin().from("parties").update({ reveal_email: to }).eq("id", party.id);
+    await sendReveal(party, {
+      to,
+      fromName: viewerName(party) ?? "Your host",
+      replyTo: isEmail(party.viewer.email) ? party.viewer.email : undefined,
+    });
+  } catch (e) {
+    return { error: e instanceof EmailError || e instanceof Error ? e.message : "The email didn't send. Please try again." };
+  }
+  refresh(party.slug);
+  return { ok: true, message: `Sent to ${to}! 💛` };
 }

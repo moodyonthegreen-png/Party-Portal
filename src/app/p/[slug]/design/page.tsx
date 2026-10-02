@@ -86,6 +86,11 @@ export default async function DesignPage({ params }: Props) {
             Your drawing will be part of a one-of-a-kind gift for {party.guestOfHonorName}, made from designs by
             everyone celebrating. You can replace yours any time before the deadline.
           </p>
+          {party.sections.games && party.games.raffle.on && party.games.raffle.rules.design && party.games.raffle.prizes.length > 0 && (
+            <p className="pp-note" style={{ marginTop: "0.9rem", fontSize: "0.95rem" }}>
+              🎟️ Adding a design enters you in the raffle to win {party.games.raffle.prizes.join(" or ")}!
+            </p>
+          )}
         </div>
         <DesignFlow
           slug={party.slug}

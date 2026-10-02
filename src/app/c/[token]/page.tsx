@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { themeFontVars } from "@/lib/fonts";
 import { getThankCard, markCardOpened } from "@/lib/thank-cards";
 import { getTheme } from "@/themes";
+import { getWrapUp } from "@/lib/wrapup";
 import { ThankCardView } from "./ThankCardView";
 import "@/app/party.css";
 
@@ -27,6 +28,11 @@ export default async function CardPage({ params, searchParams }: Props) {
   if (!preview) await markCardOpened(token);
 
   const theme = getTheme(card.party.theme);
+  // The wrap-up is a nice extra: never let it stop the card from opening
+  const wrapUp = await getWrapUp(card.party, card.personKey).catch((e) => {
+    console.error("[thank-card] wrap-up failed", e);
+    return null;
+  });
   const from = card.hostName ?? card.party.guestOfHonorName;
 
   return (
@@ -39,6 +45,7 @@ export default async function CardPage({ params, searchParams }: Props) {
         guestOfHonorName={card.party.guestOfHonorName}
         motif={theme.motif}
         preview={Boolean(preview)}
+        wrapUp={wrapUp}
       />
     </div>
   );

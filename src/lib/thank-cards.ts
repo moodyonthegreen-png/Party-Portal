@@ -4,6 +4,7 @@ import { DESIGNS_BUCKET, dbError, supabaseAdmin } from "@/lib/supabase/admin";
 
 export type ThankCard = {
   token: string;
+  personKey: string;
   recipientName: string;
   message: string;
   designUrl: string | null;
@@ -50,6 +51,7 @@ export async function getThankCard(token: string): Promise<ThankCard | null> {
   }
   return {
     token: data.token,
+    personKey: data.person_key as string,
     recipientName: data.recipient_name,
     message: data.message,
     designUrl,

@@ -132,6 +132,68 @@ export function coHostInviteEmail(opts: {
   };
 }
 
+export function revealEmail(opts: {
+  to: string;
+  guestOfHonorName: string;
+  occasion: string;
+  fromName: string;
+  peopleCount: number;
+  url: string;
+  replyTo?: string;
+}): Email {
+  const first = opts.guestOfHonorName.split(" ")[0];
+  const who = opts.peopleCount > 1 ? `${opts.peopleCount} people` : "The people who love you";
+  return {
+    to: opts.to,
+    replyTo: opts.replyTo,
+    subject: `${first}, your ${opts.occasion.toLowerCase()} keepsake is ready 💛`,
+    html: layout({
+      preheader: "Everything everyone shared, all in one place",
+      heading: `For you, ${first}`,
+      body: `<p style="text-align:center">${esc(who)} celebrated you, and every note, voice memo, video, photo and design they shared is waiting for you in one keepsake.</p>
+        <p style="text-align:center">Find a cozy spot, maybe a tissue or two, and tap through whenever you're ready. You can watch it as many times as you like.</p>`,
+      button: { label: "Open my keepsake", url: opts.url },
+      footer: `Sent with love by ${esc(opts.fromName)} through Moody Celebrations. This link is just for you.`,
+    }),
+    text: `${first}, ${who.toLowerCase()} celebrated you. Everything they shared is in your keepsake: ${opts.url}\n\nWith love, ${opts.fromName}`,
+  };
+}
+
+/** Escape text, keep line breaks, and turn plain https links into links. */
+function richText(s: string) {
+  return esc(s.trim())
+    .replace(/https?:\/\/[^\s<]+/g, (u) => `<a href="${u}" style="color:#5d7a53">${u}</a>`)
+    .replace(/\n/g, "<br>");
+}
+
+export function raffleWinnerEmail(opts: {
+  to: string;
+  name: string;
+  prize: string;
+  guestOfHonorName: string;
+  occasion: string;
+  details: string;
+  fromName: string;
+  replyTo?: string;
+}): Email {
+  const party = `${opts.guestOfHonorName}'s ${opts.occasion.toLowerCase()}`;
+  return {
+    to: opts.to,
+    replyTo: opts.replyTo,
+    subject: `You won the raffle at ${party}! 🎉`,
+    html: layout({
+      preheader: `You won: ${opts.prize}`,
+      heading: "You won! 🎉",
+      body: `<p style="text-align:center">Hi ${esc(opts.name)},</p>
+        <p style="text-align:center">Your name was drawn in the raffle at <strong>${esc(party)}</strong>. You won:</p>
+        <p style="text-align:center;font-size:22px;color:#5d7a53;margin:18px 0">${esc(opts.prize)}</p>
+        ${opts.details.trim() ? `<div style="background:#f5f2e6;border-radius:8px;padding:14px 16px;margin:8px 0 14px">${richText(opts.details)}</div>` : ""}
+        <p style="text-align:center">Thank you for celebrating with us!<br>${esc(opts.fromName)}</p>`,
+    }),
+    text: `Hi ${opts.name},\n\nYou won the raffle at ${party}: ${opts.prize}\n\n${opts.details.trim()}\n\nThank you for celebrating with us!\n${opts.fromName}`,
+  };
+}
+
 export function reminderEmail(opts: {
   to: string;
   guestName: string;
