@@ -10,7 +10,7 @@ import { ensureRevealToken, getRevealSettings, sendReveal } from "@/lib/reveal";
 import { ownedProducts, PRODUCTS, type ProductKey } from "@/lib/gift/products";
 import { coHostInviteEmail, EmailError, raffleWinnerEmail, emailConfigured, isEmail, reminderEmail, sendEmails, thankYouCardEmail } from "@/lib/email";
 import { parseGuestLines } from "@/lib/guests";
-import { issueCoHostLink, requireHost, viewerName, type HostParty } from "@/lib/host";
+import { issueCoHostLink, MAX_CO_HOSTS, MAX_HOSTS, requireHost, viewerName, type HostParty } from "@/lib/host";
 import { newCardToken } from "@/lib/thank-cards";
 import { MAX_MEDIA_BYTES, MEDIA_BUCKET, MEDIA_TYPES } from "@/lib/messages";
 import { PHOTOS_BUCKET } from "@/lib/photos";
@@ -824,7 +824,6 @@ export async function emailThankYou(slug: string, key: string, name: string, to:
 // Co-hosts (the guest of honor, or a helper) with their own dashboard link
 // ---------------------------------------------------------------------------
 
-const MAX_CO_HOSTS = 6;
 
 export type CoHostState = ActionState & { url?: string };
 
@@ -853,7 +852,7 @@ export async function inviteCoHost(slug: string, _prev: CoHostState, formData: F
   if ((existing ?? []).some((c) => String(c.email).toLowerCase() === email)) {
     return { error: "They're already a co-host. Use \"Email their link again\" below." };
   }
-  if ((existing ?? []).length >= MAX_CO_HOSTS) return { error: `A party can have up to ${MAX_CO_HOSTS} co-hosts.` };
+  if ((existing ?? []).length >= MAX_CO_HOSTS) return { error: `A party can have up to ${MAX_HOSTS} hosts: the host plus ${MAX_CO_HOSTS} co-hosts. Remove someone to invite another.` };
 
   const { data: created, error } = await db
     .from("co_hosts")

@@ -63,6 +63,7 @@ export function CoHosts({
   coHosts,
   isHost,
   ready,
+  maxCoHosts,
 }: {
   slug: string;
   guestOfHonorName: string;
@@ -71,7 +72,9 @@ export function CoHosts({
   isHost: boolean;
   /** False until the co_hosts table exists */
   ready: boolean;
+  maxCoHosts: number;
 }) {
+  const full = coHosts.length >= maxCoHosts;
   const [state, action, pending] = useActionState<CoHostState, FormData>(inviteCoHost.bind(null, slug), {});
   const formRef = useRef<HTMLFormElement>(null);
   const hasGoh = coHosts.some((c) => c.role === "guest_of_honor");
@@ -92,11 +95,12 @@ export function CoHosts({
     <section className="pp-paper" style={card} id="co-hosts">
       <div>
         <h2 className="pp-caps" style={{ fontSize: "0.8rem" }}>
-          Co-hosts
+          Co-hosts {ready && `(${coHosts.length} of ${maxCoHosts})`}
         </h2>
         <p className="pp-soft" style={{ fontSize: "1rem", marginTop: "0.4rem" }}>
-          Give {first} (or a helper) their own private link to this dashboard. They can see and do everything you can,
-          including sending thank-you cards, which will be signed with their name.
+          Give {first} and anyone helping you their own private link to this dashboard. Up to {maxCoHosts + 1} people can host
+          together: the host plus {maxCoHosts} co-hosts. They can see and do everything you can, including sending thank-you cards,
+          which will be signed with their name.
         </p>
       </div>
 
@@ -168,6 +172,12 @@ export function CoHosts({
           )}
           <Result state={rowResult} />
 
+          {full ? (
+            <p className="pp-note" style={{ fontSize: "0.95rem" }}>
+              You&apos;ve reached {maxCoHosts + 1} hosts, the most a party can have.
+              {isHost ? " Remove someone above to invite another." : ""}
+            </p>
+          ) : (
           <form ref={formRef} action={action} style={{ display: "grid", gap: "0.75rem", borderTop: "1px solid var(--pp-paper-edge)", paddingTop: "1rem" }}>
             <fieldset style={{ border: 0, padding: 0, margin: 0, display: "flex", gap: "1.25rem", flexWrap: "wrap" }}>
               <legend className="pp-caps" style={{ fontSize: "0.72rem", marginBottom: "0.5rem" }}>
@@ -213,6 +223,7 @@ export function CoHosts({
             </p>
             <Result state={state.error || state.message ? state : null} />
           </form>
+          )}
         </>
       )}
     </section>

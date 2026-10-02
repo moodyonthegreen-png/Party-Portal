@@ -17,6 +17,10 @@ export const hostCookiePath = (slug: string) => `/host/${slug}`;
 
 export type CoHostRole = "guest_of_honor" | "helper";
 
+/** Five people can run a party: the host plus up to four co-hosts. */
+export const MAX_HOSTS = 5;
+export const MAX_CO_HOSTS = MAX_HOSTS - 1;
+
 /** Who is using the dashboard right now. */
 export type Viewer =
   | { kind: "host"; name: string | null; email: string }

@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { getHostParty, listCoHosts } from "@/lib/host";
+import { getHostParty, listCoHosts, MAX_CO_HOSTS } from "@/lib/host";
 import { THEMES } from "@/themes";
 import { getWelcome, MAX_WELCOME_PHOTOS } from "@/lib/welcome";
 import { CoHosts } from "./CoHosts";
@@ -51,6 +51,7 @@ export default async function HostSettings({ params }: Props) {
         coHosts={coHosts ?? []}
         isHost={party.viewer.kind === "host"}
         ready={coHosts !== null}
+        maxCoHosts={MAX_CO_HOSTS}
       />
       <PasswordForm slug={party.slug} hasPassword={party.hasPassword} />
     </main>
