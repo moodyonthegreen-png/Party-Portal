@@ -4,6 +4,7 @@ import { formatWeight, scoreBabyPhotos, scorePool } from "@/lib/games/scoring";
 import { listGiftSources, listSavedGifts } from "@/lib/gift";
 import { PRODUCTS, type ProductKey } from "@/lib/gift/products";
 import type { HostParty } from "@/lib/host";
+import { listMemorials } from "@/lib/memorials";
 import { listMessages } from "@/lib/messages";
 import { listPhotos } from "@/lib/photos";
 import { listThankYous } from "@/lib/thanks";
@@ -54,6 +55,27 @@ export async function buildDownload(party: HostParty, section: DownloadSection):
 
   // --- Guest book ---------------------------------------------------------
   if (want("guestbook")) {
+    const memorials = (await listMemorials(party.id)).items;
+    if (memorials.length) {
+      html.push(`<h2>In loving memory</h2>`);
+      memorials.forEach((m, i) => {
+        let media = "";
+        if (m.mediaUrl && m.mediaKind) {
+          const kind = m.mediaKind === "photo" ? "photo" : m.mediaKind === "video" ? "video" : "voice memo";
+          const file = name("In loving memory", `${pad(i + 1)} ${m.name} - ${kind}`, extensionOf(m.mediaUrl) || (m.mediaKind === "photo" ? ".jpg" : ""));
+          files.push({ name: file, url: m.mediaUrl });
+          media =
+            m.mediaKind === "photo"
+              ? `<img loading="lazy" src="${attr(file)}" alt="" style="max-width:320px">`
+              : m.mediaKind === "video"
+                ? `<video controls preload="metadata" src="${attr(file)}"></video>`
+                : `<audio controls preload="metadata" src="${attr(file)}"></audio>`;
+        }
+        html.push(
+          `<article class="note">${media}<p class="from">${esc(m.name)}${m.relation ? ` <span>${esc(m.relation)}</span>` : ""}</p>${m.message ? `<p class="hand">${esc(m.message).replace(/\n/g, "<br>")}</p>` : ""}</article>`,
+        );
+      });
+    }
     const notes = [...(await listMessages(party.id))].reverse();
     if (notes.length) {
       html.push(`<h2>Guest book <small>${notes.length}</small></h2>`);

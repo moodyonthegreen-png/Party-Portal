@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
+import type { Memorial } from "@/lib/memorials";
 import type { Message } from "@/lib/messages";
 import { supabaseBrowser } from "@/lib/supabase/browser";
 import { deleteMyMessage, finishMessage, postMessage } from "./actions";
@@ -16,6 +17,7 @@ type Attachment =
 
 type Page =
   | { kind: "title" }
+  | { kind: "memorial"; memorial: Memorial }
   | { kind: "entry"; message: Message }
   | { kind: "filler" }
   | { kind: "write" };
@@ -37,10 +39,13 @@ export function GuestBook({
   slug,
   guestOfHonorName,
   messages,
+  memorials = [],
 }: {
   slug: string;
   guestOfHonorName: string;
   messages: Message[];
+  /** The host's memorial notes: always the first pages */
+  memorials?: Memorial[];
 }) {
   const router = useRouter();
   const wide = useWide();
@@ -49,11 +54,12 @@ export function GuestBook({
   // The book reads oldest first; the blank page to write on is always last
   const pages = useMemo<Page[]>(() => {
     const list: Page[] = [{ kind: "title" }];
+    for (const m of memorials) list.push({ kind: "memorial", memorial: m });
     for (const m of [...messages].reverse()) list.push({ kind: "entry", message: m });
     if (wide && list.length % 2 === 0) list.push({ kind: "filler" }); // keep the blank page on the right
     list.push({ kind: "write" });
     return list;
-  }, [messages, wide]);
+  }, [messages, memorials, wide]);
 
   const last = pages.length - 1;
   const step = wide ? 2 : 1;
@@ -229,6 +235,27 @@ export function GuestBook({
             {num}
           </div>
         );
+      case "memorial": {
+        const m = page.memorial;
+        return (
+          <div className="pp-bpage pp-bpage-memorial" key={`memorial-${m.id}`}>
+            <p className="pp-caps pp-soft mm-kicker">
+              <span aria-hidden="true">✦</span> In loving memory <span aria-hidden="true">✦</span>
+            </p>
+            <div className="pp-bpage-scroll mm-page">
+              {m.mediaKind === "photo" && m.mediaUrl && <img src={m.mediaUrl} alt={m.name} className="mm-page-photo" />}
+              {m.mediaKind === "video" && m.mediaUrl && (
+                <video src={m.mediaUrl} controls playsInline preload="metadata" className="mm-page-video" />
+              )}
+              <p className="pp-script mm-page-name">{m.name}</p>
+              {m.relation && <p className="pp-caps pp-soft mm-page-rel">{m.relation}</p>}
+              {m.mediaKind === "audio" && m.mediaUrl && <audio src={m.mediaUrl} controls preload="none" style={{ width: "100%", marginTop: 10 }} />}
+              {m.message && <p className="mm-page-msg">{m.message}</p>}
+            </div>
+            {num}
+          </div>
+        );
+      }
       case "entry": {
         const m = page.message;
         return (

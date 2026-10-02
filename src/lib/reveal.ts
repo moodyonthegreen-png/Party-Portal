@@ -6,6 +6,7 @@ import { listGiftSources, listSavedGifts } from "@/lib/gift";
 import { PRODUCTS, type ProductKey } from "@/lib/gift/products";
 import { previewImageUrl } from "@/lib/gift/preview-url";
 import type { BoothPrompt } from "@/lib/booth/prompts";
+import { listMemorials, type Memorial } from "@/lib/memorials";
 import { listMessages } from "@/lib/messages";
 import { getParty, type PublicParty } from "@/lib/parties";
 import { listPhotos } from "@/lib/photos";
@@ -88,16 +89,19 @@ export type RevealData = {
     raffle: { prize: string; name: string }[];
   };
   gift: { productName: string; imageUrl: string } | null;
+  /** The host's memorial notes, for the "watching over you" page */
+  memorials: Memorial[];
   names: string[];
 };
 
 export async function getRevealData(party: PublicParty): Promise<RevealData> {
-  const [messages, photos, designs, saved, people] = await Promise.all([
+  const [messages, photos, designs, saved, people, memorials] = await Promise.all([
     party.sections.messages ? listMessages(party.id) : Promise.resolve([]),
     party.sections.album ? listPhotos(party.id, { limit: 120 }) : Promise.resolve([]),
     listGiftSources(party.id),
     listSavedGifts(party.id).catch(() => []),
     listThankYous(party.id),
+    listMemorials(party.id),
   ]);
 
   // Games: only results the host has already revealed
@@ -156,6 +160,7 @@ export async function getRevealData(party: PublicParty): Promise<RevealData> {
       },
     },
     gift,
+    memorials: memorials.items,
     names,
   };
 }

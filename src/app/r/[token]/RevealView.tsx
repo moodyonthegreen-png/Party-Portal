@@ -16,6 +16,7 @@ type Slide =
   | { t: "games" }
   | { t: "designs" }
   | { t: "gift" }
+  | { t: "memorial"; m: RevealData["memorials"][number] }
   | { t: "end" };
 
 const PHOTOS_PER_SLIDE = 6;
@@ -56,6 +57,7 @@ export function RevealView({
     if (hasGames) s.push({ t: "games" });
     if (data.designs.length) s.push({ t: "designs" });
     if (data.gift) s.push({ t: "gift" });
+    for (const m of data.memorials) s.push({ t: "memorial", m });
     s.push({ t: "end" });
     return s;
   }, [data, hasGames]);
@@ -76,7 +78,16 @@ export function RevealView({
   // Warm up the next slide's images
   useEffect(() => {
     const n = slides[i + 1];
-    const urls = n?.t === "photos" ? n.photos.map((p) => p.url) : n?.t === "booth" ? [n.photo.url] : n?.t === "gift" && data.gift ? [data.gift.imageUrl] : [];
+    const urls =
+      n?.t === "photos"
+        ? n.photos.map((p) => p.url)
+        : n?.t === "booth"
+          ? [n.photo.url]
+          : n?.t === "gift" && data.gift
+            ? [data.gift.imageUrl]
+            : n?.t === "memorial" && n.m.mediaKind === "photo" && n.m.mediaUrl
+              ? [n.m.mediaUrl]
+              : [];
     for (const u of urls) {
       const img = new Image();
       img.src = u;
@@ -243,6 +254,24 @@ export function RevealView({
               Made from {plural(data.designs.length, "design")} by the people who love you
             </p>
             <p className="rv-names">{data.designs.map((d) => d.name).join(" · ")}</p>
+          </div>
+        )}
+
+        {slide.t === "memorial" && (
+          <div className="rv-center rv-memorial">
+            <p className="pp-caps pp-soft" style={{ fontSize: "0.75rem" }}>
+              With love from those watching over you
+            </p>
+            {slide.m.mediaKind === "photo" && slide.m.mediaUrl && <img src={slide.m.mediaUrl} alt={slide.m.name} className="rv-memorial-photo" />}
+            {slide.m.mediaKind === "video" && slide.m.mediaUrl && (
+              <video className="rv-media" src={slide.m.mediaUrl} controls playsInline preload="metadata" style={{ marginTop: "1rem" }} />
+            )}
+            <h2 className="pp-script rv-big" style={{ marginTop: "0.9rem" }}>{slide.m.name}</h2>
+            {slide.m.relation && <p className="pp-caps pp-soft" style={{ fontSize: "0.75rem", marginTop: "0.3rem" }}>{slide.m.relation}</p>}
+            {slide.m.mediaKind === "audio" && slide.m.mediaUrl && (
+              <audio src={slide.m.mediaUrl} controls preload="metadata" style={{ width: "min(100%, 420px)", marginTop: "1rem" }} />
+            )}
+            {slide.m.message && <p className="rv-hand rv-memorial-msg">{slide.m.message}</p>}
           </div>
         )}
 

@@ -33,6 +33,9 @@ export default async function KeepsakePage({ params }: Props) {
       ok: Boolean(data.gift),
       text: data.gift ? `A photo of the finished ${data.gift.productName.toLowerCase()}` : "A photo of the finished gift (finish it in the Gift designer)",
     },
+    ...(data.memorials.length
+      ? [{ ok: true, text: `A "watching over you" page for ${data.memorials.map((m) => m.name).join(", ")}` }]
+      : []),
   ];
 
   return (

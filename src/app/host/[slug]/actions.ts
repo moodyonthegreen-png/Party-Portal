@@ -16,6 +16,7 @@ import { newCardToken } from "@/lib/thank-cards";
 import { MAX_MEDIA_BYTES, MEDIA_BUCKET, MEDIA_TYPES } from "@/lib/messages";
 import { PHOTOS_BUCKET } from "@/lib/photos";
 import { MAX_WELCOME_PHOTOS } from "@/lib/welcome";
+import { MAX_MEMORIALS, memorialBucket } from "@/lib/memorials";
 import { createDraftProduct, deleteProduct, listGarmentOptions, PrintifyError, printifyConfigured, type GarmentOption, type Mockup } from "@/lib/printify";
 import { DESIGNS_BUCKET, supabaseAdmin } from "@/lib/supabase/admin";
 import { siteOrigin } from "@/lib/site";
@@ -1337,4 +1338,140 @@ export async function emailGameWinner(slug: string, game: PrizeGame, key: string
   const cur = party.games[game];
   await saveGames(party, { ...party.games, [game]: { ...cur, prize: { ...cur.prize, emailed: { ...cur.prize.emailed, [key]: new Date().toISOString() } } } });
   return { ok: true, message: `Sent to ${to.trim()}.` };
+}
+
+// ---------------------------------------------------------------------------
+// Memorial notes (the first pages of the guest book)
+// ---------------------------------------------------------------------------
+
+const MEMORIALS_NOT_READY = "Memorial notes aren't switched on yet (the database update hasn't been run).";
+type MemorialKind = "photo" | "audio" | "video";
+
+export async function saveMemorial(
+  slug: string,
+  input: { id: string | null; name: string; relation: string; message: string },
+): Promise<{ ok: true; id: string } | { ok: false; error: string }> {
+  const party = await host(slug);
+  if (isState(party)) return { ok: false, error: party.error ?? "Please open your host link again." };
+  const name = input.name.trim().replace(/\s+/g, " ");
+  const relation = input.relation.trim().replace(/\s+/g, " ");
+  const message = input.message.trim();
+  if (!name) return { ok: false, error: "Please add their name." };
+  if (name.length > 80) return { ok: false, error: "That name is a bit long." };
+  if (relation.length > 80) return { ok: false, error: "Please keep \"who they are\" under 80 characters." };
+  if (message.length > 1500) return { ok: false, error: "Please keep the message under 1,500 characters." };
+
+  const db = supabaseAdmin();
+  const row = { name, relation: relation || null, message: message || null };
+  if (input.id) {
+    if (!UUID.test(input.id)) return { ok: false, error: "That note wasn't found." };
+    const { error } = await db.from("memorials").update(row).eq("id", input.id).eq("party_id", party.id);
+    if (error) return { ok: false, error: "We couldn't save your changes. Please try again." };
+    refresh(party.slug);
+    return { ok: true, id: input.id };
+  }
+
+  const { count, error: countErr } = await db.from("memorials").select("id", { count: "exact", head: true }).eq("party_id", party.id);
+  if (countErr) return { ok: false, error: MEMORIALS_NOT_READY };
+  if ((count ?? 0) >= MAX_MEMORIALS) return { ok: false, error: `You can add up to ${MAX_MEMORIALS} memorial notes.` };
+  const id = crypto.randomUUID();
+  const { error } = await db.from("memorials").insert({ id, party_id: party.id, ...row, sort: count ?? 0 });
+  if (error) return { ok: false, error: "We couldn't add the note. Please try again." };
+  refresh(party.slug);
+  return { ok: true, id };
+}
+
+export async function startMemorialMedia(
+  slug: string,
+  id: string,
+  input: { kind: MemorialKind; mime: string; size: number },
+): Promise<{ ok: true; path: string; token: string } | { ok: false; error: string }> {
+  const party = await host(slug);
+  if (isState(party)) return { ok: false, error: party.error ?? "Please open your host link again." };
+  if (!UUID.test(id)) return { ok: false, error: "That note wasn't found." };
+
+  let path: string;
+  if (input.kind === "photo") {
+    path = `${party.id}/memorial/${id}-${Date.now()}.jpg`;
+  } else {
+    const base = input.mime.split(";")[0].trim().toLowerCase();
+    const type = MEDIA_TYPES[base];
+    if (!type || type.kind !== input.kind) {
+      return { ok: false, error: input.kind === "video" ? "That kind of video isn't supported. Try an MP4 or MOV." : "That kind of recording isn't supported. Try recording it here." };
+    }
+    if (input.size > MAX_MEDIA_BYTES) return { ok: false, error: "That file is too large (the limit is 50 MB). Try a shorter clip." };
+    path = `${party.id}/memorial-${id}-${Date.now()}.${type.ext}`;
+  }
+
+  const db = supabaseAdmin();
+  const { data: row } = await db.from("memorials").select("id").eq("id", id).eq("party_id", party.id).maybeSingle();
+  if (!row) return { ok: false, error: "That note wasn't found." };
+  const { data, error } = await db.storage.from(memorialBucket(input.kind)).createSignedUploadUrl(path);
+  if (error || !data) return { ok: false, error: "We couldn't get ready to upload. Please try again." };
+  return { ok: true, path: data.path, token: data.token };
+}
+
+export async function finishMemorialMedia(slug: string, id: string, kind: MemorialKind, path: string): Promise<ActionState> {
+  const party = await host(slug);
+  if (isState(party)) return party;
+  if (!UUID.test(id)) return { error: "That note wasn't found." };
+  const expected = kind === "photo" ? `${party.id}/memorial/${id}-` : `${party.id}/memorial-${id}-`;
+  if (!path.startsWith(expected)) return { error: "That file wasn't found." };
+
+  const db = supabaseAdmin();
+  const folder = path.slice(0, path.lastIndexOf("/"));
+  const file = path.split("/").pop()!;
+  const { data: files } = await db.storage.from(memorialBucket(kind)).list(folder, { search: file, limit: 2 });
+  if (!(files ?? []).some((f) => f.name === file)) return { error: "The file didn't finish uploading. Please try again." };
+
+  const { data: cur } = await db.from("memorials").select("media_kind, media_path").eq("id", id).eq("party_id", party.id).maybeSingle();
+  if (!cur) return { error: "That note wasn't found." };
+  const { error } = await db.from("memorials").update({ media_kind: kind, media_path: path }).eq("id", id).eq("party_id", party.id);
+  if (error) return { error: "We couldn't save it. Please try again." };
+  if (cur.media_path && cur.media_path !== path) {
+    await db.storage.from(memorialBucket(cur.media_kind as MemorialKind)).remove([cur.media_path as string]);
+  }
+  refresh(party.slug);
+  return { ok: true };
+}
+
+export async function removeMemorialMedia(slug: string, id: string): Promise<ActionState> {
+  const party = await host(slug);
+  if (isState(party)) return party;
+  if (!UUID.test(id)) return { error: "That note wasn't found." };
+  const db = supabaseAdmin();
+  const { data: cur } = await db.from("memorials").select("media_kind, media_path").eq("id", id).eq("party_id", party.id).maybeSingle();
+  if (!cur) return { error: "That note wasn't found." };
+  await db.from("memorials").update({ media_kind: null, media_path: null }).eq("id", id).eq("party_id", party.id);
+  if (cur.media_path) await db.storage.from(memorialBucket(cur.media_kind as MemorialKind)).remove([cur.media_path as string]);
+  refresh(party.slug);
+  return { ok: true };
+}
+
+export async function moveMemorial(slug: string, id: string, dir: -1 | 1): Promise<ActionState> {
+  const party = await host(slug);
+  if (isState(party)) return party;
+  const db = supabaseAdmin();
+  const { data } = await db.from("memorials").select("id").eq("party_id", party.id).order("sort").order("created_at");
+  const ids = (data ?? []).map((r) => r.id as string);
+  const i = ids.indexOf(id);
+  const j = i + dir;
+  if (i < 0 || j < 0 || j >= ids.length) return { ok: true };
+  [ids[i], ids[j]] = [ids[j], ids[i]];
+  await Promise.all(ids.map((mid, k) => db.from("memorials").update({ sort: k }).eq("id", mid).eq("party_id", party.id)));
+  refresh(party.slug);
+  return { ok: true };
+}
+
+export async function deleteMemorial(slug: string, id: string): Promise<ActionState> {
+  const party = await host(slug);
+  if (isState(party)) return party;
+  if (!UUID.test(id)) return { error: "That note wasn't found." };
+  const db = supabaseAdmin();
+  const { data: cur } = await db.from("memorials").select("media_kind, media_path").eq("id", id).eq("party_id", party.id).maybeSingle();
+  if (!cur) return { error: "That note wasn't found." };
+  await db.from("memorials").delete().eq("id", id).eq("party_id", party.id);
+  if (cur.media_path) await db.storage.from(memorialBucket(cur.media_kind as MemorialKind)).remove([cur.media_path as string]);
+  refresh(party.slug);
+  return { ok: true };
 }
