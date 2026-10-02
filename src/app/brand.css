@@ -1,0 +1,248 @@
+/*
+ * Moody Celebrations brand (the front door). Colors, type, logo, icons and
+ * pattern from the brand sheet. Party pages keep their own themes.
+ */
+.mc {
+  --mc-black: #000000;
+  --mc-gray: #e3e3e3;
+  --mc-pink: #fc7ab8;
+  --mc-lavender: #b994d9;
+  --mc-sage: #7d977d;
+  --mc-script: var(--font-allura), "Allura", cursive;
+  --mc-sans: var(--font-roboto-condensed), "Roboto Condensed", "Arial Narrow", sans-serif;
+  min-height: 100dvh;
+  color: var(--mc-black);
+  font-family: var(--mc-sans);
+  background-color: #fff;
+  /* the brand pattern, softened so the page reads clearly on top of it */
+  background-image: linear-gradient(rgb(255 255 255 / 0.5), rgb(255 255 255 / 0.5)), url("/brand/pattern-color.png");
+  background-size: auto, 340px auto;
+  background-position: center top;
+}
+
+.mc-main {
+  min-height: 100dvh;
+  max-width: 34rem;
+  margin: 0 auto;
+  padding: 2rem 1.25rem 2.5rem;
+  display: grid;
+  align-content: center;
+  gap: 1.75rem;
+}
+
+/* Logo on a soft gray band, with the brand's sage sparkles */
+.mc-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.9rem;
+  padding: 1.4rem 1rem;
+  background: var(--mc-gray);
+  border: 2.5px solid var(--mc-black);
+  border-radius: 24px;
+}
+.mc-logo img {
+  width: min(64vw, 300px);
+  height: auto;
+}
+
+/* Brand icons, recolored with a mask */
+.mc-icon {
+  display: inline-block;
+  background-color: currentColor;
+  -webkit-mask: var(--src) center / contain no-repeat;
+  mask: var(--src) center / contain no-repeat;
+  flex: none;
+}
+.mc-sparkle {
+  --src: url("/brand/icon-sparkle.png");
+  width: 26px;
+  height: 32px;
+  color: var(--mc-sage);
+}
+
+/* The card, with the icons tumbling around it */
+.mc-stage {
+  position: relative;
+}
+.mc-card {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 0.75rem;
+  padding: 1.75rem 1.5rem 1.6rem;
+  background: #fff;
+  border: 2.5px solid var(--mc-black);
+  border-radius: 24px;
+  box-shadow: 8px 8px 0 var(--mc-pink);
+}
+.mc-script {
+  font-family: var(--mc-script);
+  font-weight: 400;
+  line-height: 1;
+}
+.mc-card h1 {
+  font-size: clamp(3.2rem, 14vw, 4.2rem);
+  margin-bottom: 0.1rem;
+}
+.mc-lead {
+  font-size: 1.1rem;
+  line-height: 1.4;
+}
+.mc-label {
+  margin-top: 0.4rem;
+  font-weight: 700;
+  font-size: 0.82rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.mc-input {
+  width: 100%;
+  padding: 0.85rem 1.1rem;
+  border: 2px solid var(--mc-black);
+  border-radius: 999px;
+  background: #fff;
+  font: inherit;
+  font-size: 1.1rem;
+  outline: none;
+}
+.mc-input::placeholder {
+  color: #9a9a9a;
+}
+.mc-input:focus-visible {
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--mc-lavender) 55%, transparent);
+}
+.mc-button {
+  margin-top: 0.3rem;
+  padding: 0.95rem 1.4rem;
+  border: 2px solid var(--mc-black);
+  border-radius: 999px;
+  background: var(--mc-black);
+  color: #fff;
+  font: inherit;
+  font-weight: 700;
+  font-size: 1rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s, transform 0.15s;
+}
+.mc-button:hover {
+  background: var(--mc-pink);
+  color: var(--mc-black);
+}
+.mc-button:active {
+  transform: translateY(1px);
+}
+.mc-button:focus-visible {
+  outline: 3px solid var(--mc-lavender);
+  outline-offset: 3px;
+}
+
+.mc-float {
+  position: absolute;
+  z-index: 2;
+  pointer-events: none;
+}
+.mc-sunglasses {
+  --src: url("/brand/icon-sunglasses.png");
+  width: 96px;
+  height: 61px;
+  color: var(--mc-pink);
+  top: -34px;
+  left: -18px;
+  transform: rotate(-12deg);
+}
+.mc-confetti {
+  --src: url("/brand/icon-confetti.png");
+  width: 70px;
+  height: 66px;
+  color: var(--mc-lavender);
+  top: -30px;
+  right: -12px;
+}
+.mc-flower {
+  --src: url("/brand/icon-flower.png");
+  width: 38px;
+  height: 38px;
+  color: var(--mc-sage);
+  bottom: 54px;
+  left: -16px;
+}
+.mc-cheers {
+  --src: url("/brand/icon-cheers.png");
+  width: 84px;
+  height: 76px;
+  color: var(--mc-pink);
+  bottom: -38px;
+  right: -14px;
+}
+
+.mc-foot {
+  justify-self: center;
+  display: grid;
+  justify-items: center;
+  gap: 0.2rem;
+  padding: 0.9rem 1.6rem 1rem;
+  background: #fff;
+  border: 2.5px solid var(--mc-black);
+  border-radius: 999px;
+  text-align: center;
+}
+.mc-badge {
+  width: 92px;
+  height: auto;
+}
+.mc-tag {
+  font-size: 2rem;
+  color: var(--mc-black);
+}
+.mc-host {
+  font-size: 1rem;
+}
+.mc-host a {
+  color: var(--mc-black);
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-color: var(--mc-pink);
+  text-decoration-thickness: 3px;
+  text-underline-offset: 4px;
+}
+.mc-host a:hover {
+  text-decoration-color: var(--mc-lavender);
+}
+
+@media (min-width: 720px) {
+  .mc {
+    background-size: auto, 420px auto;
+  }
+  .mc-main {
+    padding-top: 3rem;
+  }
+  .mc-card {
+    padding: 2.25rem 2.25rem 2rem;
+    box-shadow: 10px 10px 0 var(--mc-pink);
+  }
+  .mc-sunglasses {
+    width: 128px;
+    height: 81px;
+    top: -46px;
+    left: -60px;
+  }
+  .mc-confetti {
+    width: 92px;
+    height: 87px;
+    right: -54px;
+  }
+  .mc-flower {
+    width: 48px;
+    height: 48px;
+    left: -48px;
+  }
+  .mc-cheers {
+    width: 112px;
+    height: 101px;
+    right: -64px;
+    bottom: -44px;
+  }
+}
