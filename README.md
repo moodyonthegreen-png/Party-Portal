@@ -1,6 +1,6 @@
 # Elebrate (by Moody Celebrations)
 
-The party portal that lives on a subdomain of moodycelebrations.com. Every
+Elebrate lives at elebrate.moodycelebrations.com. Every
 party package bought on Shopify gets its own guest site and host portal here.
 
 **Stack:** Next.js (App Router) on Vercel, Supabase for the database and photo
@@ -45,7 +45,7 @@ Moody Celebrations admin view, and the Shopify and Printify connections.
 1. Import this GitHub repo into Vercel.
 2. Under **Settings → Environment Variables**, add the three values from
    `.env.example`.
-3. Deploy. Later, point `party.moodycelebrations.com` (or whichever subdomain
+3. Deploy. Later, point `elebrate.moodycelebrations.com` (or whichever subdomain
    you choose) at it under **Settings → Domains**.
 
 ### 3. Running it on your own computer (optional)
