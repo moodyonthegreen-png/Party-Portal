@@ -211,7 +211,7 @@ export default async function PartyHome({ params }: Props) {
       </div>
 
       <p className="pp-soft" style={{ textAlign: "center", fontSize: "0.85rem", marginTop: "3rem" }}>
-        Made with love by Moody Celebrations
+        Made with love on Elebrate by Moody Celebrations
       </p>
       </div>
     </main>

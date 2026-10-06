@@ -4,8 +4,8 @@ import "./globals.css";
 
 
 export const metadata: Metadata = {
-  title: { default: "Moody Celebrations Party Portal", template: "%s · Moody Celebrations" },
-  description: "Join the party, add your design, and celebrate from anywhere.",
+  title: { default: "Elebrate by Moody Celebrations", template: "%s · Elebrate" },
+  description: "Elebrate: virtual showers and celebrations. Join the party, sign the guest book and celebrate from anywhere.",
   robots: { index: false, follow: false },
 };
 

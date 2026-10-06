@@ -68,7 +68,7 @@ function layout(opts: { preheader: string; heading: string; body: string; button
 <span style="display:none;max-height:0;overflow:hidden">${esc(opts.preheader)}</span>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:540px;background:#fffefb;border:1px solid #e2e6da;border-radius:14px;overflow:hidden">
-<tr><td style="background:#9aae91;padding:22px 32px;text-align:center;font-family:${serif};font-size:20px;color:#fbfaf3">Moody Celebrations
+<tr><td style="background:#9aae91;padding:22px 32px;text-align:center;font-family:${serif};font-size:20px;color:#fbfaf3">Elebrate
   <div style="width:56px;height:1px;background:#e2c67a;margin:10px auto 0;font-size:0;line-height:0">&nbsp;</div></td></tr>
 <tr><td style="padding:30px 32px 6px;text-align:center">
   <h1 style="margin:0;font-family:${serif};font-weight:normal;font-size:30px;line-height:1.15;color:#253026">${esc(opts.heading)}</h1>
@@ -77,7 +77,7 @@ function layout(opts: { preheader: string; heading: string; body: string; button
 ${button}
 ${opts.footer ? `<tr><td style="padding:0 32px 28px;font-size:13px;line-height:1.55;color:#5d695b">${opts.footer}</td></tr>` : ""}
 </table>
-<p style="margin:18px 0 0;font-size:12px;color:#7a8578;font-family:${sans}">Sent by Moody Celebrations</p>
+<p style="margin:18px 0 0;font-size:12px;color:#7a8578;font-family:${sans}">Sent by Elebrate from Moody Celebrations</p>
 </td></tr></table></body></html>`;
 }
 
@@ -89,7 +89,7 @@ export function hostLinkEmail(opts: { to: string; parties: { guestOfHonorName: s
     .join("");
   return {
     to: opts.to,
-    subject: one ? `Your host link for ${first.guestOfHonorName}'s ${first.occasion.toLowerCase()}` : "Your Moody Celebrations host links",
+    subject: one ? `Your host link for ${first.guestOfHonorName}'s ${first.occasion.toLowerCase()}` : "Your Elebrate host links",
     html: layout({
       preheader: "Open your host dashboard",
       heading: "Your host dashboard",
@@ -156,7 +156,7 @@ export function revealEmail(opts: {
       body: `<p style="text-align:center">${esc(who)} celebrated you, and every note, voice memo, video, photo and design they shared is waiting for you in one keepsake.</p>
         <p style="text-align:center">Find a cozy spot, maybe a tissue or two, and tap through whenever you're ready. You can watch it as many times as you like.</p>`,
       button: { label: "Open my keepsake", url: opts.url },
-      footer: `Sent with love by ${esc(opts.fromName)} through Moody Celebrations. This link is just for you.`,
+      footer: `Sent with love by ${esc(opts.fromName)} through Elebrate. This link is just for you.`,
     }),
     text: `${first}, ${who.toLowerCase()} celebrated you. Everything they shared is in your keepsake: ${opts.url}\n\nWith love, ${opts.fromName}`,
   };

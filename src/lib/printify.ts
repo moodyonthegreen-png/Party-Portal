@@ -23,7 +23,7 @@ async function pf<T>(path: string, init: RequestInit = {}): Promise<T> {
     ...init,
     headers: {
       Authorization: `Bearer ${token}`,
-      "User-Agent": "MoodyCelebrationsPartyPortal",
+      "User-Agent": "Elebrate",
       "Content-Type": "application/json",
       ...(init.headers ?? {}),
     },
@@ -163,7 +163,7 @@ export async function createDraftProduct(opts: {
       method: "POST",
       body: JSON.stringify({
         title: opts.title,
-        description: "Draft made by the Moody Celebrations party portal for previews and printing. Not for publishing.",
+        description: "Draft made by Elebrate (Moody Celebrations) for previews and printing. Not for publishing.",
         blueprint_id: opts.product.printifyBlueprintId,
         print_provider_id: provider.id,
         variants: [{ id: variant.id, price: 5000, is_enabled: true }],

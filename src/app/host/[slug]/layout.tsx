@@ -22,7 +22,7 @@ export default async function HostLayout({ children, params }: Props) {
           <header className="hd">
             <div className="pp-wrap pp-host-body hd-bar">
               <a href="/" className="hd-brand">
-                Moody Celebrations
+                Elebrate
               </a>
               <span className="hd-who">
                 {party.viewer.kind === "cohost" ? `Signed in as ${party.viewer.name}` : "Host dashboard"}

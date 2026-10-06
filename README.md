@@ -1,4 +1,4 @@
-# Moody Celebrations Party Portal
+# Elebrate (by Moody Celebrations)
 
 The party portal that lives on a subdomain of moodycelebrations.com. Every
 party package bought on Shopify gets its own guest site and host portal here.

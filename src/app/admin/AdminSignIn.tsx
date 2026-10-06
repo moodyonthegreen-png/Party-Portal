@@ -9,7 +9,7 @@ export function AdminSignIn({ configured }: { configured: boolean }) {
     <main className="pp-wrap" style={{ minHeight: "100dvh", display: "grid", alignContent: "center" }}>
       <div className="pp-paper" style={{ padding: "2.5rem 1.5rem" }}>
         <p className="pp-caps pp-soft" style={{ fontSize: "0.75rem", textAlign: "center" }}>
-          Moody Celebrations
+          Elebrate
         </p>
         <h1 className="pp-script" style={{ fontSize: "3rem", color: "var(--pp-accent)", textAlign: "center", margin: "0.4rem 0 1rem" }}>
           Admin

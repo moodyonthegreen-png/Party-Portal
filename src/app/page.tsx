@@ -2,7 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { BrandShell } from "@/components/BrandShell";
 
-/** "Find your party": the Moody Celebrations front door. Guests usually arrive by link or QR code instead. */
+/** "Find your party": the Elebrate front door. Guests usually arrive by link or QR code instead. */
 export default function Home() {
   async function findParty(formData: FormData) {
     "use server";
@@ -16,7 +16,8 @@ export default function Home() {
     <BrandShell
       footer={
         <>
-          <p className="mc-script mc-tag">Celebrate from anywhere</p>
+          <p className="mc-script mc-tag">Elebrate</p>
+          <p className="mc-by">by Moody Celebrations</p>
           <p className="mc-host">
             Hosting a party? <Link href="/host/login">Open your dashboard</Link>
           </p>

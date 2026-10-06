@@ -215,7 +215,7 @@ figcaption{font-size:14px;text-align:center;padding:6px 2px}figcaption span{colo
 .soft{color:#66735f;font-size:14px}.story{font-style:italic;font-size:15px;text-align:left;margin:6px 0 0;line-height:1.4}.story b{font-style:normal;font-size:11px;color:#56704f;font-family:Arial,sans-serif}.names{text-align:center;font-family:"Segoe Print","Bradley Hand",cursive;font-size:20px}
 a{color:#56704f}
 </style></head><body><main>
-<header><p class="kicker">Moody Celebrations</p><h1>${esc(title)}</h1><p class="soft">Saved ${day(new Date().toISOString())}. Everything here is also in the folders next to this page.</p></header>
+<header><p class="kicker">Elebrate</p><h1>${esc(title)}</h1><p class="soft">Saved ${day(new Date().toISOString())}. Everything here is also in the folders next to this page.</p></header>
 ${html.join("\n") || `<p>Nothing here yet.</p>`}
 ${names.length ? `<h2>With love from</h2><p class="names">${names.map(esc).join(" · ")}</p>` : ""}
 </main></body></html>`;
